@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { Stream } from 'stream';
+import { CompileResult } from './types';
 const FormData = require('form-data');
 
 const AppOrigin = 'https://cloudlatex.io';
@@ -79,10 +80,14 @@ export class WebAppApi {
       body: JSON.stringify({ material_file: params }),
       method: 'PUT'}
     );
+    if(!res.ok) {
+      console.log(res);
+      return;
+    }
     return JSON.parse(await res.text());
   }
 
-  async compileProject() {
+  async compileProject(): Promise<CompileResult> {
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/compile`,
       {headers: this.headers(),
@@ -101,6 +106,10 @@ export class WebAppApi {
       body: form,
       method: 'POST'}
     );
+    if(!res.ok) {
+      console.log(res);
+      return;
+    }
     return JSON.parse(await res.text());
   }
 

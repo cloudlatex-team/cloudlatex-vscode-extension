@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 
-type ConfigObj = {
+type SettingObj = {
   projectId: string;
   initialized: boolean;
 };
 
-export default class Config {
+export default class Setting {
 
   private filePath: string;
-  public obj: ConfigObj;
+  public obj: SettingObj;
   constructor() {
     this.filePath = vscode.workspace.rootPath + '/.vswpp.json';
     this.obj = {projectId: '', initialized: false};

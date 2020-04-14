@@ -1,7 +1,7 @@
 import * as whichChrome from 'which-chrome';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
-import Config from './config';
+import Setting from './setting';
 import fetch from 'node-fetch';
 import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
 //import * as puppeteer from 'puppeteer-core';
@@ -11,11 +11,11 @@ export default class Browser {
   public browser: any;
   public page: any;
   private remoteDebugPort = 9222;
-  private config: Config;
+  private setting: Setting;
   // private CookieFilePath: string;
-  constructor(config: Config) {
+  constructor(setting: Setting) {
     //this.CookieFilePath = vscode.workspace.rootPath + '/cookie.json';
-    this.config = config;
+    this.setting = setting;
   }
 
   public async launch() {
@@ -26,8 +26,8 @@ export default class Browser {
     // chromeArgs.push(`--user-data-dir=/Users/morita/Library/Application\ Support/Google/Chrome/`);
     chromeArgs.push(`--user-data-dir=${vscode.workspace.rootPath}/.vswpp/`);
 
-    const headless = false; //this.config.obj.initialized;
-    console.log('config', this.config.obj);
+    const headless = false; //this.setting.obj.initialized;
+    console.log('setting', this.setting.obj);
 
     this.browser = await puppeteer.launch({
       executablePath: chromePath,
@@ -36,7 +36,7 @@ export default class Browser {
     });
     this.page = await this.browser.newPage();
 
-    if(!this.config.obj.initialized) {
+    if(!this.setting.obj.initialized) {
       await this.initialize();
     }
 
@@ -86,9 +86,9 @@ export default class Browser {
     if(!matched) {
       throw new Error(`Invalid url. Current page is not project url ${url}`);
     }
-    this.config.obj.projectId = matched[0].replace('projects/', '');
-    this.config.save().then(() => {
-      console.log('save config file successfully');
+    this.setting.obj.projectId = matched[0].replace('projects/', '');
+    this.setting.save().then(() => {
+      console.log('save setting file successfully');
     }).catch(err => {
       console.error(err);
     });

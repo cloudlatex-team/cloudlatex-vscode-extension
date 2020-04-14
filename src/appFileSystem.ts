@@ -9,28 +9,27 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
   protected rootPath: string;
   protected files: {[key in KeyType]: AppFile};
   private fileWatcher?: chokidar.FSWatcher;
-  private systemChangedFiles: {[key in KeyType]: boolean};
+  private watcherSyncedFiles: {[key in KeyType]: boolean};
 
   constructor(rootPath: string) {
     super();
     this.rootPath = rootPath;
     this.files = {};
-    this.initFileWatcher(rootPath);
-    this.systemChangedFiles = {};
+    this.watcherSyncedFiles = {};
   }
 
-  private initFileWatcher(rootPath: string) {
+  public initFileWatcher() {
     const watcherOption = {
-      ignored: /\.git|\.vswpp/
+      ignored: /\.git|\.vswpp|synctex\.gz|main\.pdf|\.workspace|\.vscode/ //#TODO
     };
-    this.fileWatcher = chokidar.watch(rootPath, watcherOption);
+    this.fileWatcher = chokidar.watch(this.rootPath, watcherOption);
     this.fileWatcher.on('add', (file: string) => this.onWatchingNewFile(file));
     this.fileWatcher.on('change', (file: string) => this.onWatchedFileChanged(file));
     this.fileWatcher.on('unlink', (file: string) => this.onWatchedFileDeleted(file));
   }
 
   public async pull() {
-    await this._downloadProjectInfo();
+    await this.downloadProjectInfo();
     for(let id in this.files) {
       try {
         this.download(id);
@@ -40,7 +39,7 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     }
   }
 
-  protected _downloadProjectInfo(): Promise<unknown> {
+  public downloadProjectInfo(): Promise<unknown> {
     throw new Error('No implementation');
   }
 
@@ -51,26 +50,34 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     const file = this.files[id];
     console.log('downloading..,', file);
     const stream = await this._download(file);
-    this.systemChangedFiles[id] = true;
+    this.watcherSyncedFiles[id] = false;
     const localPath =  this._getRelativePath(file);
-    const absPath = path.join(this.rootPath, localPath);
-    const dirname = path.dirname(absPath);
-    await fs.promises.mkdir(dirname, {recursive: true});
+    return this.saveAs(localPath, stream);
+  }
 
-    await new Promise((resolve, reject) => {
+  protected _download(file: AppFile): Promise<NodeJS.ReadableStream>  {
+    throw new Error('No implementation');
+  }
+
+  public async saveAs(relativePath: string, stream: NodeJS.ReadableStream): Promise<unknown> {
+    const absPath = path.join(this.rootPath, relativePath);
+    const dirname = path.dirname(absPath);
+    try {
+      await fs.promises.access(absPath);
+    } catch(err) {
+      await fs.promises.mkdir(dirname, {recursive: true});
+    }
+
+    return await new Promise((resolve, reject) => {
       const fileStream = fs.createWriteStream(absPath);
       stream.pipe(fileStream);
       stream.on("error", (err) => {
         reject(err);
       });
-      fileStream.on("finish", function() {
+      fileStream.on("finish", () => {
         resolve();
       });
     });
-  }
-
-  protected _download(file: AppFile): Promise<NodeJS.ReadableStream>  {
-    throw new Error('No implementation');
   }
 
   public upload(relativePath: string, option?: any): Promise<unknown>  {
@@ -122,11 +129,11 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
   private onWatchingNewFile(localPath: string) {
     const id = this.getIdfromLocalPath(localPath);
     if(id) {
-      if(this.systemChangedFiles[id]) {
-        this.systemChangedFiles[id] = false;
+      if(!this.watcherSyncedFiles[id]) {
+        this.watcherSyncedFiles[id] = true;
         return;
       }
-      throw new Error('New file detected, but already registered.: ' + localPath)
+      throw new Error('New file detected, but already registered.: ' + localPath);
     }
     fs.writeFileSync(path.join(this.rootPath, localPath), '');
     this.upload(localPath);
@@ -139,11 +146,12 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       return;
     }
     // file was changed by downloading
-    if(this.systemChangedFiles[id]) {
-      this.systemChangedFiles[id] = true;
+    if(!this.watcherSyncedFiles[id]) {
+      this.watcherSyncedFiles[id] = false;
       return;
     }
     this.updateRemote(id);
+    this.emit('file-changed', localPath);
   }
 
   private onWatchedFileDeleted(localPath: string) {
@@ -152,8 +160,8 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       this.emit('local-deleted-error', localPath);
       return;
     }
-    if(this.systemChangedFiles[id]) {
-      this.systemChangedFiles[id] = true;
+    if(!this.watcherSyncedFiles[id]) {
+      this.watcherSyncedFiles[id] = false;
       return;
     }
     this.deleteRemote(id);

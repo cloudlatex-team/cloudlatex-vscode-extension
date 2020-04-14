@@ -27,8 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 		//const appContent = new AppContent();
 		//appContent.create();
 
-		let latexApp = new LatexApp();
-		latexApp.launch();
+		LatexApp.launch();
 		// let browser = new Browser();
     // browser.launch();
 

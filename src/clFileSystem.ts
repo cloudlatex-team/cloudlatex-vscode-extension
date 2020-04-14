@@ -12,7 +12,7 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
     this.api = api;
   }
 
-  _download(file: ClFile) {
+  protected _download(file: ClFile) {
     if(file.is_folder) {
     } else {
       if(!file.file_url) {
@@ -23,30 +23,32 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
     return Promise.reject();
   }
 
-  _upload(relativePath: string, option?: any) {
+  protected _upload(relativePath: string, option?: any) {
     const stream = fs.createReadStream(path.join(this.rootPath, relativePath), 'utf8');
     return this.api.uploadFile(stream, relativePath);
   }
 
-  _updateRemote(id: number) {
+  protected _updateRemote(id: number): Promise<any> {
     const file = this.files[id];
     let content;
-    try {
-      content = fs.readFileSync(path.join(this.rootPath, file.full_path));
-    } catch(e) {
+    return fs.promises.readFile(
+      path.join(this.rootPath, file.full_path), 'utf-8'
+    ).catch(err => {
       this.emit('local-reading-error', file.full_path);
       return Promise.reject(file.full_path);
-    }
-    return this.api.updateFile(id, {
-      content
+    }).then(content => {
+      this.api.updateFile(id, {
+        content,
+        revision: file.revision
+      });
     });
   }
 
-  _deleteRemote(id: number) {
+  protected _deleteRemote(id: number) {
     return this.api.deleteFile(id);
   }
 
-  async _downloadProjectInfo(): Promise<unknown> {
+  public async downloadProjectInfo(): Promise<unknown> {
     const res = await this.api?.loadFiles();
     const materialFiles: Array<ClFile> = res.material_files;
     console.log(materialFiles, res);
