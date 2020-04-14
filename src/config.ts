@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
-import { resolve } from 'dns';
 
 type ConfigObj = {
   projectId: string;

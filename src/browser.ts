@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 import Config from './config';
 import fetch from 'node-fetch';
 import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
-
 //import * as puppeteer from 'puppeteer-core';
 const puppeteer = require('puppeteer-core');
 
@@ -14,14 +13,12 @@ export default class Browser {
   private remoteDebugPort = 9222;
   private config: Config;
   // private CookieFilePath: string;
-  constructor() {
+  constructor(config: Config) {
     //this.CookieFilePath = vscode.workspace.rootPath + '/cookie.json';
-    this.config = new Config();
+    this.config = config;
   }
 
   public async launch() {
-    await this.config.load();
-
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
     console.log(chromePath);
     let chromeArgs = [];
@@ -43,13 +40,7 @@ export default class Browser {
       await this.initialize();
     }
 
-    const {csrf, loginSession} = await this.getCreditials();
-    console.log(csrf, loginSession);
-    const api = new WebAppApi(csrf, loginSession, this.config.obj.projectId);
-    const res = await api.loadFiles();
-    const materialFiles = res.material_files;
-    console.log(materialFiles, res);
-
+    return await this.getCreditials();
 
     // set cookie
     /* const cookies = this.loadCookies();
@@ -90,7 +81,6 @@ export default class Browser {
     */
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    this.config.obj.initialized = true;
     const url = this.page.url();
     const matched = url.match(/projects\/\d+/);
     if(!matched) {

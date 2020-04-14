@@ -58,6 +58,7 @@
 	},
 	"dependencies": {
 		"chokidar": "^3.3.1",
+		"eventemitter3": "^4.0.0",
 		"form-data": "^3.0.0",
 		"inline-source": "^7.2.0",
 		"karma-chrome-launcher": "^2.2.0",

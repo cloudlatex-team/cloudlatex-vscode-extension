@@ -104,6 +104,13 @@ export class WebAppApi {
     return JSON.parse(await res.text());
   }
 
+  async downloadFile(url: string): Promise<NodeJS.ReadableStream> {
+    const res = await fetch(
+      `${url}`
+    );
+    return res.body;
+  }
+
   async loadSynctexObject(url: string) {
     const res = await fetch(
       `${url}`

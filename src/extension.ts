@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
 import AppContent from './appContent';
 import Browser from './browser';
+import LatexApp from './latexApp';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -23,11 +24,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// Display a message box to the user
 		// vscode.window.showInformationMessage('open WebApp2!');
-		const appContent = new AppContent();
-		appContent.create();
+		//const appContent = new AppContent();
+		//appContent.create();
 
-		//let browser = new Browser();
-    //browser.launch();
+		let latexApp = new LatexApp();
+		latexApp.launch();
+		// let browser = new Browser();
+    // browser.launch();
 
 	});
 

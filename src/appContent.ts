@@ -10,8 +10,6 @@ export default class AppContent {
   }
 
   public async create() {
-    let browser = new Browser();
-    browser.launch();
     this.panel = vscode.window.createWebviewPanel(
       'web-app', // Identifies the type of the webview. Used internally
       'Web app', // Title of the panel displayed to the user
