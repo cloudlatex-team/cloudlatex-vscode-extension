@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {Readable} from 'stream';
+import * as pako from 'pako';
 
 import Browser from './browser';
 import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
@@ -109,9 +110,11 @@ export default class LatexApp {
     this.fileSystem.saveAs(pdfPath, pdfStream);
 
     // download synctex
-    // #TODO fix path in synctex file
-    const synctexStream = await this.api.downloadFile(result.synctex_uri);
-    const synctexPath = path.join(this.config.outDir, this.targetName + '.synctex.gz');
-    this.fileSystem.saveAs(synctexPath, synctexStream);
+    const compressed = await this.api.loadSynctexObject(result.synctex_uri);
+    const decompressed = pako.inflate(new Uint8Array(compressed));
+    let synctexStr = new TextDecoder("utf-8").decode(decompressed);
+    synctexStr = synctexStr.replace(/\/data\/\./g, this.rootPath);
+    const synctexPath = path.join(this.config.outDir, this.targetName + '.synctex');
+    this.fileSystem.saveAs(synctexPath, Readable.from(synctexStr));
   }
 }

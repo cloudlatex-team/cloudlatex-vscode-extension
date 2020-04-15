@@ -1,4 +1,4 @@
-const EventEmitter = require('eventemitter3');
+import * as  EventEmitter from 'eventemitter3';
 import * as chokidar from 'chokidar';
 import * as fs from 'fs';
 import * as path from 'path';

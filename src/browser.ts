@@ -4,8 +4,7 @@ import * as vscode from 'vscode';
 import Setting from './setting';
 import fetch from 'node-fetch';
 import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
-//import * as puppeteer from 'puppeteer-core';
-const puppeteer = require('puppeteer-core');
+import * as puppeteer from 'puppeteer-core';
 
 export default class Browser {
   public browser: any;

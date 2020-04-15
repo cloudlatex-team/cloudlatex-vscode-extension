@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { Stream } from 'stream';
 import { CompileResult } from './types';
-const FormData = require('form-data');
+import * as FormData from 'form-data';
 
 const AppOrigin = 'https://cloudlatex.io';
 export const ProjectsUrl = AppOrigin + '/projects';
@@ -74,6 +74,7 @@ export class WebAppApi {
   }
 
   async updateFile(id: number, params: any) {
+    // #TODO 400 error is responded
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/files/${id}`,
       {headers: this.headers(),
