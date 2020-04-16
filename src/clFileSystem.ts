@@ -2,7 +2,7 @@ import AppFileSystem from "./appFileSystem";
 import { ClFile } from "./types";
 import * as fs from 'fs';
 import * as path from 'path';
-import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
+import WebAppApi from './webAppApi';
 
 export default class ClFileSystem extends AppFileSystem<ClFile> {
   private api: WebAppApi;

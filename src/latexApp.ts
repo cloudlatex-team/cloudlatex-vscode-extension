@@ -4,7 +4,7 @@ import {Readable} from 'stream';
 import * as pako from 'pako';
 
 import Browser from './browser';
-import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
+import WebAppApi from './webAppApi';
 import Setting from './setting';
 import ClFileSystem from './clFileSystem';
 import AppFileSystem from './appFileSystem';
@@ -105,6 +105,7 @@ export default class LatexApp {
     }*/
 
     // download pdf
+    // #TODO update pdf preview
     const pdfStream = await this.api.downloadFile(result.uri);
     const pdfPath = path.join(this.config.outDir, this.targetName + '.pdf');
     this.fileSystem.saveAs(pdfPath, pdfStream);

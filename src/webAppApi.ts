@@ -3,16 +3,9 @@ import { Stream } from 'stream';
 import { CompileResult } from './types';
 import * as FormData from 'form-data';
 
-const AppOrigin = 'http://localhost:3000'; //'https://cloudlatex.io';
-export const ProjectsUrl = AppOrigin + '/projects';
-const APIRoot = AppOrigin + '/api';
-export const APIEndpoint = APIRoot + '/projects';
-export const editPageUrlMatch =  /\/projects\/\d+\/edit/g; // /https\:\/\/cloudlatex.io\/projects\/\d+\/edit/g;;
+import {LoginSessionKey, csrfKey, APIEndpoint} from './appConst';
 
-export const LoginSessionKey = '_cloudlatex2_session';
-const csrfKey = 'X-CSRF-Token';
-
-export class WebAppApi {
+export default class WebAppApi {
   private csrf: string;
   private loginSession: string;
   private projectId: string;

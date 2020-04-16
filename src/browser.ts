@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import Setting from './setting';
 import fetch from 'node-fetch';
-import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
+import {ProjectsUrl, editPageUrlMatch, LoginSessionKey} from './appConst';
 import * as puppeteer from 'puppeteer-core';
 import { Creditials } from './types';
 

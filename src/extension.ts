@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
 import AppContent from './appContent';
-import Browser from './browser';
 import LatexApp from './latexApp';
 
 // this method is called when your extension is activated
