@@ -105,10 +105,11 @@ export default class LatexApp {
     }*/
 
     // download pdf
-    // #TODO update pdf preview
     const pdfStream = await this.api.downloadFile(result.uri);
     const pdfPath = path.join(this.config.outDir, this.targetName + '.pdf');
-    this.fileSystem.saveAs(pdfPath, pdfStream);
+    this.fileSystem.saveAs(pdfPath, pdfStream).then(() => {
+      vscode.commands.executeCommand('latex-workshop.refresh-viewer');
+    });
 
     // download synctex
     const compressed = await this.api.loadSynctexObject(result.synctex_uri);

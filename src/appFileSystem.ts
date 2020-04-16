@@ -163,7 +163,7 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     }
     // file was changed by downloading
     if(!this.watcherSyncedFiles[id]) {
-      this.watcherSyncedFiles[id] = false;
+      this.watcherSyncedFiles[id] = true;
       return;
     }
     const result = await this.updateRemote(id);

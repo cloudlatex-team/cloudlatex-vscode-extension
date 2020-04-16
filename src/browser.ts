@@ -38,6 +38,7 @@ export default class Browser {
     try {
       this.page = await this.browser.newPage();
 
+      // TODO check if logined?
       if(!this.setting.obj.initialized) {
         await this.initialize();
       }
