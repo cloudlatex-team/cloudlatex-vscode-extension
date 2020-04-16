@@ -65,7 +65,7 @@ export default class LatexApp {
     }
 
     this.fileSystem.initFileWatcher();
-    this.fileSystem.on('file-changed', (localPath: string) => {
+    this.fileSystem.on('file-changed', (absPath: string) => {
       this.compile();
     });
 

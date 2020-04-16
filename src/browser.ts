@@ -20,7 +20,6 @@ export default class Browser {
 
   public async launch(): Promise<Creditials> {
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
-    console.log(chromePath);
     let chromeArgs = [];
     chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
     // chromeArgs.push(`--user-data-dir=/Users/morita/Library/Application\ Support/Google/Chrome/`);

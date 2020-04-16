@@ -23,9 +23,12 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
     return Promise.reject();
   }
 
-  protected _upload(relativePath: string, option?: any) {
+  protected async _upload(relativePath: string, option?: any): Promise<string>{
     const stream = fs.createReadStream(path.join(this.rootPath, relativePath), 'utf8');
-    return this.api.uploadFile(stream, relativePath);
+    const relativeDir = path.dirname(relativePath);
+    const result = await this.api.uploadFile(stream, relativeDir);
+    await this.downloadProjectInfo();
+    return result.file.id;;
   }
 
   protected _updateRemote(id: number): Promise<any> {
@@ -47,12 +50,15 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
     });
   }
 
-  protected _deleteRemote(id: number) {
-    return this.api.deleteFile(id);
+  protected async _deleteRemote(id: number) {
+    const result = await this.api.deleteFile(id);
+    await this.downloadProjectInfo();
+    return result;
   }
 
   public async downloadProjectInfo(): Promise<unknown> {
     const res = await this.api?.loadFiles();
+    this.files = {};
     const materialFiles: Array<ClFile> = res.material_files;
     console.log(materialFiles, res);
 

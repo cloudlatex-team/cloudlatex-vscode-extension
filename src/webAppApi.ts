@@ -106,9 +106,9 @@ export class WebAppApi {
     return result;
   }
 
-  async uploadFile(stream: Stream, relativePath: string) {
+  async uploadFile(stream: Stream, relativeDir: string) {
     const form = new FormData();
-    form.append('relative_path', relativePath);
+    form.append('relative_path', relativeDir);
     form.append('file', stream);
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/files/upload`,
@@ -118,7 +118,7 @@ export class WebAppApi {
     );
     if(!res.ok) {
       console.log('upload file failed', res);
-      return;
+      throw res;
     }
     return JSON.parse(await res.text());
   }

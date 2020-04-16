@@ -20,7 +20,7 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
 
   public initFileWatcher() {
     const watcherOption = {
-      ignored: /\.git|\.vswpp|synctex\.gz|main\.pdf|\.workspace|\.vscode/ //#TODO
+      ignored: /\.git|\.vswpp|synctex\.gz|main\.pdf|\.workspace|\.vscode|.DS\_Store/ //#TODO
     };
     this.fileWatcher = chokidar.watch(this.rootPath, watcherOption);
     this.fileWatcher.on('add', (file: string) => this.onWatchingNewFile(file));
@@ -39,6 +39,11 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     }
   }
 
+  // #TODO
+  public async sync() {
+
+  }
+
   public downloadProjectInfo(): Promise<unknown> {
     throw new Error('No implementation');
   }
@@ -51,8 +56,8 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     console.log('downloading..,', file);
     const stream = await this._download(file);
     this.watcherSyncedFiles[id] = false;
-    const localPath =  this._getRelativePath(file);
-    return this.saveAs(localPath, stream);
+    const relativePath =  this._getRelativePath(file);
+    return this.saveAs(relativePath, stream);
   }
 
   protected _download(file: AppFile): Promise<NodeJS.ReadableStream>  {
@@ -80,11 +85,13 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     });
   }
 
-  public upload(relativePath: string, option?: any): Promise<unknown>  {
-    return this._upload(relativePath, option);
+  public async upload(relativePath: string, option?: any): Promise<KeyType>  {
+    const id = await this._upload(relativePath, option);
+    this.watcherSyncedFiles[id] = true;
+    return id;
   }
 
-  protected _upload(relativePath: string, option?: any): Promise<unknown>  {
+  protected _upload(relativePath: string, option?: any): Promise<KeyType>  {
     throw new Error('No implementation');
   }
 
@@ -104,8 +111,11 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     throw new Error('No implementation');
   }
 
-  private getIdfromLocalPath(lcoalPath: string): KeyType | null {
-    let relativePath: string = lcoalPath.replace(this.rootPath, '');
+  private getRelativePath(absPath: string): string {
+    return absPath.replace(this.rootPath, '');
+  }
+  private getIdfromAbsPath(absPath: string): KeyType | null {
+    let relativePath: string = this.getRelativePath(absPath);
     if(relativePath[0] === '/') {
       relativePath = relativePath.slice(1);
     }
@@ -126,23 +136,25 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     throw new Error('No implementation');
   }
 
-  private onWatchingNewFile(localPath: string) {
-    const id = this.getIdfromLocalPath(localPath);
+  private onWatchingNewFile(absPath: string) {
+    const relativePath = this.getRelativePath(absPath);
+    const id = this.getIdfromAbsPath(absPath);
     if(id) {
       if(!this.watcherSyncedFiles[id]) {
+        // this file is downloaded from remote
         this.watcherSyncedFiles[id] = true;
         return;
       }
-      throw new Error('New file detected, but already registered.: ' + localPath);
+      throw new Error('New file detected, but already registered.: ' + absPath);
     }
-    console.log('new file detected', path.join(this.rootPath, localPath));
-    this.upload(localPath);
+    console.log('new file detected', absPath);
+    this.upload(relativePath);
   }
 
-  private async onWatchedFileChanged(localPath: string) {
-    const id = this.getIdfromLocalPath(localPath);
+  private async onWatchedFileChanged(absPath: string) {
+    const id = this.getIdfromAbsPath(absPath);
     if(!id) {
-      this.emit('local-changed-error', localPath);
+      this.emit('local-changed-error', absPath);
       return;
     }
     // file was changed by downloading
@@ -150,16 +162,14 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       this.watcherSyncedFiles[id] = false;
       return;
     }
-    console.log('update remote ...')
     const result = await this.updateRemote(id);
-    console.log('update remote successfully', result);
-    this.emit('file-changed', localPath);
+    this.emit('file-changed', absPath);
   }
 
-  private onWatchedFileDeleted(localPath: string) {
-    const id = this.getIdfromLocalPath(localPath);
+  private onWatchedFileDeleted(absPath: string) {
+    const id = this.getIdfromAbsPath(absPath);
     if (!id) {
-      this.emit('local-deleted-error', localPath);
+      this.emit('local-deleted-error', absPath);
       return;
     }
     if(!this.watcherSyncedFiles[id]) {
