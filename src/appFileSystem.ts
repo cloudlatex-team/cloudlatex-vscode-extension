@@ -148,7 +148,11 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       throw new Error('New file detected, but already registered.: ' + absPath);
     }
     console.log('new file detected', absPath);
-    this.upload(relativePath);
+    try {
+      this.upload(relativePath);
+    } catch(err) {
+      console.error('upload failed', err);
+    }
   }
 
   private async onWatchedFileChanged(absPath: string) {

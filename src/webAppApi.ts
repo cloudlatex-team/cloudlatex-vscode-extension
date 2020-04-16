@@ -3,11 +3,11 @@ import { Stream } from 'stream';
 import { CompileResult } from './types';
 import * as FormData from 'form-data';
 
-const AppOrigin = 'https://cloudlatex.io';
+const AppOrigin = 'http://localhost:3000'; //'https://cloudlatex.io';
 export const ProjectsUrl = AppOrigin + '/projects';
 const APIRoot = AppOrigin + '/api';
 export const APIEndpoint = APIRoot + '/projects';
-export const editPageUrlMatch =  /https\:\/\/cloudlatex.io\/projects\/\d+\/edit/g;;
+export const editPageUrlMatch =  /\/projects\/\d+\/edit/g; // /https\:\/\/cloudlatex.io\/projects\/\d+\/edit/g;;
 
 export const LoginSessionKey = '_cloudlatex2_session';
 const csrfKey = 'X-CSRF-Token';
@@ -22,13 +22,16 @@ export class WebAppApi {
     this.projectId = projectId;
   }
 
-  private headers(json: boolean = false) {
+  private headers(option: {json?: boolean, form?: boolean} = {}) {
     const headers: any = {
       cookie: `${LoginSessionKey}=${this.loginSession}`,
       [csrfKey]: this.csrf
     };
-    if(json) {
+    if(option.json) {
       headers['Content-Type'] = 'application/json';
+    }
+    if(option.form) {
+      headers['Content-Type'] = 'multipart/form-data';
     }
     return headers;
   }
@@ -53,7 +56,7 @@ export class WebAppApi {
   async createFile(name: string, belongs: number, is_folder: boolean) {
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}`,
-      {headers: this.headers(true),
+      {headers: this.headers({json: true}),
       method: 'POST',
       body: JSON.stringify({name, is_folder, belongs})}
     );
@@ -81,7 +84,7 @@ export class WebAppApi {
   async updateFile(id: number, params: any): Promise<{revision: string}> {
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/files/${id}`,
-      {headers: this.headers(true),
+      {headers: this.headers({json: true}),
       body: JSON.stringify({ material_file: params }),
       method: 'PUT'}
     );
@@ -110,14 +113,15 @@ export class WebAppApi {
     const form = new FormData();
     form.append('relative_path', relativeDir);
     form.append('file', stream);
+    const headers = form.getHeaders();
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/files/upload`,
-      {headers: this.headers(),
+      {headers: {...this.headers(), ...headers},
       body: form,
       method: 'POST'}
     );
     if(!res.ok) {
-      console.log('upload file failed', res);
+      console.log('upload file failed', res, await res.text());
       throw res;
     }
     return JSON.parse(await res.text());
