@@ -5,6 +5,7 @@ import Setting from './setting';
 import fetch from 'node-fetch';
 import {ProjectsUrl, editPageUrlMatch, WebAppApi, LoginSessionKey} from './webAppApi';
 import * as puppeteer from 'puppeteer-core';
+import { Creditials } from './types';
 
 export default class Browser {
   public browser: any;
@@ -17,7 +18,7 @@ export default class Browser {
     this.setting = setting;
   }
 
-  public async launch() {
+  public async launch(): Promise<Creditials> {
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
     console.log(chromePath);
     let chromeArgs = [];
@@ -33,24 +34,32 @@ export default class Browser {
       args: chromeArgs,
       headless
     });
-    this.page = await this.browser.newPage();
 
-    if(!this.setting.obj.initialized) {
-      await this.initialize();
-    }
+    let credentials;
+    try {
+      this.page = await this.browser.newPage();
 
-    return await this.getCreditials();
-
-    // set cookie
-    /* const cookies = this.loadCookies();
-    if(cookies) {
-      for (let cookie of cookies) {
-        await this.page.setCookie(cookie);
+      if(!this.setting.obj.initialized) {
+        await this.initialize();
       }
-    }*/
 
+      credentials = await this.getCreditials();
 
-    // await this.browser.close();
+      // set cookie
+      /* const cookies = this.loadCookies();
+      if(cookies) {
+        for (let cookie of cookies) {
+          await this.page.setCookie(cookie);
+        }
+      }*/
+
+    } catch(err) {
+      console.error('some error occurred in browser', err);
+      await this.browser.close();
+      throw new Error('Cannot get creditials');
+    }
+    //await this.browser.close();
+    return credentials;
   }
 
   private async initialize() {
@@ -87,7 +96,6 @@ export default class Browser {
     }
     this.setting.obj.projectId = matched[0].replace('projects/', '');
     this.setting.save().then(() => {
-      console.log('save setting file successfully');
     }).catch(err => {
       console.error(err);
     });
@@ -95,9 +103,6 @@ export default class Browser {
 
   private async getCreditials() {
     await this.page.goto(ProjectsUrl);
-    //await this.page.waitForNavigation({
-    //  timeout: 0
-    //});
     const csrf: string = await this.page.evaluate(`
       document.querySelector('meta[name="csrf-token"]').getAttribute('content')
     `);

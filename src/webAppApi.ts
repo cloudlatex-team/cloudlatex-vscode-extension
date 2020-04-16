@@ -22,11 +22,15 @@ export class WebAppApi {
     this.projectId = projectId;
   }
 
-  private headers() {
-    return {
+  private headers(json: boolean = false) {
+    const headers: any = {
       cookie: `${LoginSessionKey}=${this.loginSession}`,
       [csrfKey]: this.csrf
     };
+    if(json) {
+      headers['Content-Type'] = 'application/json';
+    }
+    return headers;
   }
 
   async loadProjects() {
@@ -49,13 +53,14 @@ export class WebAppApi {
   async createFile(name: string, belongs: number, is_folder: boolean) {
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}`,
-      {headers: this.headers(),
+      {headers: this.headers(true),
       method: 'POST',
       body: JSON.stringify({name, is_folder, belongs})}
     );
     return JSON.parse(await res.text());
   }
 
+  // #TODO needed?
   async openFile(id: number) {
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/files/${id}`,
@@ -73,19 +78,19 @@ export class WebAppApi {
     return JSON.parse(await res.text());
   }
 
-  async updateFile(id: number, params: any) {
-    // #TODO 400 error is responded
+  async updateFile(id: number, params: any): Promise<{revision: string}> {
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/files/${id}`,
-      {headers: this.headers(),
+      {headers: this.headers(true),
       body: JSON.stringify({ material_file: params }),
       method: 'PUT'}
     );
     if(!res.ok) {
-      console.log(res);
-      return;
+      console.log('update file failed', res);
+      throw res;
     }
-    return JSON.parse(await res.text());
+    const result = JSON.parse(await res.text());
+    return result;
   }
 
   async compileProject(): Promise<CompileResult> {
@@ -94,7 +99,11 @@ export class WebAppApi {
       {headers: this.headers(),
       method: 'POST'}
     );
-    return JSON.parse(await res.text());
+    const result = JSON.parse(await res.text());
+    if(!res.ok) {
+      throw result;
+    }
+    return result;
   }
 
   async uploadFile(stream: Stream, relativePath: string) {
@@ -108,7 +117,7 @@ export class WebAppApi {
       method: 'POST'}
     );
     if(!res.ok) {
-      console.log(res);
+      console.log('upload file failed', res);
       return;
     }
     return JSON.parse(await res.text());

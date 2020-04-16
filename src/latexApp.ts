@@ -90,7 +90,7 @@ export default class LatexApp {
     try {
       result = await this.api.compileProject();
     } catch(e) {
-      console.error('error in complie', e); // #TODO
+      console.error('error in complie', e); // #TODO show multiple compile error
       return;
     }
     console.log('compile result', result);

@@ -37,10 +37,13 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
       this.emit('local-reading-error', file.full_path);
       return Promise.reject(file.full_path);
     }).then(content => {
-      this.api.updateFile(id, {
+      return this.api.updateFile(id, {
         content,
         revision: file.revision
       });
+    }).then(result => {
+      file.revision = result.revision;
+      return file;
     });
   }
 

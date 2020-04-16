@@ -135,11 +135,11 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       }
       throw new Error('New file detected, but already registered.: ' + localPath);
     }
-    fs.writeFileSync(path.join(this.rootPath, localPath), '');
+    console.log('new file detected', path.join(this.rootPath, localPath));
     this.upload(localPath);
   }
 
-  private onWatchedFileChanged(localPath: string) {
+  private async onWatchedFileChanged(localPath: string) {
     const id = this.getIdfromLocalPath(localPath);
     if(!id) {
       this.emit('local-changed-error', localPath);
@@ -150,7 +150,9 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       this.watcherSyncedFiles[id] = false;
       return;
     }
-    this.updateRemote(id);
+    console.log('update remote ...')
+    const result = await this.updateRemote(id);
+    console.log('update remote successfully', result);
     this.emit('file-changed', localPath);
   }
 
