@@ -2,12 +2,14 @@ import * as  EventEmitter from 'eventemitter3';
 import * as chokidar from 'chokidar';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as vscode from 'vscode';
+
 
 type KeyType = number | string;
 
 export default class AppFileSystem<AppFile> extends EventEmitter{
-  protected rootPath: string;
-  protected files: {[key in KeyType]: AppFile};
+  public rootPath: string;
+  public files: {[key in KeyType]: AppFile};
   private fileWatcher?: chokidar.FSWatcher;
   private watcherSyncedFiles: {[key in KeyType]: boolean};
 
@@ -29,7 +31,6 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
   }
 
   public async pull() {
-    await this.downloadProjectInfo();
     for(let id in this.files) {
       try {
         this.download(id);
@@ -44,7 +45,7 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
 
   }
 
-  public downloadProjectInfo(): Promise<unknown> {
+  public loadFiles(): Promise<unknown> {
     throw new Error('No implementation');
   }
 
@@ -166,7 +167,13 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       this.watcherSyncedFiles[id] = true;
       return;
     }
-    const result = await this.updateRemote(id);
+    try {
+      const result = await this.updateRemote(id);
+      console.log('update remote result', result);
+    } catch(e) {
+      console.error(e);
+      vscode.window.showWarningMessage(e);
+    }
     this.emit('file-changed', absPath);
   }
 

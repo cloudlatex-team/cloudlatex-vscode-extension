@@ -56,15 +56,6 @@ export default class WebAppApi {
     return JSON.parse(await res.text());
   }
 
-  // #TODO needed?
-  async openFile(id: number) {
-    const res = await fetch(
-      `${APIEndpoint}/${this.projectId}/files/${id}`,
-      {headers: this.headers()}
-    );
-    return JSON.parse(await res.text());
-  }
-
   async deleteFile(id: number) {
     const res = await fetch(
       `${APIEndpoint}/${this.projectId}/files/${id}`,
@@ -81,11 +72,11 @@ export default class WebAppApi {
       body: JSON.stringify({ material_file: params }),
       method: 'PUT'}
     );
-    if(!res.ok) {
-      console.log('update file failed', res);
-      throw res;
-    }
     const result = JSON.parse(await res.text());
+    if(!res.ok) {
+      console.log('update file failed', res, result);
+      throw result;
+    }
     return result;
   }
 
@@ -97,6 +88,7 @@ export default class WebAppApi {
     );
     const result = JSON.parse(await res.text());
     if(!res.ok) {
+      console.log('compile failed', res, result);
       throw result;
     }
     return result;
@@ -113,11 +105,12 @@ export default class WebAppApi {
       body: form,
       method: 'POST'}
     );
+    const result = JSON.parse(await res.text());
     if(!res.ok) {
-      console.log('upload file failed', res, await res.text());
-      throw res;
+      console.log('upload file failed', res, result);
+      throw result;
     }
-    return JSON.parse(await res.text());
+    return result;
   }
 
   async downloadFile(url: string): Promise<NodeJS.ReadableStream> {

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import Setting from './setting';
 import fetch from 'node-fetch';
-import {ProjectsUrl, editPageUrlMatch, LoginSessionKey} from './appConst';
+import {ProjectsUrl, ProjectsPageUrlMatch, EditPageUrlMatch, LoginSessionKey} from './appConst';
 import * as puppeteer from 'puppeteer-core';
 import { Creditials } from './types';
 
@@ -38,6 +38,7 @@ export default class Browser {
     try {
       this.page = await this.browser.newPage();
 
+      await this.waitUntilLogIn();
       // TODO check if logined?
       if(!this.setting.obj.initialized) {
         await this.initialize();
@@ -62,11 +63,18 @@ export default class Browser {
     return credentials;
   }
 
-  private async initialize() {
-    await this.page.goto(ProjectsUrl);
+  private async waitUntilLogIn() {
+    this.page.goto(ProjectsUrl);
+    while(!this.page.url().match(ProjectsPageUrlMatch)) {
+      await this.page.waitForNavigation({
+        timeout: 0
+      });
+    }
+  }
 
+  private async initialize() {
     // await until achieve at project page
-    while(!this.page.url().match(editPageUrlMatch)) {
+    while(!this.page.url().match(EditPageUrlMatch)) {
       await this.page.waitForNavigation({
         timeout: 0
       });

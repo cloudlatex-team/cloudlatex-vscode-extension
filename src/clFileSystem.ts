@@ -27,7 +27,7 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
     const stream = fs.createReadStream(path.join(this.rootPath, relativePath));
     const relativeDir = path.dirname(relativePath);
     const result = await this.api.uploadFile(stream, relativeDir);
-    await this.downloadProjectInfo();
+    await this.loadFiles();
     return result.file.id;;
   }
 
@@ -52,11 +52,11 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
 
   protected async _deleteRemote(id: number) {
     const result = await this.api.deleteFile(id);
-    await this.downloadProjectInfo();
+    await this.loadFiles();
     return result;
   }
 
-  public async downloadProjectInfo(): Promise<unknown> {
+  public async loadFiles(): Promise<unknown> {
     const res = await this.api?.loadFiles();
     this.files = {};
     const materialFiles: Array<ClFile> = res.material_files;
