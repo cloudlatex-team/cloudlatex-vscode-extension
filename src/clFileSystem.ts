@@ -25,7 +25,10 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
 
   protected async _upload(relativePath: string, option?: any): Promise<string>{
     const stream = fs.createReadStream(path.join(this.rootPath, relativePath));
-    const relativeDir = path.dirname(relativePath);
+    let relativeDir = path.dirname(relativePath);
+    if (relativeDir.length > 1 && relativeDir[0] === '/') {
+      relativeDir = relativeDir.slice(1);
+    }
     const result = await this.api.uploadFile(stream, relativeDir);
     await this.loadFiles();
     return result.file.id;;

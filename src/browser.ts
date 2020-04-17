@@ -26,7 +26,6 @@ export default class Browser {
     chromeArgs.push(`--user-data-dir=${vscode.workspace.rootPath}/.vswpp/`);
 
     const headless = false; //this.setting.obj.initialized;
-    console.log('setting', this.setting.obj);
 
     this.browser = await puppeteer.launch({
       executablePath: chromePath,
@@ -39,7 +38,6 @@ export default class Browser {
       this.page = await this.browser.newPage();
 
       await this.waitUntilLogIn();
-      // TODO check if logined?
       if(!this.setting.obj.initialized) {
         await this.initialize();
       }
@@ -59,7 +57,7 @@ export default class Browser {
       await this.browser.close();
       throw new Error('Cannot get creditials');
     }
-    //await this.browser.close();
+    await this.browser.close();
     return credentials;
   }
 
