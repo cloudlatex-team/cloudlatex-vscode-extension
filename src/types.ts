@@ -12,7 +12,7 @@ export interface ClFile {
 }
 
 export interface CompileResult {
-  exitCode: number,
+  exit_code: number,
   uri: string,
   synctex_uri: string,
   errors: Array<string>,

@@ -193,7 +193,7 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       this.emit('file-changed', absPath);
     } catch(e) {
       console.error('update file failed!!!', e);
-      vscode.window.showWarningMessage(e);
+      vscode.window.showWarningMessage(e.message);
     }
   }
 

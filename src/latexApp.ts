@@ -12,7 +12,6 @@ import { Creditials, Config, CompileResult, EditorProject } from './types';
 export default class LatexApp {
   private setting: Setting;
   private config: Config;
-  //private watcher: Watcher;
   private api: WebAppApi;
   private fileSystem: ClFileSystem;
   private projectInfo?: EditorProject;
@@ -25,11 +24,13 @@ export default class LatexApp {
       throw new Error('root path can not be obtained!');
     }
     this.api = new WebAppApi(creditials.csrf, creditials.loginSession, setting.obj.projectId);
-    this.fileSystem = new ClFileSystem(rootPath, this.api);
     this.config = vscode.workspace.getConfiguration('cloudlatex') as any as Config;
+    this.fileSystem = new ClFileSystem(rootPath, this.api, (relativePath) => {
+      return ![this.logPath, this.pdfPath, this.synctexPath].includes(relativePath);
+    });
   }
 
-  public static async launch() {
+  public static async launch(): Promise<LatexApp> {
     const setting = new Setting();
     const browser = new Browser(setting);
     try {
@@ -40,11 +41,13 @@ export default class LatexApp {
     const creditials = await browser.launch();
     console.log('creditials', creditials);
     const app = new LatexApp(setting, creditials);
-    app.launch();
+    await app.launch();
+    return app;
   }
 
   async launch() {
     this.projectInfo = (await this.api.loadProjectInfo())['project'];
+    console.log('project info', this.projectInfo);
     await this.fileSystem.loadFiles();
 
     if (!this.setting.obj.initialized) {
@@ -89,6 +92,22 @@ export default class LatexApp {
     return path.basename(file.name, '.tex');
   }
 
+  get logPath(): string {
+    return path.join(this.config.outDir, this.targetName + '.log');
+  }
+
+  get pdfPath(): string {
+    return path.join(this.config.outDir, this.targetName + '.pdf');
+  }
+
+  get synctexPath(): string {
+    return path.join(this.config.outDir, this.targetName + '.synctex');
+  }
+
+  public async reload() {
+    await this.fileSystem.loadFiles();
+  }
+
   public async compile() {
     try {
       if(!this.api) {
@@ -96,14 +115,18 @@ export default class LatexApp {
       }
       console.log('compile...');
       let result = await this.api.compileProject();
-      vscode.window.showInformationMessage('[latex-cloud] Successfully Compiled.');
+
+      if(result.exit_code === 0) {
+        vscode.window.showInformationMessage('[latex-cloud] Successfully Compiled.');
+      } else {
+        vscode.window.showWarningMessage('[latex-cloud] Some error occured with compilation.');
+      }
 
       console.log('compile result', result);
 
       // log
       const logStr = result.errors.join('\n') + result.warnings.join('\n') + '\n' + result.log;
-      const logPath = path.join(this.config.outDir, this.targetName + '.log');
-      this.fileSystem.saveAs(logPath, Readable.from(logStr));
+      this.fileSystem.saveAs(this.logPath, Readable.from(logStr));
 
       /*if(result.exitCode !== 0) {
         return;
@@ -111,8 +134,7 @@ export default class LatexApp {
 
       // download pdf
       const pdfStream = await this.api.downloadFile(result.uri);
-      const pdfPath = path.join(this.config.outDir, this.targetName + '.pdf');
-      this.fileSystem.saveAs(pdfPath, pdfStream).then(() => {
+      this.fileSystem.saveAs(this.pdfPath, pdfStream).then(() => {
         // latex workshop support
         vscode.commands.executeCommand('latex-workshop.refresh-viewer');
       });
@@ -122,11 +144,10 @@ export default class LatexApp {
       const decompressed = pako.inflate(new Uint8Array(compressed));
       let synctexStr = new TextDecoder("utf-8").decode(decompressed);
       synctexStr = synctexStr.replace(/\/data\/\./g, this.fileSystem.rootPath);
-      const synctexPath = path.join(this.config.outDir, this.targetName + '.synctex');
-      this.fileSystem.saveAs(synctexPath, Readable.from(synctexStr));
+      this.fileSystem.saveAs(this.synctexPath, Readable.from(synctexStr));
     } catch(e) {
       console.error(e);
-      vscode.window.showWarningMessage(e); // #TODO show multiple compile error
+      vscode.window.showWarningMessage(e.message); // #TODO show multiple compile error
     }
   }
 }

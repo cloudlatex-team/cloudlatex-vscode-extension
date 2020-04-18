@@ -12,15 +12,15 @@
   ],
   "activationEvents": [
     "onCommand:vscode-web-app.openWebApp",
-    "onView:targetTree2"
+    "onView:vscodeWebApp"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "views": {
       "vscode-web-app": [
         {
-          "id": "targetTree2",
-          "name": "Targets"
+          "id": "vscodeWebApp",
+          "name": ""
         }
       ]
     },
@@ -43,6 +43,25 @@
           "description": "directory to output compile result"
         }
       }
+    },
+    "commands": [
+      {
+        "command": "vscode-web-app.refreshEntry",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+        "command": "vscode-web-app.refreshEntry",
+        "when": "view == vscodeWebApp",
+        "group": "navigation"
+        }
+      ]
     }
   },
   "scripts": {
