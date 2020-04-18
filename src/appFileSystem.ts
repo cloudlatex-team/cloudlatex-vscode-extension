@@ -12,17 +12,20 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
   public files: {[key in KeyType]: AppFile};
   private fileWatcher?: chokidar.FSWatcher;
   private watcherSyncedFiles: {[key in KeyType]: boolean};
+  public readonly watcherFileFilter?: (relativePath: string) => boolean;
 
-  constructor(rootPath: string) {
+  constructor(rootPath: string/*, noWatchFiles: Array<string>*/) {
     super();
     this.rootPath = rootPath;
     this.files = {};
     this.watcherSyncedFiles = {};
+    //this.noWatchFiles = noWatchFiles;
   }
 
   public initFileWatcher() {
     const watcherOption = {
-      ignored: /\.git|\.vswpp|synctex\.gz|main\.pdf|\.workspace|\.vscode|.DS\_Store/ //#TODO
+      ignored: /\.git|\.vswpp|synctex\.gz|\.vscode|.DS\_Store/ //#TODO
+      // ignored: /\.git|\.vswpp|synctex\.gz|main\.pdf|\.workspace|\.vscode|.DS\_Store/ //#TODO
     };
     this.fileWatcher = chokidar.watch(this.rootPath, watcherOption);
     this.fileWatcher.on('add', (file: string) => this.onWatchingNewFile(file));
@@ -57,7 +60,7 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     console.log('downloading..,', file);
     const stream = await this._download(file);
     this.watcherSyncedFiles[id] = false;
-    const relativePath =  this._getRelativePath(file);
+    const relativePath =  this._getRelativePathFromFile(file);
     return this.saveAs(relativePath, stream);
   }
 
@@ -121,7 +124,7 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
       relativePath = relativePath.slice(1);
     }
     for(let id in this.files) {
-      let _relativePath = this._getRelativePath(this.files[id]);
+      let _relativePath = this._getRelativePathFromFile(this.files[id]);
       if(_relativePath[0] === '/') {
         _relativePath = _relativePath.slice(1);
       }
@@ -133,11 +136,25 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     return null;
   }
 
-  protected _getRelativePath(file: AppFile): string {
+  protected _getRelativePathFromFile(file: AppFile): string {
     throw new Error('No implementation');
   }
 
+  private filterWatchingEvent(absPath: string): boolean {
+    let relativePath = this.getRelativePath(absPath);
+    if(relativePath[0] === '/') {
+      relativePath = relativePath.slice(1);
+    }
+    if(this.watcherFileFilter && !this.watcherFileFilter(relativePath)) {
+      return false;
+    }
+    return true;
+  }
+
   private onWatchingNewFile(absPath: string) {
+    if(!this.filterWatchingEvent(absPath)) {
+      return;
+    }
     const relativePath = this.getRelativePath(absPath);
     const id = this.getIdfromAbsPath(absPath);
     if(id) {
@@ -157,6 +174,9 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
   }
 
   private async onWatchedFileChanged(absPath: string) {
+    if(!this.filterWatchingEvent(absPath)) {
+      return;
+    }
     const id = this.getIdfromAbsPath(absPath);
     if(!id) {
       this.emit('local-changed-error', absPath);
@@ -170,14 +190,17 @@ export default class AppFileSystem<AppFile> extends EventEmitter{
     try {
       const result = await this.updateRemote(id);
       console.log('update remote result', result);
+      this.emit('file-changed', absPath);
     } catch(e) {
-      console.error(e);
+      console.error('update file failed!!!', e);
       vscode.window.showWarningMessage(e);
     }
-    this.emit('file-changed', absPath);
   }
 
   private onWatchedFileDeleted(absPath: string) {
+    if(!this.filterWatchingEvent(absPath)) {
+      return;
+    }
     const id = this.getIdfromAbsPath(absPath);
     if (!id) {
       this.emit('local-deleted-error', absPath);

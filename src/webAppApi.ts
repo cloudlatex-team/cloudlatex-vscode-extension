@@ -74,7 +74,6 @@ export default class WebAppApi {
     );
     const result = JSON.parse(await res.text());
     if(!res.ok) {
-      console.log('update file failed', res, result);
       throw result;
     }
     return result;

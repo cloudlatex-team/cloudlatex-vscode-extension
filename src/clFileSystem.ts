@@ -5,11 +5,8 @@ import * as path from 'path';
 import WebAppApi from './webAppApi';
 
 export default class ClFileSystem extends AppFileSystem<ClFile> {
-  private api: WebAppApi;
-
-  constructor(rootPath: string, api: WebAppApi) {
+  constructor(rootPath: string, private api: WebAppApi, public readonly watcherFileFilter: (relativePath: string) => boolean) {
     super(rootPath);
-    this.api = api;
   }
 
   protected _download(file: ClFile) {
@@ -71,7 +68,7 @@ export default class ClFileSystem extends AppFileSystem<ClFile> {
     return;
   }
 
-  protected _getRelativePath(file: ClFile): string {
+  protected _getRelativePathFromFile(file: ClFile): string {
     return file.full_path;
   }
 
