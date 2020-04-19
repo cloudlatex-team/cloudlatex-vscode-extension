@@ -7,7 +7,7 @@ import Browser from './browser';
 import WebAppApi from './webAppApi';
 import Setting from './setting';
 import ClFileSystem from './clFileSystem';
-import { Creditials, Config, CompileResult, EditorProject } from './types';
+import { Creditials, Config, CompileResult, EditorProject, AppStatus } from './types';
 
 export default class LatexApp {
   private setting: Setting;
@@ -15,6 +15,7 @@ export default class LatexApp {
   private api: WebAppApi;
   private fileSystem: ClFileSystem;
   private projectInfo?: EditorProject;
+  private loggedIn :boolean = false;
 
   constructor(setting: Setting, creditials: Creditials) {
     this.setting = setting;
@@ -24,12 +25,13 @@ export default class LatexApp {
       throw new Error('root path can not be obtained!');
     }
     this.api = new WebAppApi(creditials.csrf, creditials.loginSession, setting.obj.projectId);
-    this.config = vscode.workspace.getConfiguration('cloudlatex') as any as Config;
+    this.config = vscode.workspace.getConfiguration('latex-cloud') as any as Config;
     this.fileSystem = new ClFileSystem(rootPath, this.api, (relativePath) => {
       return ![this.logPath, this.pdfPath, this.synctexPath].includes(relativePath);
     });
   }
 
+  // #TODO include the state: not loggedin yet
   public static async launch(): Promise<LatexApp> {
     const setting = new Setting();
     const browser = new Browser(setting);
@@ -48,6 +50,9 @@ export default class LatexApp {
   async launch() {
     this.projectInfo = (await this.api.loadProjectInfo())['project'];
     console.log('project info', this.projectInfo);
+    this.loggedIn = true;
+    vscode.commands.executeCommand('vscode-web-app.refreshEntry', this.appStatus);
+
     await this.fileSystem.loadFiles();
 
     if (!this.setting.obj.initialized) {
@@ -102,6 +107,15 @@ export default class LatexApp {
 
   get synctexPath(): string {
     return path.join(this.config.outDir, this.targetName + '.synctex');
+  }
+
+  get appStatus(): AppStatus {
+    return {
+      loggedIn: this.loggedIn,
+      backend: this.config.backend,
+      projectName: this.projectInfo?.title,
+      projectId: this.projectInfo?.id ? String(this.projectInfo.id) : ''
+    };
   }
 
   public async reload() {

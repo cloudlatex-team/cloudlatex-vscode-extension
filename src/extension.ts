@@ -4,18 +4,19 @@ import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
 import AppContent from './appContent';
 import LatexApp from './latexApp';
+import { AppStatus } from './types';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
-	const tree =  new TargetTreeProvider();
-  vscode.window.registerTreeDataProvider('vscodeWebApp', tree);
-	vscode.commands.registerCommand('vscode-web-app.refreshEntry', () =>
-    tree.refresh()
-	);
-
 	let latexApp: LatexApp;
+
+	const tree =  new TargetTreeProvider({loggedIn: false});
+  vscode.window.registerTreeDataProvider('vscodeWebApp', tree);
+	vscode.commands.registerCommand('vscode-web-app.refreshEntry', (status: AppStatus) => {
+    tree.refresh(status);
+	});
+
 	// This line of code will only be executed once when your extension is activated
 
 	// The command has been defined in the package.json file

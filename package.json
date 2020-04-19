@@ -37,10 +37,16 @@
       "type": "object",
       "title": "Cloudlatex",
       "properties": {
-        "cloudlatex.outDir": {
+        "latex-cloud.outDir": {
           "type": "string",
           "default": ".workspace",
           "description": "directory to output compile result"
+        },
+        "latex-cloud.backend": {
+          "type": "string",
+          "enum": ["cloudlatex", "overleaf"],
+          "default": "cloudlatex",
+          "description": "backend web application"
         }
       }
     },

@@ -26,10 +26,6 @@ export interface Creditials {
   loginSession: string
 }
 
-export interface Config {
-  outDir: string;
-}
-
 export interface EditorProject {
   id: number;
   last_opened_file_id: number;
@@ -41,4 +37,16 @@ export interface EditorProject {
   title: string;
   updated_at: string;         // Date?
   scroll_sync: boolean;
+}
+
+export interface Config {
+  outDir: string;
+  backend: string;
+}
+
+export interface AppStatus {
+  loggedIn: boolean;
+  backend?: string;
+  projectName?: string;
+  projectId?: string;
 }

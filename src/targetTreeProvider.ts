@@ -1,12 +1,16 @@
 import * as vscode from 'vscode';
+import {AppStatus} from './types';
+import { stat } from 'fs';
 
 export default class TargetTreeProvider implements vscode.TreeDataProvider<object> {
-  private _onDidChangeTreeData: vscode.EventEmitter<object | undefined> = new vscode.EventEmitter<object | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<object | undefined> = this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<Item> = new vscode.EventEmitter<Item>();
+  readonly onDidChangeTreeData: vscode.Event<Item> = this._onDidChangeTreeData.event;
+  constructor(private status: AppStatus) {
 
-  constructor() {}
+  }
 
-  refresh(): void {
+  refresh(status: AppStatus): void {
+    this.status = status;
     this._onDidChangeTreeData.fire();
   }
 
@@ -18,25 +22,32 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
     // vscode.commands.executeCommand('vscode-web-app.openWebApp');
     // vscode.commands.executeCommand('workbench.view.explorer');
 
-    this._onDidChangeTreeData.fire(); // Make sure collection is not cached.
-    //return Promise.reject([]);
-    return Promise.resolve([
-      new Item('Login with CloudLatex', vscode.TreeItemCollapsibleState.None, {
-        command: 'vscode-web-app.openWebApp',
-        title: 'titile',
-        arguments: []
-      }),
-      new Item('Compile', vscode.TreeItemCollapsibleState.None, {
+    const items = [];
+    if (this.status.loggedIn) {
+      items.push( new Item('Compile', vscode.TreeItemCollapsibleState.None,
+      this.status.backend || '',
+      {
         command: 'vscode-web-app.compile',
         title: 'titile',
         arguments: []
-      }),
-      new Item('Reload', vscode.TreeItemCollapsibleState.None, {
+      }));
+      items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
+      this.status.backend || '',
+      {
         command: 'vscode-web-app.reload',
         title: 'titile',
         arguments: []
-      })
-    ]);
+      }));
+    } else {
+      items.push(new Item(`Login with ${this.status.backend}`, vscode.TreeItemCollapsibleState.None,
+      this.status.backend || '',
+      {
+        command: 'vscode-web-app.openWebApp',
+        title: 'titile',
+        arguments: []
+      }));
+    }
+    return Promise.resolve(items);
   }
 }
 
@@ -44,6 +55,7 @@ class Item extends vscode.TreeItem {
   constructor(
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    public readonly backend: string,
     public readonly command?: vscode.Command
   ) {
     super(label, collapsibleState);
@@ -54,6 +66,6 @@ class Item extends vscode.TreeItem {
   }
 
   get description(): string {
-    return '(CloudLatex)[https://cloudlatex.io/]';
+    return `(${this.backend})`;
   }
 }
