@@ -20,12 +20,6 @@ export interface CompileResult {
   log: string,
 }
 
-
-export interface Creditials {
-  csrf: string,
-  loginSession: string
-}
-
 export interface EditorProject {
   id: number;
   last_opened_file_id: number;
@@ -42,6 +36,10 @@ export interface EditorProject {
 export interface Config {
   outDir: string;
   backend: string;
+  email: string;
+  client: string;
+  token: string;
+  projectId: number;
 }
 
 export interface AppStatus {

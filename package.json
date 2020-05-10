@@ -37,16 +37,38 @@
       "type": "object",
       "title": "Cloudlatex",
       "properties": {
-        "latex-cloud.outDir": {
+        "cloud-latex.outDir": {
           "type": "string",
           "default": ".workspace",
           "description": "directory to output compile result"
         },
-        "latex-cloud.backend": {
+        "cloud-latex.backend": {
           "type": "string",
-          "enum": ["cloudlatex", "overleaf"],
+          "enum": [
+            "cloudlatex"
+          ],
           "default": "cloudlatex",
           "description": "backend web application"
+        },
+        "cloud-latex.email": {
+          "type": "string",
+          "default": 0,
+          "description": "E-mail address"
+        },
+        "cloud-latex.client": {
+          "type": "string",
+          "default": "",
+          "description": "client id"
+        },
+        "cloud-latex.token": {
+          "type": "string",
+          "default": "",
+          "description": "access token"
+        },
+        "cloud-latex.projectId": {
+          "type": "number",
+          "default": 0,
+          "description": "projectId"
         }
       }
     },
@@ -63,9 +85,9 @@
     "menus": {
       "view/title": [
         {
-        "command": "vscode-web-app.refreshEntry",
-        "when": "view == vscodeWebApp",
-        "group": "navigation"
+          "command": "vscode-web-app.refreshEntry",
+          "when": "view == vscodeWebApp",
+          "group": "navigation"
         }
       ]
     }
@@ -94,15 +116,11 @@
   },
   "dependencies": {
     "@types/pako": "^1.0.1",
-    "@types/puppeteer-core": "^2.0.0",
     "chokidar": "^3.3.1",
     "eventemitter3": "^4.0.0",
     "form-data": "^3.0.0",
-    "inline-source": "^7.2.0",
     "karma-chrome-launcher": "^2.2.0",
     "node-fetch": "^2.6.0",
-    "pako": "^1.0.11",
-    "puppeteer-core": "^2.1.1",
-    "which-chrome": "^0.1.1"
+    "pako": "^1.0.11"
   }
 }

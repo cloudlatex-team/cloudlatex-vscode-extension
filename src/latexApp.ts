@@ -3,29 +3,26 @@ import * as vscode from 'vscode';
 import {Readable} from 'stream';
 import * as pako from 'pako';
 
-import Browser from './browser';
 import WebAppApi from './webAppApi';
-import Setting from './setting';
+import Setting from './configManager';
 import ClFileSystem from './clFileSystem';
-import { Creditials, Config, CompileResult, EditorProject, AppStatus } from './types';
+import { Config, CompileResult, EditorProject, AppStatus } from './types';
 
 export default class LatexApp {
-  private setting: Setting;
   private config: Config;
   private api: WebAppApi;
   private fileSystem: ClFileSystem;
   private projectInfo?: EditorProject;
   private loggedIn :boolean = false;
 
-  constructor(setting: Setting, creditials: Creditials) {
-    this.setting = setting;
-
+  constructor() {
     const rootPath = vscode.workspace.rootPath;
     if (!rootPath) {
       throw new Error('root path can not be obtained!');
     }
-    this.api = new WebAppApi(creditials.csrf, creditials.loginSession, setting.obj.projectId);
-    this.config = vscode.workspace.getConfiguration('latex-cloud') as any as Config;
+    this.config = vscode.workspace.getConfiguration('cloud-latex') as any as Config;
+    // TODO raise if config is invalid.
+    this.api = new WebAppApi(this.config);
     this.fileSystem = new ClFileSystem(rootPath, this.api, (relativePath) => {
       return ![this.logPath, this.pdfPath, this.synctexPath].includes(relativePath);
     });
@@ -33,38 +30,31 @@ export default class LatexApp {
 
   // #TODO include the state: not loggedin yet
   public static async launch(): Promise<LatexApp> {
-    const setting = new Setting();
-    const browser = new Browser(setting);
-    try {
-      await setting.load();
-    } catch(err) {
-      console.error(err);
-    }
-    const creditials = await browser.launch();
-    console.log('creditials', creditials);
-    const app = new LatexApp(setting, creditials);
+    const app = new LatexApp();
     await app.launch();
     return app;
   }
 
   async launch() {
+    try {
+      const result = await this.api.validateToken();
+      if (!result.success) {
+        throw new result;
+      }
+    } catch(err) {
+      vscode.window.showErrorMessage('[cloud-latex] Failed to login.');
+      return;
+    }
     this.projectInfo = (await this.api.loadProjectInfo())['project'];
+    if (!this.projectInfo) {
+      vscode.window.showErrorMessage('[cloud-latex] Failed to load Project info.');
+      return;
+    }
     console.log('project info', this.projectInfo);
     this.loggedIn = true;
     vscode.commands.executeCommand('vscode-web-app.refreshEntry', this.appStatus);
 
     await this.fileSystem.loadFiles();
-
-    if (!this.setting.obj.initialized) {
-      try {
-        await this.fileSystem.pull();
-      } catch (err) {
-        console.error(err);
-        return;
-      }
-      this.setting.obj.initialized = true;
-      this.setting.save();
-    }
 
     this.compile();
 
@@ -131,9 +121,9 @@ export default class LatexApp {
       let result = await this.api.compileProject();
 
       if(result.exit_code === 0) {
-        vscode.window.showInformationMessage('[latex-cloud] Successfully Compiled.');
+        vscode.window.showInformationMessage('[cloud-latex] Successfully Compiled.');
       } else {
-        vscode.window.showWarningMessage('[latex-cloud] Some error occured with compilation.');
+        vscode.window.showWarningMessage('[cloud-latex] Some error occured with compilation.');
       }
 
       console.log('compile result', result);
@@ -148,9 +138,13 @@ export default class LatexApp {
 
       // download pdf
       const pdfStream = await this.api.downloadFile(result.uri);
-      this.fileSystem.saveAs(this.pdfPath, pdfStream).then(() => {
+      this.fileSystem.saveAs(this.pdfPath, pdfStream).catch(err => {
+        vscode.window.showErrorMessage(err);
+      }).then(() => {
         // latex workshop support
-        vscode.commands.executeCommand('latex-workshop.refresh-viewer');
+        return vscode.commands.executeCommand('latex-workshop.refresh-viewer');
+      }).catch(err => {
+        console.warn(err);
       });
 
       // download synctex
