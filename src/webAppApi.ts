@@ -18,8 +18,8 @@ export default class WebAppApi {
     };
     if(option.json) {
       headers['Content-Type'] = 'application/json';
-      if(option.form) {
     }
+    if(option.form) {
       headers['Content-Type'] = 'multipart/form-data';
     }
     return headers;
