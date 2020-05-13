@@ -37,6 +37,11 @@
       "type": "object",
       "title": "Cloudlatex",
       "properties": {
+        "cloud-latex.enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "set true if enable cloudlatex plugin"
+        },
         "cloud-latex.outDir": {
           "type": "string",
           "default": ".workspace",
@@ -68,7 +73,7 @@
         "cloud-latex.projectId": {
           "type": "number",
           "default": 0,
-          "description": "projectId"
+          "description": "projectId. *Do not mistake this value, otherwise your files might be overwritten."
         }
       }
     },

@@ -28,6 +28,33 @@ export default class LatexApp {
     });
   }
 
+  // Check if this plugin is enabled.
+  public static isEnabled(): boolean {
+    const config = vscode.workspace.getConfiguration('cloud-latex');
+    /*
+     * To prevent overwriting files unexpectedly,
+     * `enable` should be defined in workspace configuration.
+     */
+    const enableInspect = config.inspect('enable');
+    if (!enableInspect || !enableInspect.workspaceValue) {
+      return false;
+    }
+    return true;
+  }
+
+ /*
+  * To prevent overwriting files unexpectedly,
+  * `projectId` should be defined in workspace configuration.
+  */
+  public static validateProjectIdConfiguration(): boolean {
+    const config = vscode.workspace.getConfiguration('cloud-latex');
+    const projectIdInspect = config.inspect('projectId');
+    if (!projectIdInspect || !projectIdInspect.workspaceValue) {
+      return false;
+    }
+    return true;
+  }
+
   // #TODO include the state: not loggedin yet
   public static async launch(): Promise<LatexApp> {
     const app = new LatexApp();
