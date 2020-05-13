@@ -19,8 +19,8 @@ export function activate(context: vscode.ExtensionContext) {
   LatexApp.launch().then(_latexApp => latexApp = _latexApp);
 
   const tree =  new TargetTreeProvider({loggedIn: false});
-  vscode.window.registerTreeDataProvider('vscodeWebApp', tree);
-  vscode.commands.registerCommand('vscode-web-app.refreshEntry', (status: AppStatus) => {
+  vscode.window.registerTreeDataProvider('cloudlatex-commands', tree);
+  vscode.commands.registerCommand('cloudlatex.refreshEntry', (status: AppStatus) => {
     tree.refresh(status);
   });
 
@@ -29,14 +29,14 @@ export function activate(context: vscode.ExtensionContext) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand('vscode-web-app.openWebApp', () => {
+  let disposable = vscode.commands.registerCommand('cloudlatex.openWebApp', () => {
     // The code you place here will be executed every time your command is executed
   });
 
   context.subscriptions.push(disposable);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('vscode-web-app.compile', () => {
+    vscode.commands.registerCommand('cloudlatex.compile', () => {
       if(latexApp) {
         latexApp.compile();
       }
@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('vscode-web-app.reload', () => {
+    vscode.commands.registerCommand('cloudlatex.reload', () => {
       if(latexApp) {
         latexApp.reload();
       }

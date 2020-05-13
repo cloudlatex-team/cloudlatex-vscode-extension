@@ -1,6 +1,6 @@
 {
-  "name": "vscode-web-app",
-  "displayName": "vscode-web-app",
+  "name": "cloudlatex",
+  "displayName": "cloudlatex",
   "description": "",
   "publisher": "moritanian",
   "version": "0.0.1",
@@ -11,24 +11,25 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:vscode-web-app.openWebApp",
-    "onView:vscodeWebApp"
+    "onCommand:cloudlatex.openWebApp",
+    "onView:cloudlatex-commands"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "views": {
-      "vscode-web-app": [
+      "cloudlatex": [
         {
-          "id": "vscodeWebApp",
-          "name": ""
+          "id": "cloudlatex-commands",
+          "name": "Commands",
+          "when": "config.cloudlatex.enabled"
         }
       ]
     },
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "vscode-web-app",
-          "title": "vc-web-app",
+          "id": "cloudlatex",
+          "title": "cloudlatex",
           "icon": "resources/icon.png"
         }
       ]
@@ -37,17 +38,17 @@
       "type": "object",
       "title": "Cloudlatex",
       "properties": {
-        "cloud-latex.enable": {
+        "cloudlatex.enabled": {
           "type": "boolean",
           "default": false,
           "description": "set true if enable cloudlatex plugin"
         },
-        "cloud-latex.outDir": {
+        "cloudlatex.outDir": {
           "type": "string",
           "default": ".workspace",
           "description": "directory to output compile result"
         },
-        "cloud-latex.backend": {
+        "cloudlatex.backend": {
           "type": "string",
           "enum": [
             "cloudlatex"
@@ -55,22 +56,22 @@
           "default": "cloudlatex",
           "description": "backend web application"
         },
-        "cloud-latex.email": {
+        "cloudlatex.email": {
           "type": "string",
           "default": 0,
           "description": "E-mail address"
         },
-        "cloud-latex.client": {
+        "cloudlatex.client": {
           "type": "string",
           "default": "",
           "description": "client id"
         },
-        "cloud-latex.token": {
+        "cloudlatex.token": {
           "type": "string",
           "default": "",
           "description": "access token"
         },
-        "cloud-latex.projectId": {
+        "cloudlatex.projectId": {
           "type": "number",
           "default": 0,
           "description": "projectId. *Do not mistake this value, otherwise your files might be overwritten."
@@ -79,7 +80,7 @@
     },
     "commands": [
       {
-        "command": "vscode-web-app.refreshEntry",
+        "command": "cloudlatex.refreshEntry",
         "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -90,8 +91,8 @@
     "menus": {
       "view/title": [
         {
-          "command": "vscode-web-app.refreshEntry",
-          "when": "view == vscodeWebApp",
+          "command": "cloudlatex.refreshEntry",
+          "when": "view == cloudlatex-commands",
           "group": "navigation"
         }
       ]

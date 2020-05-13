@@ -19,7 +19,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
   }
 
   getChildren(element?: object): Thenable<object[]> {
-    // vscode.commands.executeCommand('vscode-web-app.openWebApp');
+    // vscode.commands.executeCommand('cloudlatex.openWebApp');
     // vscode.commands.executeCommand('workbench.view.explorer');
 
     const items = [];
@@ -27,14 +27,14 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
       items.push( new Item('Compile', vscode.TreeItemCollapsibleState.None,
       this.status.backend || '',
       {
-        command: 'vscode-web-app.compile',
+        command: 'cloudlatex.compile',
         title: 'titile',
         arguments: []
       }));
       items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
       this.status.backend || '',
       {
-        command: 'vscode-web-app.reload',
+        command: 'cloudlatex.reload',
         title: 'titile',
         arguments: []
       }));
@@ -42,7 +42,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
       items.push(new Item(`Login with ${this.status.backend}`, vscode.TreeItemCollapsibleState.None,
       this.status.backend || '',
       {
-        command: 'vscode-web-app.openWebApp',
+        command: 'cloudlatex.openWebApp',
         title: 'titile',
         arguments: []
       }));

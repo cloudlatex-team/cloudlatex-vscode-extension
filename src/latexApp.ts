@@ -20,7 +20,7 @@ export default class LatexApp {
     if (!rootPath) {
       throw new Error('root path can not be obtained!');
     }
-    this.config = vscode.workspace.getConfiguration('cloud-latex') as any as Config;
+    this.config = vscode.workspace.getConfiguration('cloudlatex') as any as Config;
     // TODO raise if config is invalid.
     this.api = new WebAppApi(this.config);
     this.fileSystem = new ClFileSystem(rootPath, this.api, (relativePath) => {
@@ -30,13 +30,13 @@ export default class LatexApp {
 
   // Check if this plugin is enabled.
   public static isEnabled(): boolean {
-    const config = vscode.workspace.getConfiguration('cloud-latex');
+    const config = vscode.workspace.getConfiguration('cloudlatex');
     /*
      * To prevent overwriting files unexpectedly,
-     * `enable` should be defined in workspace configuration.
+     * `enabled` should be defined in workspace configuration.
      */
-    const enableInspect = config.inspect('enable');
-    if (!enableInspect || !enableInspect.workspaceValue) {
+    const enabledInspect = config.inspect('enabled');
+    if (!enabledInspect || !enabledInspect.workspaceValue) {
       return false;
     }
     return true;
@@ -47,7 +47,7 @@ export default class LatexApp {
   * `projectId` should be defined in workspace configuration.
   */
   public static validateProjectIdConfiguration(): boolean {
-    const config = vscode.workspace.getConfiguration('cloud-latex');
+    const config = vscode.workspace.getConfiguration('cloudlatex');
     const projectIdInspect = config.inspect('projectId');
     if (!projectIdInspect || !projectIdInspect.workspaceValue) {
       return false;
@@ -69,17 +69,17 @@ export default class LatexApp {
         throw new result;
       }
     } catch(err) {
-      vscode.window.showErrorMessage('[cloud-latex] Failed to login.');
+      vscode.window.showErrorMessage('[cloudlatex] Failed to login.');
       return;
     }
     this.projectInfo = (await this.api.loadProjectInfo())['project'];
     if (!this.projectInfo) {
-      vscode.window.showErrorMessage('[cloud-latex] Failed to load Project info.');
+      vscode.window.showErrorMessage('[cloudlatex] Failed to load Project info.');
       return;
     }
     console.log('project info', this.projectInfo);
     this.loggedIn = true;
-    vscode.commands.executeCommand('vscode-web-app.refreshEntry', this.appStatus);
+    vscode.commands.executeCommand('cloudlatex.refreshEntry', this.appStatus);
 
     await this.fileSystem.loadFiles();
 
@@ -148,9 +148,9 @@ export default class LatexApp {
       let result = await this.api.compileProject();
 
       if(result.exit_code === 0) {
-        vscode.window.showInformationMessage('[cloud-latex] Successfully Compiled.');
+        vscode.window.showInformationMessage('[cloudlatex] Successfully Compiled.');
       } else {
-        vscode.window.showWarningMessage('[cloud-latex] Some error occured with compilation.');
+        vscode.window.showWarningMessage('[cloudlatex] Some error occured with compilation.');
       }
 
       console.log('compile result', result);
