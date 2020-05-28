@@ -2,10 +2,10 @@ import fetch from 'node-fetch';
 import { Stream } from 'stream';
 import { CompileResult } from './types';
 import * as FormData from 'form-data';
-import { Config } from './types';
-import { APIProjects, APIRoot } from './appConst';
+import { Config, ProjectInfo, WebAppApi } from '../../types';
+import { APIProjects, APIRoot } from './clConst';
 
-export default class WebAppApi {
+export default class CLWebAppApi implements WebAppApi {
   constructor(private config: Config) {
   }
 
@@ -38,7 +38,7 @@ export default class WebAppApi {
   async loadProjectInfo() {
     const res = await fetch(`${APIProjects}/${this.config.projectId}`, {headers: this.headers()});
     const text = await res.text();
-    return JSON.parse(text);
+    return JSON.parse(text)['project'] as ProjectInfo;
   }
 
   async loadFiles() {

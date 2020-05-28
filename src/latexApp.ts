@@ -1,117 +1,64 @@
 import * as path from 'path';
-import * as vscode from 'vscode';
+import * as  EventEmitter from 'eventemitter3';
 import {Readable} from 'stream';
 import * as pako from 'pako';
+import Logger from './logger';
+import { Config, ProjectInfo, AppInfo, SyncMode, DecideSyncMode } from './types';
+import Manager from './fileManage/index';
 
-import WebAppApi from './webAppApi';
-import Setting from './configManager';
-import ClFileSystem from './clFileSystem';
-import { Config, CompileResult, EditorProject, AppStatus } from './types';
-
-export default class LatexApp {
-  private config: Config;
-  private api: WebAppApi;
-  private fileSystem: ClFileSystem;
-  private projectInfo?: EditorProject;
+export default class LatexApp extends EventEmitter {
+  private projectInfo?: ProjectInfo;
   private loggedIn :boolean = false;
+  private manager: Manager;
 
-  constructor() {
-    const rootPath = vscode.workspace.rootPath;
-    if (!rootPath) {
-      throw new Error('root path can not be obtained!');
-    }
-    this.config = vscode.workspace.getConfiguration('cloudlatex') as any as Config;
-    // TODO raise if config is invalid.
-    this.api = new WebAppApi(this.config);
-    this.fileSystem = new ClFileSystem(rootPath, this.api, (relativePath) => {
-      return ![this.logPath, this.pdfPath, this.synctexPath].includes(relativePath);
-    });
-  }
-
-  // Check if this plugin is enabled.
-  public static isEnabled(): boolean {
-    const config = vscode.workspace.getConfiguration('cloudlatex');
-    /*
-     * To prevent overwriting files unexpectedly,
-     * `enabled` should be defined in workspace configuration.
-     */
-    const enabledInspect = config.inspect('enabled');
-    if (!enabledInspect || !enabledInspect.workspaceValue) {
-      return false;
-    }
-    return true;
-  }
-
- /*
-  * To prevent overwriting files unexpectedly,
-  * `projectId` should be defined in workspace configuration.
-  */
-  public static validateProjectIdConfiguration(): boolean {
-    const config = vscode.workspace.getConfiguration('cloudlatex');
-    const projectIdInspect = config.inspect('projectId');
-    if (!projectIdInspect || !projectIdInspect.workspaceValue) {
-      return false;
-    }
-    return true;
-  }
-
-  // #TODO include the state: not loggedin yet
-  public static async launch(): Promise<LatexApp> {
-    const app = new LatexApp();
-    await app.launch();
-    return app;
+  constructor(private config: Config, rootPath: string, decideSyncMode: DecideSyncMode, private logger: Logger) {
+    super();
+    this.manager = new Manager(config, rootPath, decideSyncMode, 
+      relativePath => {
+        return ![this.logPath, this.pdfPath, this.synctexPath].includes(relativePath);
+      }, 
+      logger);
+    
   }
 
   async launch() {
-    try {
-      const result = await this.api.validateToken();
-      if (!result.success) {
-        throw new result;
-      }
-    } catch(err) {
-      vscode.window.showErrorMessage('[cloudlatex] Failed to login.');
-      return;
-    }
-    this.projectInfo = (await this.api.loadProjectInfo())['project'];
+    await this.manager.init();
+    this.manager.on('successfully-synced', () => {
+      this.compile();
+    });
+
+    // #TODO offline 時を現在のstate machineに統合
+    this.projectInfo = await this.manager.api.loadProjectInfo();
     if (!this.projectInfo) {
-      vscode.window.showErrorMessage('[cloudlatex] Failed to load Project info.');
+      this.logger.error('[cloudlatex] Failed to load Project info.');
       return;
     }
     console.log('project info', this.projectInfo);
     this.loggedIn = true;
-    vscode.commands.executeCommand('cloudlatex.refreshEntry', this.appStatus);
+    this.emit('appinfo-updated');
 
-    await this.fileSystem.loadFiles();
-
-    this.compile();
-
-
-    this.fileSystem.initFileWatcher();
-    this.fileSystem.on('file-changed', (absPath: string) => {
-      this.compile();
-    });
-
-    this.fileSystem.on('local-reading-error', (e: any) => {
-      console.error('local-reading-error', e);
-    });
-    this.fileSystem.on('local-changed-error', (e: any) => {
-      console.error('local-changed-error', e);
-    });
-    this.fileSystem.on('local-deleted-error', (e: any) => {
-      console.error('local-deleted-error', e);
-    });
-
+    await this.manager.startSync();
+    /*
+    try {
+      const result = await this.manager.api.validateToken();
+      if (!result.success) {
+        throw new result;
+      }
+    } catch(err) {
+      return;
+    }
+    */
   }
 
   get targetName(): string {
     if(!this.projectInfo) {
       throw new Error('Project info is not defined');
     }
-    const file = this.fileSystem.files[this.projectInfo.compile_target_file_id];
+    const file = this.manager.files.findBy('remoteId', this.projectInfo.compile_target_file_id);
     if(!file) {
       throw new Error('target file is not found');
     }
-    return path.basename(file.name, '.tex');
+    return path.basename(file.relativePath, '.tex');
   }
 
   get logPath(): string {
@@ -126,7 +73,7 @@ export default class LatexApp {
     return path.join(this.config.outDir, this.targetName + '.synctex');
   }
 
-  get appStatus(): AppStatus {
+  get appInfo(): AppInfo {
     return {
       loggedIn: this.loggedIn,
       backend: this.config.backend,
@@ -136,53 +83,50 @@ export default class LatexApp {
   }
 
   public async reload() {
-    await this.fileSystem.loadFiles();
+    await this.manager.fileAdapter.loadFileList();
   }
 
   public async compile() {
     try {
-      if(!this.api) {
-        throw new Error('api object is not set.');
-      }
       console.log('compile...');
-      let result = await this.api.compileProject();
+      let result = await this.manager.api.compileProject();
 
       if(result.exit_code === 0) {
-        vscode.window.showInformationMessage('[cloudlatex] Successfully Compiled.');
+        this.logger.info('[cloudlatex] Successfully Compiled.');
       } else {
-        vscode.window.showWarningMessage('[cloudlatex] Some error occured with compilation.');
+        this.logger.warn('[cloudlatex] Some error occured with compilation.');
       }
 
       console.log('compile result', result);
 
       // log
       const logStr = result.errors.join('\n') + result.warnings.join('\n') + '\n' + result.log;
-      this.fileSystem.saveAs(this.logPath, Readable.from(logStr));
+      this.manager.fileAdapter.saveAs(this.logPath, Readable.from(logStr));
 
       /*if(result.exitCode !== 0) {
         return;
       }*/
 
       // download pdf
-      const pdfStream = await this.api.downloadFile(result.uri);
-      this.fileSystem.saveAs(this.pdfPath, pdfStream).catch(err => {
-        vscode.window.showErrorMessage(err);
+      const pdfStream = await this.manager.api.downloadFile(result.uri);
+      this.manager.fileAdapter.saveAs(this.pdfPath, pdfStream).catch(err => {
+        this.logger.error(err);
       }).then(() => {
-        // latex workshop support
-        return vscode.commands.executeCommand('latex-workshop.refresh-viewer');
+        this.emit('successfully-compiled');
+        return;
       }).catch(err => {
         console.warn(err);
       });
 
       // download synctex
-      const compressed = await this.api.loadSynctexObject(result.synctex_uri);
+      const compressed = await this.manager.api.loadSynctexObject(result.synctex_uri);
       const decompressed = pako.inflate(new Uint8Array(compressed));
-      let synctexStr = new TextDecoder("utf-8").decode(decompressed);
-      synctexStr = synctexStr.replace(/\/data\/\./g, this.fileSystem.rootPath);
-      this.fileSystem.saveAs(this.synctexPath, Readable.from(synctexStr));
+      let synctexStr = new TextDecoder('utf-8').decode(decompressed);
+      synctexStr = synctexStr.replace(/\/data\/\./g, this.manager.rootPath);
+      this.manager.fileAdapter.saveAs(this.synctexPath, Readable.from(synctexStr));
     } catch(e) {
       console.error(e);
-      vscode.window.showWarningMessage(e.message); // #TODO show multiple compile error
+      this.logger.warn(e.message); // #TODO show multiple compile error
     }
   }
 }

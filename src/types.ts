@@ -1,26 +1,5 @@
-export interface ClFile {
-  is_folder: boolean;
-  id: number;
-  name: string;
-  revision: string;
-  size: number;
-  mimetype: string;
-  belonging_to: number;  // id
-  full_path: string;
-  file_url: string;
-  thumbnail_url?: string;
-}
-
-export interface CompileResult {
-  exit_code: number,
-  uri: string,
-  synctex_uri: string,
-  errors: Array<string>,
-  warnings: Array<string>,
-  log: string,
-}
-
-export interface EditorProject {
+// TODO move to backend
+export interface ProjectInfo {
   id: number;
   last_opened_file_id: number;
   compile_target_file_id: number;
@@ -42,9 +21,45 @@ export interface Config {
   projectId: number;
 }
 
-export interface AppStatus {
+export interface AppInfo {
   loggedIn: boolean;
   backend?: string;
   projectName?: string;
   projectId?: string;
+}
+
+export interface WebAppApi {
+  loadProjectInfo(): Promise<ProjectInfo>,
+  downloadFile(url: string): Promise<NodeJS.ReadableStream>,
+  loadSynctexObject(url: string): Promise<any>,
+  compileProject(): any
+}
+
+/*
+export const AppStates = {
+  Init: 'Init',
+  Offline: 'Offline',
+  At_Login: 'At_Login',
+  Failed_Login: 'Failed_Login',
+  Conflicting: 'Conflicting',
+  Pulling: 'Pulling',
+  Pushing: 'Pushing',
+  Idle: 'Idle'
+} as const;
+
+//'init' | 'offline' | 'at_login' | 'failed_login' | 'conflicting' | 'pushing' | 'pulling' | 'idle';
+export type AppState = (typeof AppStates)[keyof typeof AppStates];
+*/
+
+export type KeyType = number | string;
+export type SyncMode = 'upload' | 'download';
+export type ChangeState = 'no' | 'update' | 'new' | 'delete';
+export type ChangeLocation = 'no' | 'local' | 'remote' | 'both';
+
+export interface DecideSyncMode {
+  (
+    remoteChangedFiles: string[],
+    localChangedFiles: string[], 
+    bothChangedFiles: string[]
+  ): Promise<SyncMode>
 }

@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
-import {AppStatus} from './types';
+import {AppInfo} from './types';
 import { stat } from 'fs';
 
 export default class TargetTreeProvider implements vscode.TreeDataProvider<object> {
   private _onDidChangeTreeData: vscode.EventEmitter<Item> = new vscode.EventEmitter<Item>();
   readonly onDidChangeTreeData: vscode.Event<Item> = this._onDidChangeTreeData.event;
-  constructor(private status: AppStatus) {
+  constructor(private status: AppInfo) {
 
   }
 
-  refresh(status: AppStatus): void {
+  refresh(status: AppInfo): void {
     this.status = status;
     this._onDidChangeTreeData.fire();
   }
