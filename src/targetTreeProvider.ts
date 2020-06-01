@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import {AppInfo} from './types';
-import { stat } from 'fs';
+import {AppInfo} from 'latex-extension';
 
 export default class TargetTreeProvider implements vscode.TreeDataProvider<object> {
   private _onDidChangeTreeData: vscode.EventEmitter<Item> = new vscode.EventEmitter<Item>();

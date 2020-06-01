@@ -2,8 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
-import LatexApp from './latexApp';
-import { AppInfo, Config, DecideSyncMode } from './types';
+import LatexApp, {AppInfo, Config, DecideSyncMode} from 'latex-extension';
 
 const decideSyncMode: DecideSyncMode = async function(remoteChanges, localChanges, bothChanges) {
   const pull: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
