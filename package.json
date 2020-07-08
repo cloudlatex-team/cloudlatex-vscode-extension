@@ -10,8 +10,9 @@
   "categories": [
     "Other"
   ],
+  "license": "MIT",
   "activationEvents": [
-    "onCommand:cloudlatex.openWebApp",
+    "onCommand:cloudlatex.compile",
     "onView:cloudlatex-commands"
   ],
   "main": "./out/extension.js",
@@ -55,6 +56,11 @@
           ],
           "default": "cloudlatex",
           "description": "backend web application"
+        },
+        "cloudlatex.endpoint": {
+          "type": "string",
+          "default": "https://cloudlatex.io/api",
+          "description": "API endpoint"
         },
         "cloudlatex.email": {
           "type": "string",
