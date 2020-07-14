@@ -2,20 +2,32 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
-import LatexApp, {AppInfo, Config, DecideSyncMode} from 'latex-extension';
+import LatexApp, {AppInfo, Config, DecideSyncMode, Logger } from 'latex-extension';
 
-const decideSyncMode: DecideSyncMode = async function(remoteChanges, localChanges, bothChanges) {
-  const pull: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
-  const push: vscode.QuickPickItem = { label: 'Pull', description: 'Apply remote changes to local' };
-  
-  const result = await vscode.window.showQuickPick([pull, push]);
-  if(result === pull) {
+const decideSyncMode: DecideSyncMode = async function(conflictFiles) {
+  const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
+  const pull: vscode.QuickPickItem = { label: 'Pull', description: 'Apply remote changes to local' };
+
+  // TODO explanation of the conflict
+  const explanation = `Following files is both changed in the server and local: \n 
+    ${conflictFiles.join('\n')}
+  `;
+  const ResolveConflict = 'Resolve conflict';
+  const selection = await vscode.window.showWarningMessage(explanation, ResolveConflict);
+  if (selection !== ResolveConflict) {
+    vscode.window.showInformationMessage(selection || 'no');
+    throw new Error('The result of decideSyncMode is invalid.');
+  }
+  const result = await vscode.window.showQuickPick([pull, push], {placeHolder: explanation});
+  if (result === pull) {
     return 'download';
-  } else if(result === push) {
+  } else if (result === push) {
     return 'upload';
   }
   throw new Error('The result of decideSyncMode is invalid.');
 };
+
+// TODO execute at the project open
 console.log('extension.ts');
 
 // this method is called when your extension is activated
@@ -54,12 +66,12 @@ export function activate(context: vscode.ExtensionContext) {
     // latex workshop support
     vscode.commands.executeCommand('latex-workshop.refresh-viewer');
   });
-  
+
   latexApp.launch();
 
 
   // Tree provider
-  const tree =  new TargetTreeProvider({offline: true});
+  const tree =  new TargetTreeProvider(latexApp.appInfo);
   vscode.window.registerTreeDataProvider('cloudlatex-commands', tree);
   vscode.commands.registerCommand('cloudlatex.refreshEntry', (status: AppInfo) => {
     tree.refresh(status);
@@ -108,9 +120,9 @@ function validateProjectIdConfiguration(): boolean {
   return true;
 }
 
-class VSLogger {
-  log(m: any, ...o: any[]){console.log(m, ...o);};
-  info(m: any, ...o: any[]){vscode.window.showInformationMessage(m, ...o);};
-  warn(m: any, ...o: any[]){vscode.window.showWarningMessage(m, ...o);};
-  error(m: any, ...o: any[]){vscode.window.showErrorMessage(m, ...o);};
+class VSLogger extends Logger  {
+  _log(m: any, ...o: any[]){console.log(m, ...o);};
+  _info(m: any, ...o: any[]){vscode.window.showInformationMessage(m, ...o);};
+  _warn(m: any, ...o: any[]){vscode.window.showWarningMessage(m, ...o);};
+  _error(m: any, ...o: any[]){vscode.window.showErrorMessage(m, ...o);};
 }

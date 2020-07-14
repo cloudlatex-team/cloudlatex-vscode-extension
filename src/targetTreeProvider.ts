@@ -21,14 +21,14 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
     const items = [];
     if (!this.status.offline) {
       items.push( new Item('Compile', vscode.TreeItemCollapsibleState.None,
-      this.status.backend || '',
+      '',
       {
         command: 'cloudlatex.compile',
         title: 'titile',
         arguments: []
       }));
       items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
-      this.status.backend || '',
+      '',
       {
         command: 'cloudlatex.reload',
         title: 'titile',
@@ -36,7 +36,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
       }));
     } else {
       items.push( new Item('Offline', vscode.TreeItemCollapsibleState.None,
-      this.status.backend || 'hoge',
+      '',
       {
         command: 'cloudlatex.reload',
         title: 'titile',
