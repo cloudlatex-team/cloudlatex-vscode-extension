@@ -1,18 +1,18 @@
 {
   "name": "cloudlatex",
-  "displayName": "cloudlatex",
+  "displayName": "Cloud LaTeX",
   "description": "",
   "publisher": "moritanian",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.43.0"
+    "vscode": "^1.44.0"
   },
   "categories": [
     "Other"
   ],
   "license": "MIT",
   "activationEvents": [
-    "onCommand:cloudlatex.compile",
+    "workspaceContains:.cloudlatex.json",
     "onView:cloudlatex-commands"
   ],
   "main": "./out/extension.js",
@@ -57,6 +57,11 @@
           "default": "cloudlatex",
           "description": "backend web application"
         },
+        "cloudlatex.autoBuild": {
+          "type": "boolean",
+          "default": true,
+          "description": "set true if automatically build when any files are saved."
+        },
         "cloudlatex.endpoint": {
           "type": "string",
           "default": "https://cloudlatex.io/api",
@@ -88,10 +93,26 @@
       {
         "command": "cloudlatex.refreshEntry",
         "title": "Refresh",
+        "category": "Cloud LaTeX",
         "icon": {
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
+      },
+      {
+        "command": "cloudlatex.compile",
+        "title": "Compile",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.reload",
+        "title": "Reload",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.open",
+        "title": "Open",
+        "category": "Cloud LaTeX"
       }
     ],
     "menus": {

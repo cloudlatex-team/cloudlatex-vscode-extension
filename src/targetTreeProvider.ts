@@ -1,23 +1,24 @@
 import * as vscode from 'vscode';
 import {AppInfo} from 'latex-extension';
 
-export default class TargetTreeProvider implements vscode.TreeDataProvider<object> {
-  private _onDidChangeTreeData: vscode.EventEmitter<Item> = new vscode.EventEmitter<Item>();
-  readonly onDidChangeTreeData: vscode.Event<Item> = this._onDidChangeTreeData.event;
+// TODO sync from server button
+export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {
+  private _onDidChangeTreeData: vscode.EventEmitter<Item | undefined> = new vscode.EventEmitter<Item | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<Item | undefined> = this._onDidChangeTreeData.event;
   constructor(private status: AppInfo) {
 
   }
 
   refresh(status: AppInfo): void {
     this.status = status;
-    this._onDidChangeTreeData.fire();
+    this._onDidChangeTreeData.fire(undefined);
   }
 
-  getTreeItem(element: object): vscode.TreeItem {
+  getTreeItem(element: Item): vscode.TreeItem {
     return element;
   }
 
-  getChildren(element?: object): Thenable<object[]> {
+  async getChildren(element?: object) {
     const items = [];
     if (!this.status.offline) {
       items.push( new Item('Compile', vscode.TreeItemCollapsibleState.None,
@@ -43,7 +44,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
         arguments: []
       }));
     }
-    return Promise.resolve(items);
+    return items;
   }
 }
 
