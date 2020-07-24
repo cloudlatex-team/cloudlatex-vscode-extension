@@ -11,8 +11,11 @@ LaTeX Cloud is an extension for Visual Studio Code to write tex locally with lat
 - Sync files
 - Auto build
 
-## Usage
-### Setting
+## Installation
+Find the cloudlatex plugin in [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/), or run `ext install latex-workshop` in VS Code Quick Open (`ctrl/cmd + P`).
+
+
+## Setting
 
 settings.json
 ```settings.json
