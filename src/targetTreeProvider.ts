@@ -44,6 +44,13 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
         arguments: []
       }));
     }
+    items.push(new Item('Set account',  vscode.TreeItemCollapsibleState.None,
+    '',
+    {
+      command: 'cloudlatex.account',
+      title: 'titile',
+      arguments: []
+    }));
     return items;
   }
 }

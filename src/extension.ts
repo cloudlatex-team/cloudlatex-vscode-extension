@@ -2,36 +2,24 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
-import LatexApp, {AppInfo, Config, DecideSyncMode, Logger } from 'latex-extension';
+import LatexApp, {AppInfo, Config, Logger} from 'latex-extension';
+import { decideSyncMode, inputAccount } from './interaction';
+import VSLogger from './vslogger';
+import { Account, VSConfig} from './type';
+import AccountManager from './accountManager';
+import * as fs from 'fs';
+import * as path from 'path';
+// #TODO save user info in ~/.cloudlatex or ...
+// https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
+// https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/environmentPath.ts
 
-// #TODO import latexapp as npm module
-const decideSyncMode: DecideSyncMode = async function(conflictFiles) {
-  const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
-  const pull: vscode.QuickPickItem = { label: 'Pull', description: 'Apply remote changes to local' };
 
-  const explanation = `Following files is both changed in the server and local: \n 
-    ${conflictFiles.join('\n')}
-  `;
-  const ResolveConflict = 'Resolve conflict';
-  const selection = await vscode.window.showInformationMessage(explanation, {modal: true}, ResolveConflict);
-
-  if (selection !== ResolveConflict) {
-    throw new Error('The result of decideSyncMode is invalid.');
-  }
-  const result = await vscode.window.showQuickPick([pull, push], {placeHolder: explanation});
-  if (result === pull) {
-    return 'download';
-  } else if (result === push) {
-    return 'upload';
-  }
-  throw new Error('The result of decideSyncMode is invalid.');
-};
 
 let statusBarItem: vscode.StatusBarItem;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   if (!isEnabled()) {
     vscode.window.showErrorMessage('Be sure to set cloudlatex.enable to true not at user\'s settings but at workspace settings.');
     return;
@@ -42,14 +30,16 @@ export function activate(context: vscode.ExtensionContext) {
     return;
   }
 
-  /*
+  console.log(context);
+
+  /**
    * Status bar
    */
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
   statusBarItem.command = 'cloudlatex.open';
 	context.subscriptions.push(statusBarItem);
 
-  /*
+  /**
    * Latex app
    */
   const rootPath = vscode.workspace.rootPath;
@@ -57,14 +47,45 @@ export function activate(context: vscode.ExtensionContext) {
     throw new Error('The root path can not be obtained!');
   }
 
-  const config: Config = Object.assign({},
-    vscode.workspace.getConfiguration('cloudlatex') as any as Config,
-    {
-      rootPath
-    }
-  );
+  const vsconfig = vscode.workspace.getConfiguration('cloudlatex') as any as VSConfig;
 
-  const latexApp = new LatexApp(config, decideSyncMode, new VSLogger());
+  // storage path to save meta data
+  const storagePath = context.storagePath || rootPath;
+  try {
+    await fs.promises.mkdir(storagePath);
+  } catch (e) {
+    // directory is already created
+  }
+
+  // global storage path to save account data and global meta data.
+  const globalStoragePath = context.globalStoragePath;
+  try {
+    await fs.promises.mkdir(globalStoragePath);
+  } catch (e) {
+    // directory is already created
+  }
+  const accountPath = path.join(globalStoragePath, 'account.json');
+  const accountManager = new AccountManager<Account>(accountPath);
+  let account = await accountManager.load();
+  if (!account) {
+    // Temporary invalid account
+    account = {
+      token: '',
+      email: '',
+      client: ''
+    };
+  }
+  console.log('loaded account', account);
+
+  const config: Config = {
+    ...vsconfig,
+    ...account,
+    storagePath,
+    rootPath
+  };
+
+  const logger = new VSLogger();
+  const latexApp = new LatexApp(config, decideSyncMode, logger);
 
   latexApp.on('appinfo-updated', () => {
     vscode.commands.executeCommand('cloudlatex.refreshEntry');
@@ -89,51 +110,88 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.show();
   });
 
-  latexApp.launch();
 
-
-  /*
-   * Left Panel
+  /**
+   * Side Bar
    */
   const tree =  new TargetTreeProvider(latexApp.appInfo);
   const panel = vscode.window.registerTreeDataProvider('cloudlatex-commands', tree);
 
 
-  /*
+  /**
    * Commands
    */
   vscode.commands.registerCommand('cloudlatex.refreshEntry', () => {
     tree.refresh(latexApp.appInfo); // TODO fix error
   });
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('cloudlatex.compile', () => {
-      latexApp.compile();
-    })
-  );
+  vscode.commands.registerCommand('cloudlatex.compile', async () => {
+    const result = await latexApp.validateAccount();
+    if (result === 'offline') {
+      logger.warn('Cannot stil connect to the server.');
+      return;
+    }
+    if (result === 'invalid') {
+      return;
+    }
+    latexApp.compile();
+  });
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('cloudlatex.reload', () => {
-      latexApp.reload();
-    })
-  );
+  vscode.commands.registerCommand('cloudlatex.reload', async () => {
+    const result = await latexApp.validateAccount();
+    if (result === 'offline') {
+      logger.warn('Cannot stil connect to the server.');
+    }
+    if (result === 'valid') {
+      latexApp.startSync();
+    }
+  });
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('cloudlatex.open', () => {
-      vscode.commands.executeCommand('workbench.view.extension.cloudlatex').then(
-        () => vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup')
-      );
-    })
-  );
+  vscode.commands.registerCommand('cloudlatex.open', () => {
+    vscode.commands.executeCommand('workbench.view.extension.cloudlatex').then(
+      () => vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup')
+    );
+  });
+
+  vscode.commands.registerCommand('cloudlatex.account', async () => {
+    let account!: Account;
+    try {
+      account = await inputAccount();
+    } catch (e) {
+      logger.log('account input is canceled');
+      return; // input box is canceled.
+    }
+    try {
+      await accountManager.save(account);
+      latexApp.updateConfig(account);
+      console.log(account);
+      if (await latexApp.validateAccount() === 'valid') {
+        logger.info('Your account is validated!');
+        latexApp.startSync();
+      }
+    } catch (e) {
+      logger.warn(JSON.stringify(e));
+    }
+  });
+
+  /**
+   * Launch app
+   */
+  await latexApp.launch();
+  if (await latexApp.validateAccount() === 'valid') {
+    latexApp.startSync();
+  }
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+  // TODO delete config files
+}
 
 // Check if this plugin is enabled.
 function isEnabled(): boolean {
   const config = vscode.workspace.getConfiguration('cloudlatex');
-  /*
+  /**
    * To prevent overwriting files unexpectedly,
    * `enabled` should be defined in workspace configuration.
    */
@@ -144,10 +202,10 @@ function isEnabled(): boolean {
   return true;
 }
 
-/*
-* To prevent overwriting files unexpectedly,
-* `projectId` should be defined in workspace configuration.
-*/
+/**
+ * To prevent overwriting files unexpectedly,
+ * `projectId` should be defined in workspace configuration.
+ */
 function validateProjectIdConfiguration(): boolean {
   const config = vscode.workspace.getConfiguration('cloudlatex');
   const projectIdInspect = config.inspect('projectId');
@@ -157,9 +215,3 @@ function validateProjectIdConfiguration(): boolean {
   return true;
 }
 
-class VSLogger extends Logger  {
-  _log(m: any, ...o: any[]){console.log(m, ...o);};
-  _info(m: any, ...o: any[]){vscode.window.showInformationMessage(m, ...o);};
-  _warn(m: any, ...o: any[]){vscode.window.showWarningMessage(m, ...o);};
-  _error(m: any, ...o: any[]){vscode.window.showErrorMessage(m, ...o);};
-}

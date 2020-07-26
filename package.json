@@ -2,11 +2,12 @@
   "name": "cloudlatex",
   "displayName": "Cloud LaTeX",
   "description": "",
-  "publisher": "moritanian",
+  "publisher": "cloudlatex",
   "version": "0.0.2",
   "engines": {
     "vscode": "^1.44.0"
   },
+  "icon": "resources/cl.ico",
   "categories": [
     "Other"
   ],
@@ -22,8 +23,20 @@
     "vscode"
   ],
   "activationEvents": [
+    "onLanguage:tex",
+    "onLanguage:latex",
+    "onLanguage:latex-expl3",
+    "onLanguage:doctex",
+    "onLanguage:jlweave",
+    "onLanguage:rsweave",
+    "onLanguage:pdf",
+    "onLanguage:bibtex",
     "workspaceContains:.cloudlatex.json",
-    "onView:cloudlatex-commands"
+    "onView:cloudlatex-commands",
+    "onCommand:cloudlatex.open",
+    "onCommand:cloudlatex.reload",
+    "onCommand:cloudlatex.compile",
+    "onCommand:cloudlatex.account"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -77,21 +90,6 @@
           "default": "https://cloudlatex.io/api",
           "description": "API endpoint"
         },
-        "cloudlatex.email": {
-          "type": "string",
-          "default": 0,
-          "description": "E-mail address"
-        },
-        "cloudlatex.client": {
-          "type": "string",
-          "default": "",
-          "description": "client id"
-        },
-        "cloudlatex.token": {
-          "type": "string",
-          "default": "",
-          "description": "access token"
-        },
         "cloudlatex.projectId": {
           "type": "number",
           "default": 0,
@@ -122,6 +120,11 @@
       {
         "command": "cloudlatex.open",
         "title": "Open",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.account",
+        "title": "Set account",
         "category": "Cloud LaTeX"
       }
     ],
