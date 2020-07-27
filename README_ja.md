@@ -1,7 +1,5 @@
 # Cloud LaTeX Extension for Visual Studio Code
 
-
-
 ## 特徴
 - [Cloud LaTeX](https://cloudlatex.io/)を用いてローカルPC上のtexファイルをコンパイル
 - ローカル上のファイルとCloud LaTeXサーバ上のファイルを自動同期

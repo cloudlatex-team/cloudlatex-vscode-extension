@@ -2,11 +2,10 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
-import LatexApp, {AppInfo, Config, Logger} from 'latex-extension';
+import LatexApp, {AppInfo, Config, Logger, Account} from 'latex-extension';
 import { decideSyncMode, inputAccount } from './interaction';
 import VSLogger from './vslogger';
-import { Account, VSConfig} from './type';
-import AccountManager from './accountManager';
+import { VSConfig} from './type';
 import * as fs from 'fs';
 import * as path from 'path';
 // #TODO save user info in ~/.cloudlatex or ...
@@ -65,23 +64,12 @@ export async function activate(context: vscode.ExtensionContext) {
     // directory is already created
   }
   const accountPath = path.join(globalStoragePath, 'account.json');
-  const accountManager = new AccountManager<Account>(accountPath);
-  let account = await accountManager.load();
-  if (!account) {
-    // Temporary invalid account
-    account = {
-      token: '',
-      email: '',
-      client: ''
-    };
-  }
-  console.log('loaded account', account);
 
   const config: Config = {
     ...vsconfig,
-    ...account,
     storagePath,
-    rootPath
+    rootPath,
+    accountStorePath: accountPath,
   };
 
   const logger = new VSLogger();
@@ -162,9 +150,7 @@ export async function activate(context: vscode.ExtensionContext) {
       return; // input box is canceled.
     }
     try {
-      await accountManager.save(account);
-      latexApp.updateConfig(account);
-      console.log(account);
+      latexApp.setAccount(account);
       if (await latexApp.validateAccount() === 'valid') {
         logger.info('Your account is validated!');
         latexApp.startSync();
