@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {AppInfo} from 'latex-extension';
+import {AppInfo} from 'cloudlatex-cli-plugin';
 
 // TODO sync from server button
 export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {

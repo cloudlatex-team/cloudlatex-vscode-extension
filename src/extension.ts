@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
-import LatexApp, {AppInfo, Config, Logger, Account} from 'latex-extension';
+import LatexApp, {AppInfo, Config, Logger, Account} from 'cloudlatex-cli-plugin';
 import { decideSyncMode, inputAccount } from './interaction';
 import VSLogger from './vslogger';
 import { VSConfig} from './type';
@@ -11,8 +11,6 @@ import * as path from 'path';
 // #TODO save user info in ~/.cloudlatex or ...
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/environmentPath.ts
-
-
 
 let statusBarItem: vscode.StatusBarItem;
 

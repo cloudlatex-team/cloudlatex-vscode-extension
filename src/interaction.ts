@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import LatexApp, {AppInfo, Config, DecideSyncMode, Logger } from 'latex-extension';
-import { Account } from './type';
+import LatexApp, {AppInfo, Config, DecideSyncMode, Logger, Account } from 'cloudlatex-cli-plugin';
 
 export const decideSyncMode: DecideSyncMode = async function(conflictFiles) {
   const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };

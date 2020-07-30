@@ -340,6 +340,20 @@ cliui@^5.0.0:
     strip-ansi "^5.2.0"
     wrap-ansi "^5.1.0"
 
+"cloudlatex-cli-plugin@git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#v0.0.3":
+  version "0.0.3"
+  resolved "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#c96eeb5f0d6c7b6da7485d8dccb70152759682f1"
+  dependencies:
+    "@moritanian/type-db" "^0.1.0"
+    "@types/text-encoding" "^0.0.35"
+    chokidar "^3.3.1"
+    eventemitter3 "^4.0.0"
+    form-data "^3.0.0"
+    node-fetch "^2.6.0"
+    pako "^1.0.11"
+    text-encoding "^0.7.0"
+    uuid "^8.1.0"
+
 color-convert@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"
@@ -964,20 +978,6 @@ json-stable-stringify-without-jsonify@^1.0.1:
   resolved "https://registry.yarnpkg.com/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz#9db7b59496ad3f3cfef30a75142d2d930ad72651"
   integrity sha1-nbe1lJatPzz+8wp1FC0tkwrXJlE=
 
-"latex-extension@git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#v0.0.2":
-  version "0.0.2"
-  resolved "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#ee93c6675cd3263e5b1cd36a08de39daa6faacde"
-  dependencies:
-    "@moritanian/type-db" "^0.1.0"
-    "@types/text-encoding" "^0.0.35"
-    chokidar "^3.3.1"
-    eventemitter3 "^4.0.0"
-    form-data "^3.0.0"
-    node-fetch "^2.6.0"
-    pako "^1.0.11"
-    text-encoding "^0.7.0"
-    uuid "^8.1.0"
-
 levn@^0.3.0, levn@~0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/levn/-/levn-0.3.0.tgz#3b09924edf9f083c0490fdd4c0bc4421e04764ee"
@@ -1571,9 +1571,9 @@ uri-js@^4.2.2:
     punycode "^2.1.0"
 
 uuid@^8.1.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.2.0.tgz#cb10dd6b118e2dada7d0cd9730ba7417c93d920e"
-  integrity sha512-CYpGiFTUrmI6OBMkAdjSDM0k5h8SkkiTP4WAjQgDgNB1S3Ou9VBEvr6q0Kv2H1mMk7IWfxYGpMH5sd5AvcIV2Q==
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.0.tgz#ab738085ca22dc9a8c92725e459b1d507df5d6ea"
+  integrity sha512-fX6Z5o4m6XsXBdli9g7DtWgAx+osMsRRZFKma1mIUsLCz6vRvv+pz5VNbyu9UEDzpMWulZfvpgb/cmDXVulYFQ==
 
 v8-compile-cache@^2.0.3:
   version "2.1.0"

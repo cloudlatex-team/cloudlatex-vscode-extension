@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Logger } from 'latex-extension';
+import { Logger } from 'cloudlatex-cli-plugin';
 
 export default class VSLogger extends Logger  {
   _log(m: any, ...o: any[]){console.log(m, ...o);};
