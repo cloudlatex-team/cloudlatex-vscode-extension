@@ -36,7 +36,8 @@
     "onCommand:cloudlatex.open",
     "onCommand:cloudlatex.reload",
     "onCommand:cloudlatex.compile",
-    "onCommand:cloudlatex.account"
+    "onCommand:cloudlatex.account",
+    "onCommand:cloudlatex.setting"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -45,7 +46,7 @@
         {
           "id": "cloudlatex-commands",
           "name": "Commands",
-          "when": "config.cloudlatex.enabled"
+          "when": "config.cloudlatex.enabled || !config.cloudlatex.supressIcon"
         }
       ]
     },
@@ -65,35 +66,32 @@
         "cloudlatex.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "set true if enable cloudlatex plugin"
+          "description": "Set true if enable cloudlatex plugin"
         },
         "cloudlatex.outDir": {
           "type": "string",
           "default": ".workspace",
-          "description": "directory to output compile result"
-        },
-        "cloudlatex.backend": {
-          "type": "string",
-          "enum": [
-            "cloudlatex"
-          ],
-          "default": "cloudlatex",
-          "description": "backend web application"
+          "description": "Directory to output compile result"
         },
         "cloudlatex.autoBuild": {
           "type": "boolean",
           "default": true,
-          "description": "set true if automatically build when any files are saved."
+          "description": "Set true if automatically build when any files are saved."
         },
         "cloudlatex.endpoint": {
           "type": "string",
           "default": "https://cloudlatex.io/api",
-          "description": "API endpoint"
+          "description": "API endpoint. *Do not edit this value under normal usage."
         },
         "cloudlatex.projectId": {
           "type": "number",
           "default": 0,
-          "description": "projectId. *Do not mistake this value, otherwise your files might be overwritten."
+          "description": "ProjectId. *Do not mistake this value, otherwise your files might be overwritten."
+        },
+        "cloudlatex.supressIcon": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set true to hide cloudlatex icon on the activity bar in the unactivated project."
         }
       }
     },
@@ -125,6 +123,11 @@
       {
         "command": "cloudlatex.account",
         "title": "Set account",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.setting",
+        "title": "Setting",
         "category": "Cloud LaTeX"
       }
     ],

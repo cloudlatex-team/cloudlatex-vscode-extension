@@ -1,9 +1,14 @@
 export type VSConfig = {
   enabled: boolean,
   outDir: string,
-  backend: string,
+  // backend: string,
   autoBuild: boolean,
   endpoint: string,
-  projectId: number
+  projectId: number,
+  supressIcon: boolean
 };
 
+export type SideBarInfo = {
+  activated: boolean,
+  offline: boolean,
+};

@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
-import {AppInfo} from 'cloudlatex-cli-plugin';
+import { SideBarInfo } from './type';
 
 // TODO sync from server button
 export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {
   private _onDidChangeTreeData: vscode.EventEmitter<Item | undefined> = new vscode.EventEmitter<Item | undefined>();
   readonly onDidChangeTreeData: vscode.Event<Item | undefined> = this._onDidChangeTreeData.event;
-  constructor(private status: AppInfo) {
+  constructor(private status: SideBarInfo) {
 
   }
 
-  refresh(status: AppInfo): void {
+  refresh(status: SideBarInfo): void {
     this.status = status;
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -19,38 +19,47 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   async getChildren(element?: object) {
+    console.log('get children', this.status);
     const items = [];
-    if (!this.status.offline) {
-      items.push( new Item('Compile', vscode.TreeItemCollapsibleState.None,
-      '',
-      {
-        command: 'cloudlatex.compile',
-        title: 'titile',
-        arguments: []
-      }));
-      items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
-      '',
-      {
-        command: 'cloudlatex.reload',
-        title: 'titile',
-        arguments: []
-      }));
-    } else {
-      items.push( new Item('Offline', vscode.TreeItemCollapsibleState.None,
-      '',
-      {
-        command: 'cloudlatex.reload',
-        title: 'titile',
-        arguments: []
-      }));
-    }
+
     items.push(new Item('Set account',  vscode.TreeItemCollapsibleState.None,
-    '',
     {
       command: 'cloudlatex.account',
       title: 'titile',
       arguments: []
     }));
+
+    items.push(new Item('Project setting',  vscode.TreeItemCollapsibleState.None,
+    {
+      command: 'cloudlatex.setting',
+      title: 'titile',
+      arguments: []
+    }));
+
+    if (this.status.activated) {
+      if (!this.status.offline) {
+        items.push( new Item('Compile', vscode.TreeItemCollapsibleState.None,
+        {
+          command: 'cloudlatex.compile',
+          title: 'titile',
+          arguments: []
+        }));
+        items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
+        {
+          command: 'cloudlatex.reload',
+          title: 'titile',
+          arguments: []
+        }));
+      } else {
+        items.push( new Item('Offline', vscode.TreeItemCollapsibleState.None,
+        {
+          command: 'cloudlatex.reload',
+          title: 'titile',
+          arguments: []
+        }));
+      }
+    }
+
     return items;
   }
 }
@@ -59,7 +68,6 @@ class Item extends vscode.TreeItem {
   constructor(
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly backend: string,
     public readonly command?: vscode.Command
   ) {
     super(label, collapsibleState);
@@ -67,9 +75,5 @@ class Item extends vscode.TreeItem {
 
   get tooltip(): string {
     return `${this.label}`;
-  }
-
-  get description(): string {
-    return `(${this.backend})`;
   }
 }
