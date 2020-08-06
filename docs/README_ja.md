@@ -26,6 +26,7 @@ Activity Barに表示される`CL`アイコンをクリックするとSide Bar�
 `Cloudlatex.projectID` に準備の項で確認した値を設定し、
 `Clodulatex.Enabled` にチェックを付けます。
 
+＊ Cloudlatexの設定項目が表示されない時は、一旦vscodeを閉じ、再度開いてみてください
 ＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
 
 <img src="setting.png" width="500px">
