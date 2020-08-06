@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { SideBarInfo } from './type';
 
-// TODO sync from server button
 export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {
   private _onDidChangeTreeData: vscode.EventEmitter<Item | undefined> = new vscode.EventEmitter<Item | undefined>();
   readonly onDidChangeTreeData: vscode.Event<Item | undefined> = this._onDidChangeTreeData.event;
@@ -19,7 +18,6 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   async getChildren(element?: object) {
-    console.log('get children', this.status);
     const items = [];
 
     items.push(new Item('Set account',  vscode.TreeItemCollapsibleState.None,

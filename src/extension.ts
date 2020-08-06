@@ -15,8 +15,6 @@ import * as path from 'path';
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/environmentPath.ts
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
   app.activate();
@@ -28,7 +26,6 @@ export async function activate(context: vscode.ExtensionContext) {
   console.log(context);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {
   // TODO delete config files
 }
@@ -39,6 +36,7 @@ class VSLatexApp {
   logger: VSLogger;
   tree!: TargetTreeProvider;
   statusBarItem!: vscode.StatusBarItem;
+  statusBarAnimationId:  NodeJS.Timeout  | null = null;
   activated: boolean;
   constructor(context: vscode.ExtensionContext) {
     this.context =  context;
@@ -69,13 +67,33 @@ class VSLatexApp {
       vscode.commands.executeCommand('cloudlatex.refreshEntry');
     });
 
+    this.latexApp.on('start-sync', () => {
+      this.animateStatusBar([
+        '$(sync)   ', '$(sync).  ', '$(sync).. ', '$(sync)... '
+      ]);
+    });
+
+    this.latexApp.on('failed-sync', () => {
+      this.clearStatusBarAnimation();
+      this.statusBarItem.text = '$(issues)';
+      this.statusBarItem.show();
+    });
+
+    this.latexApp.on('successfully-synced', () => {
+      this.clearStatusBarAnimation();
+      this.statusBarItem.text = '$(folder-active)';
+      this.statusBarItem.show();
+    });
+
     this.latexApp.on('start-compile', () => {
-      this.statusBarItem.text = 'Compiling ...';
-      this.statusBarItem.tooltip = 'Cloud LaTeX';
+      this.animateStatusBar([
+        '$(loading)   ', '$(loading).  ', '$(loading).. ', '$(loading)...',
+      ]);
       this.statusBarItem.show();
     });
 
     this.latexApp.on('successfully-compiled', () => {
+      this.clearStatusBarAnimation();
       this.statusBarItem.text = 'Compiled';
       this.statusBarItem.show();
 
@@ -84,6 +102,7 @@ class VSLatexApp {
     });
 
     this.latexApp.on('failed-compile', () =>{
+      this.clearStatusBarAnimation();
       this.statusBarItem.text = 'Failed to compile';
       this.statusBarItem.show();
     });
@@ -111,7 +130,25 @@ class VSLatexApp {
   setupStatusBar() {
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
     this.statusBarItem.command = 'cloudlatex.open';
+    this.statusBarItem.text = 'CL';
     this.context.subscriptions.push(this.statusBarItem);
+  }
+
+  animateStatusBar(textList: string[], interval: number = 300) {
+    this.clearStatusBarAnimation();
+    this.statusBarItem.show();
+    let idx = 0;
+    this.statusBarAnimationId = setInterval(() => {
+      this.statusBarItem.text = textList[idx];
+      idx = (++idx) % textList.length;
+    }, interval);
+  }
+
+  clearStatusBarAnimation() {
+    if (this.statusBarAnimationId) {
+      clearInterval(this.statusBarAnimationId);
+      this.statusBarAnimationId = null;
+    }
   }
 
   /**
@@ -175,6 +212,10 @@ class VSLatexApp {
     vscode.commands.registerCommand('cloudlatex.setting', async() => {
       await vscode.commands.executeCommand( 'workbench.action.openWorkspaceSettings');
       await vscode.commands.executeCommand( 'workbench.action.openSettings', 'cloudlatex' );
+    });
+
+    vscode.commands.registerCommand('cloudlatex.resetLocal', async() => {
+      this.latexApp.resetLocal();
     });
   }
 
@@ -249,31 +290,3 @@ class VSLatexApp {
     };
   }
 }
-
-// Check if this plugin is enabled.
-function isEnabled(): boolean {
-  const config = vscode.workspace.getConfiguration('cloudlatex');
-  /**
-   * To prevent overwriting files unexpectedly,
-   * `enabled` should be defined in workspace configuration.
-   */
-  const enabledInspect = config.inspect('enabled');
-  if (!enabledInspect || !enabledInspect.workspaceValue) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * To prevent overwriting files unexpectedly,
- * `projectId` should be defined in workspace configuration.
- */
-function validateProjectIdConfiguration(): boolean {
-  const config = vscode.workspace.getConfiguration('cloudlatex');
-  const projectIdInspect = config.inspect('projectId');
-  if (!projectIdInspect || !projectIdInspect.workspaceValue) {
-    return false;
-  }
-  return true;
-}
-
