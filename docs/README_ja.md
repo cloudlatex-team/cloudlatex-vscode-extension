@@ -14,8 +14,24 @@
 
 ## 設定
 ローカルに空のVSCode用プロジェクトを作成します。
-プロジェクトの[settings.json](https://code.visualstudio.com/docs/getstarted/settings)に以下の設定を記述します。(GUIからの設定も可能です)
-projectIdは、準備の項で確認した値に置き換えます。
+Activity Barに表示される`CL`アイコンをクリックするとSide Barに二つのボタンが表示されます。
+
+`Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
+アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
+
+<img src="panel.png" width="300px">
+
+
+次に`Project setting` ボタンをクリックし表示される項目のうち、
+`Cloudlatex.projectID` に準備の項で確認した値を設定し、
+`Clodulatex.Enabled` にチェックを付けます。
+
+＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
+
+<img src="setting.png" width="500px">
+
+
+プロジェクトの[settings.json](https://code.visualstudio.com/docs/getstarted/settings)から設定することも可能です。
 
 ```settings.json
 {
@@ -33,11 +49,6 @@ projectIdは、準備の項で確認した値に置き換えます。
 }
 ```
 
-設定を行うと、activity barにCLアイコンが追加されます。
-CLアイコンをクリックするとサイドパネルに`Set account`ボタンが出現するのでクリックし、
-`email`, `client`, `token` を設定します。
-アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
-
 入力されたアカウントでログインができると自動でCloud LaTeXサーバからプロジェクトファイルがダウンロードされ、コンパイルが実行されます。
 
 ## ファイルの同期とコンパイル
@@ -46,6 +57,18 @@ Cloud LaTeXのwebアプリから行ったファイルの変更もローカルに
 
 `setting.json` で `{"cloudlatex.autoBuild": true}` を設定することで、ファイル保存時に自動でコンパイルが行われます。
 CLアイコンをクリックすることで表示されるサイドパネルの、 `Compile` ボタンからコンパイルすることも可能です。
+
+### ファイルのコンフリクト
+同一のファイルをローカルとサーバ(Cloudlatex Webエディタ、あるいはDropbox連携機能)の両方で編集すると、ファイルのコンフリクトが発生します。コンフリクトが発生すると、ローカルかサーバいずれかの変更に合わせる必要があります、
+
+コンフリクトを検知すると、以下のダイアログが表示されます。
+<img src="conflict.png" width="500px">
+`Resolve conflict` ボタンを押し、`Pull` か `Push` を選択します。
+- Pull: サーバの変更をダウンロードし、サーバに合わせます
+- Push: サーバにローカルの変更をアップロードすることで、ローカルに合わせます
+
+<img src="push_or_pull.png" width="500px">
+
 
 ## 注意事項
 - VSCodeでプロジェクトを開いている時にのみファイルの同期が行われます。そのため、プロジェクトを開いていない際に行ったファイル操作は同期されません。
