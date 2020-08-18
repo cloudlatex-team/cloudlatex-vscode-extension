@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
-import LatexApp, {AppInfo, Config, Account} from 'cloudlatex-cli-plugin';
+import LatexApp, {AppInfo, Config, Account, CompileResult} from 'cloudlatex-cli-plugin';
 import { decideSyncMode, inputAccount } from './interaction';
 import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
@@ -38,10 +38,15 @@ class VSLatexApp {
   statusBarItem!: vscode.StatusBarItem;
   statusBarAnimationId:  NodeJS.Timeout  | null = null;
   activated: boolean;
+  logPanel: vscode.OutputChannel;
+  problemPanel: vscode.DiagnosticCollection;
   constructor(context: vscode.ExtensionContext) {
     this.context =  context;
-    this.logger = new VSLogger();
     this.activated = false;
+    this.problemPanel = vscode.languages.createDiagnosticCollection('LaTeX');
+    this.logPanel = vscode.window.createOutputChannel('Cloud LaTeX');
+    this.logPanel.append('Ready\n');
+    this.logger = new VSLogger(this.logPanel);
     this.setupStatusBar();
     this.setupCommands();
     this.setupSideBar();
@@ -92,19 +97,21 @@ class VSLatexApp {
       this.statusBarItem.show();
     });
 
-    this.latexApp.on('successfully-compiled', () => {
+    this.latexApp.on('successfully-compiled', (result: CompileResult) => {
       this.clearStatusBarAnimation();
       this.statusBarItem.text = 'Compiled';
       this.statusBarItem.show();
+      this.showProblems(result.logs);
 
       // latex workshop support
       vscode.commands.executeCommand('latex-workshop.refresh-viewer');
     });
 
-    this.latexApp.on('failed-compile', () =>{
+    this.latexApp.on('failed-compile', (result: CompileResult) =>{
       this.clearStatusBarAnimation();
       this.statusBarItem.text = 'Failed to compile';
       this.statusBarItem.show();
+      this.showProblems(result.logs);
     });
 
     /**
@@ -112,7 +119,7 @@ class VSLatexApp {
      */
     await this.latexApp.launch();
     if (await this.latexApp.validateAccount() === 'valid') {
-      this.latexApp.startSync();
+      this.latexApp.startSync(true);
     }
   }
 
@@ -152,6 +159,33 @@ class VSLatexApp {
   }
 
   /**
+   * Problems panel
+   *
+   * ref: https://github.com/James-Yu/LaTeX-Workshop/blob/master/src/components/parser/log.ts
+   */
+  showProblems(logs: CompileResult['logs']) {
+    this.problemPanel.clear();
+    if (!logs || logs.length === 0) {
+      return;
+    }
+    const diagsCollection: { [key: string]: vscode.Diagnostic[] } = {};
+    logs.forEach((log) => {
+        const range = new vscode.Range(new vscode.Position(log.line - 1, 0), new vscode.Position(log.line - 1, 65535));
+        const diag = new vscode.Diagnostic(range, log.message,
+          log.type ==='warning' ? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error );
+        diag.source = 'LaTeX';
+        if (diagsCollection[log.file] === undefined) {
+            diagsCollection[log.file] = [];
+        }
+        diagsCollection[log.file].push(diag);
+    });
+
+    for (const file in diagsCollection) {
+        this.problemPanel.set(vscode.Uri.file(file), diagsCollection[file]);
+    }
+  }
+
+  /**
    * Commands
    */
   setupCommands() {
@@ -177,7 +211,7 @@ class VSLatexApp {
         this.logger.warn('Cannot stil connect to the server.');
       }
       if (result === 'valid') {
-        this.latexApp.startSync();
+        this.latexApp.startSync(true);
       }
     });
 
@@ -202,7 +236,7 @@ class VSLatexApp {
         }
         if (await this.latexApp.validateAccount() === 'valid') {
           this.logger.info('Your account is validated!');
-          this.latexApp.startSync();
+          this.latexApp.startSync(true);
         }
       } catch (e) {
         this.logger.warn(JSON.stringify(e));
@@ -212,6 +246,10 @@ class VSLatexApp {
     vscode.commands.registerCommand('cloudlatex.setting', async() => {
       await vscode.commands.executeCommand( 'workbench.action.openWorkspaceSettings');
       await vscode.commands.executeCommand( 'workbench.action.openSettings', 'cloudlatex' );
+    });
+
+    vscode.commands.registerCommand('cloudlatex.compilerLog', () => {
+     this.logPanel.show();
     });
 
     vscode.commands.registerCommand('cloudlatex.resetLocal', async() => {

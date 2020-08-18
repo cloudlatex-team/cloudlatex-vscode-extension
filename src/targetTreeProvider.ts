@@ -42,6 +42,12 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
           title: 'titile',
           arguments: []
         }));
+        items.push( new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
+        {
+          command: 'cloudlatex.compilerLog',
+          title: 'titile',
+          arguments: []
+        }));
         items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
         {
           command: 'cloudlatex.reload',
