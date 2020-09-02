@@ -83,3 +83,6 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 
 # ソースコード
 https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/master
+
+# ライセンス
+Apache License 2.0

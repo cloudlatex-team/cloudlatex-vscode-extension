@@ -30,3 +30,6 @@ settings.json
   "cloudlatex.enabled": true,
 }
 ```
+
+# License
+Apache License 2.0
