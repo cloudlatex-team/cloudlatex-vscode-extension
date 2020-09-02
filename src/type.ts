@@ -11,4 +11,5 @@ export type VSConfig = {
 export type SideBarInfo = {
   activated: boolean,
   offline: boolean,
+  projectName: string | null
 };

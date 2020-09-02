@@ -23,7 +23,7 @@ export async function activate(context: vscode.ExtensionContext) {
     app.activate();
   });
 
-  console.log(context);
+  console.log(context.globalStoragePath);
 }
 
 export function deactivate() {
@@ -73,32 +73,25 @@ class VSLatexApp {
     });
 
     this.latexApp.on('start-sync', () => {
-      this.animateStatusBar([
-        '$(sync)   ', '$(sync).  ', '$(sync).. ', '$(sync)... '
-      ]);
+      this.statusBarItem.text = '$(sync~spin)';
     });
 
     this.latexApp.on('failed-sync', () => {
-      this.clearStatusBarAnimation();
       this.statusBarItem.text = '$(issues)';
       this.statusBarItem.show();
     });
 
     this.latexApp.on('successfully-synced', () => {
-      this.clearStatusBarAnimation();
       this.statusBarItem.text = '$(folder-active)';
       this.statusBarItem.show();
     });
 
     this.latexApp.on('start-compile', () => {
-      this.animateStatusBar([
-        '$(loading)   ', '$(loading).  ', '$(loading).. ', '$(loading)...',
-      ]);
+      this.statusBarItem.text = '$(loading~spin)';
       this.statusBarItem.show();
     });
 
     this.latexApp.on('successfully-compiled', (result: CompileResult) => {
-      this.clearStatusBarAnimation();
       this.statusBarItem.text = 'Compiled';
       this.statusBarItem.show();
       this.showProblems(result.logs);
@@ -108,10 +101,12 @@ class VSLatexApp {
     });
 
     this.latexApp.on('failed-compile', (result: CompileResult) =>{
-      this.clearStatusBarAnimation();
+      this.logger.log('failed compilation', result);
       this.statusBarItem.text = 'Failed to compile';
       this.statusBarItem.show();
-      this.showProblems(result.logs);
+      if (result.logs) {
+        this.showProblems(result.logs);
+      }
     });
 
     /**
@@ -139,23 +134,6 @@ class VSLatexApp {
     this.statusBarItem.command = 'cloudlatex.open';
     this.statusBarItem.text = 'CL';
     this.context.subscriptions.push(this.statusBarItem);
-  }
-
-  animateStatusBar(textList: string[], interval: number = 300) {
-    this.clearStatusBarAnimation();
-    this.statusBarItem.show();
-    let idx = 0;
-    this.statusBarAnimationId = setInterval(() => {
-      this.statusBarItem.text = textList[idx];
-      idx = (++idx) % textList.length;
-    }, interval);
-  }
-
-  clearStatusBarAnimation() {
-    if (this.statusBarAnimationId) {
-      clearInterval(this.statusBarAnimationId);
-      this.statusBarAnimationId = null;
-    }
   }
 
   /**
@@ -324,7 +302,8 @@ class VSLatexApp {
   get sideBarInfo(): SideBarInfo {
     return {
       offline: this.latexApp && this.latexApp.appInfo.offline,
-      activated: this.activated
+      activated: this.activated,
+      projectName: this.latexApp && this.latexApp.appInfo.projectName || null
     };
   }
 }

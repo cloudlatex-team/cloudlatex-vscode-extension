@@ -27,7 +27,9 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
       arguments: []
     }));
 
-    items.push(new Item('Project setting',  vscode.TreeItemCollapsibleState.None,
+    items.push(new Item(
+      `Project setting ${'(' + this.status.projectName + ')' || ''}`,
+      vscode.TreeItemCollapsibleState.None,
     {
       command: 'cloudlatex.setting',
       title: 'titile',
