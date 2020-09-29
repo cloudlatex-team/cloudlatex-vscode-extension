@@ -1,6 +1,6 @@
 # Cloud LaTeX Extension for Visual Studio Code
 
-＊このプラグインはbetaバージョンです。バグを見つけた方は、[issues](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/issues)に報告してください。
+＊このプラグインはbetaバージョンです。バグの報告は、[issues](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/issues)で受け付けています。
 また、プルリクエストも歓迎しています。
 
 # 特徴
@@ -83,7 +83,7 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 
 # 注意事項
 - VSCodeでプロジェクトを開いている時にのみファイルの同期が行われます。そのため、プロジェクトを開いていない際に行ったファイル操作は同期されません。
-
+- コンパイルターゲットに指定したファイル名を変更または削除すると、コンパイルができなくなります。その場合、Cloud LaTeX webアプリよりコンパイルターゲットを設定しなおしてください。
 
 # ソースコード
 https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/master

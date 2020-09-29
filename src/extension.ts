@@ -8,7 +8,7 @@ import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
-// #TODO check invalid account at start and offline
+// #TODO launch app even if user settings' enable
 
 // #TODO account 消えてる？
 // #TODO save user info in ~/.cloudlatex or ...
@@ -101,7 +101,6 @@ class VSLatexApp {
     });
 
     this.latexApp.on('failed-compile', (result: CompileResult) =>{
-      this.logger.log('failed compilation', result);
       this.statusBarItem.text = 'Failed to compile';
       this.statusBarItem.show();
       if (result.logs) {
@@ -174,7 +173,6 @@ class VSLatexApp {
     vscode.commands.registerCommand('cloudlatex.compile', async () => {
       const result = await this.latexApp.validateAccount();
       if (result === 'offline') {
-        this.logger.warn('Cannot stil connect to the server.');
         return;
       }
       if (result === 'invalid') {
@@ -186,7 +184,6 @@ class VSLatexApp {
     vscode.commands.registerCommand('cloudlatex.reload', async () => {
       const result = await this.latexApp.validateAccount();
       if (result === 'offline') {
-        this.logger.warn('Cannot stil connect to the server.');
       }
       if (result === 'valid') {
         this.latexApp.startSync(true);

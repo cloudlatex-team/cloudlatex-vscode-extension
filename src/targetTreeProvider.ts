@@ -28,7 +28,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
     }));
 
     items.push(new Item(
-      `Project setting ${'(' + this.status.projectName + ')' || ''}`,
+      `Project setting ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
       vscode.TreeItemCollapsibleState.None,
     {
       command: 'cloudlatex.setting',
@@ -77,9 +77,5 @@ class Item extends vscode.TreeItem {
     public readonly command?: vscode.Command
   ) {
     super(label, collapsibleState);
-  }
-
-  get tooltip(): string {
-    return `${this.label}`;
   }
 }
