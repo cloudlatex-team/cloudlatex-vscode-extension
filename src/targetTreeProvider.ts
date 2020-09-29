@@ -25,7 +25,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
       command: 'cloudlatex.account',
       title: 'titile',
       arguments: []
-    }));
+    }, 'account'));
 
     items.push(new Item(
       `Project setting ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
@@ -34,7 +34,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
       command: 'cloudlatex.setting',
       title: 'titile',
       arguments: []
-    }));
+    }, 'settings'));
 
     if (this.status.activated) {
       if (!this.status.offline) {
@@ -43,26 +43,26 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
           command: 'cloudlatex.compile',
           title: 'titile',
           arguments: []
-        }));
+        }, 'debug-start'));
         items.push( new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
         {
           command: 'cloudlatex.compilerLog',
           title: 'titile',
           arguments: []
-        }));
+        }, 'output'));
         items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
         {
           command: 'cloudlatex.reload',
           title: 'titile',
           arguments: []
-        }));
+        }, 'debug-restart'));
       } else {
         items.push( new Item('Offline', vscode.TreeItemCollapsibleState.None,
         {
           command: 'cloudlatex.reload',
           title: 'titile',
           arguments: []
-        }));
+        }, 'rss'));
       }
     }
 
@@ -74,8 +74,13 @@ class Item extends vscode.TreeItem {
   constructor(
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly command?: vscode.Command
+    public readonly command?: vscode.Command,
+    public readonly codicon?: string
   ) {
     super(label, collapsibleState);
+    if (codicon) {
+      this.iconPath = new vscode.ThemeIcon(codicon);
+    }
   }
+
 }
