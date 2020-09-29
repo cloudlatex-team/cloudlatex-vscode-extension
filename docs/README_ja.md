@@ -31,6 +31,7 @@ Activity Barに表示される`CL`アイコンをクリックするとSide Bar�
 `Clodulatex.Enabled` にチェックを付けます。
 
 ＊ Cloudlatexの設定項目が表示されない時は、一旦vscodeを閉じ、再度開いてみてください
+
 ＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
 
 <img src="setting.png" width="500px">
@@ -73,6 +74,7 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 <img src="conflict.png" width="500px">
 
 `Resolve conflict` ボタンを押し、`Pull` か `Push` を選択します。
+
 <img src="push_or_pull.png" width="500px">
 
 - Pull: サーバの変更をダウンロードし、サーバに合わせます
@@ -84,6 +86,7 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 # 注意事項
 - VSCodeでプロジェクトを開いている時にのみファイルの同期が行われます。そのため、プロジェクトを開いていない際に行ったファイル操作は同期されません。
 - コンパイルターゲットに指定したファイル名を変更または削除すると、コンパイルができなくなります。その場合、Cloud LaTeX webアプリよりコンパイルターゲットを設定しなおしてください。
+- 起動時に「Be sure to set cloudlatex.enabled to true ...」というエラーメッセージが表示される場合、`Project setting`の `User` タブの `cloudlatex.autoBuild` のチェックを外してください。(`Project` タブの`cloudlatex.autoBuild` にのみチェックを入れる必要があります)
 
 # ソースコード
 https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/master
