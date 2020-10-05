@@ -57,7 +57,10 @@ class VSLatexApp {
       this.latexApp.exit();
     }
     const config = await this.configuration();
-    this.latexApp = new LatexApp(config, decideSyncMode, this.logger);
+    this.latexApp = await  LatexApp.createApp(config, {
+      decideSyncMode,
+      logger: this.logger
+    });
 
     if (!this.validateVSConfig()) {
       this.activated = false;
@@ -68,7 +71,11 @@ class VSLatexApp {
     this.activated = true;
     vscode.commands.executeCommand('cloudlatex.refreshEntry');
 
-    this.latexApp.on('appinfo-updated', () => {
+    this.latexApp.on('updated-network', () => {
+      vscode.commands.executeCommand('cloudlatex.refreshEntry');
+    });
+
+    this.latexApp.on('loaded-project', () => {
       vscode.commands.executeCommand('cloudlatex.refreshEntry');
     });
 
@@ -112,9 +119,16 @@ class VSLatexApp {
      * Launch app
      */
     await this.latexApp.launch();
-    if (await this.latexApp.validateAccount() === 'valid') {
-      this.latexApp.startSync(true);
+  }
+
+  async validateAccount() {
+    const result = await this.latexApp.validateAccount();
+
+    if (result === 'offline') {
+      this.logger.warn('Cannot connect to the server.');
     }
+
+    return result;
   }
 
   /**
@@ -171,22 +185,16 @@ class VSLatexApp {
     });
 
     vscode.commands.registerCommand('cloudlatex.compile', async () => {
-      const result = await this.latexApp.validateAccount();
-      if (result === 'offline') {
-        return;
+      const result = await this.validateAccount();
+      if (result === 'valid') {
+        this.latexApp.compile();
       }
-      if (result === 'invalid') {
-        return;
-      }
-      this.latexApp.compile();
     });
 
     vscode.commands.registerCommand('cloudlatex.reload', async () => {
-      const result = await this.latexApp.validateAccount();
-      if (result === 'offline') {
-      }
+      const result = await this.validateAccount();
       if (result === 'valid') {
-        this.latexApp.startSync(true);
+        this.latexApp.startSync();
       }
     });
 
@@ -211,7 +219,7 @@ class VSLatexApp {
         }
         if (await this.latexApp.validateAccount() === 'valid') {
           this.logger.info('Your account is validated!');
-          this.latexApp.startSync(true);
+          this.latexApp.startSync();
         }
       } catch (e) {
         this.logger.warn(JSON.stringify(e));

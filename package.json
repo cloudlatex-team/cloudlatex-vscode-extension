@@ -73,10 +73,10 @@
           "default": ".workspace",
           "description": "Directory to output compile result"
         },
-        "cloudlatex.autoBuild": {
+        "cloudlatex.autoCompile": {
           "type": "boolean",
           "default": true,
-          "description": "Set true if automatically build when any files are saved."
+          "description": "Set true if automatically compile when any files are saved."
         },
         "cloudlatex.endpoint": {
           "type": "string",

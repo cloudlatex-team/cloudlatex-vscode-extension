@@ -2,7 +2,7 @@ export type VSConfig = {
   enabled: boolean,
   outDir: string,
   // backend: string,
-  autoBuild: boolean,
+  autoCompile: boolean,
   endpoint: string,
   projectId: number,
   supressIcon: boolean

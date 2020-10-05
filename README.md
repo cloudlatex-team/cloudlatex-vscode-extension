@@ -47,7 +47,7 @@ settings.json
   "cloudlatex.projectId": Your Project id,
   "cloudlatex.enabled": true,
   "cloudlatex.outDir":  "./.workspace",
-   "latex-workshop.latex.autoBuild.run": "never",
+   "latex-workshop.latex.autoCompile.run": "never",
   "latex-workshop.latex.outDir": "./.workspace",
 }
 ```
