@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 // #TODO launch app even if user settings' enable
 
-// #TODO account 消えてる？
+// #TODO do not show logged-in menu after install and login
 // #TODO save user info in ~/.cloudlatex or ...
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/environmentPath.ts
@@ -57,7 +57,7 @@ class VSLatexApp {
       this.latexApp.exit();
     }
     const config = await this.configuration();
-    this.latexApp = await  LatexApp.createApp(config, {
+    this.latexApp = await LatexApp.createApp(config, {
       decideSyncMode,
       logger: this.logger
     });
@@ -237,6 +237,17 @@ class VSLatexApp {
 
     vscode.commands.registerCommand('cloudlatex.resetLocal', async() => {
       this.latexApp.resetLocal();
+    });
+
+    vscode.commands.registerCommand('cloudlatex.clearAccount', async() => {
+      try {
+        const config = await this.configuration();
+        if (config.accountStorePath) {
+          await fs.promises.unlink(config.accountStorePath);
+        }
+      } catch (e) {
+        this.logger.error(e);
+      }
     });
   }
 

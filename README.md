@@ -1,7 +1,13 @@
 # Cloud LaTeX Extension for Visual Studio Code
+<span style="color: red; font-size: 16px">This plugin is under development. 
+Please do not use it for any purpose other than operation validation.
+</span>
 
+
+<!--
 ＊This plusigin is a beta version. Please report some issues at [issues](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/issues).
 Pull requests are also welcome.
+-->
 
 *** Write locally and compile on cloud service.
 

@@ -1,9 +1,9 @@
 {
   "name": "cloudlatex",
   "displayName": "Cloud LaTeX",
-  "description": "",
+  "description": "Compile LaTeX document with Cloud LaTeX on VSCode.",
   "publisher": "cloudlatex",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -138,6 +138,11 @@
       {
         "command": "cloudlatex.resetLocal",
         "title": "Reset local",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.clearAccount",
+        "title": "Clear stored account",
         "category": "Cloud LaTeX"
       }
     ],

@@ -1,7 +1,10 @@
 # Cloud LaTeX Extension for Visual Studio Code
+<span style="color: red; font-size: 16px">開発中のプラグインです。動作確認以外の用途で使用しないでください。</span>
 
+<!--
 ＊このプラグインはbetaバージョンです。バグの報告は、[issues](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/issues)で受け付けています。
 また、プルリクエストも歓迎しています。
+-->
 
 # 特徴
 - ローカルPCにtexliveをインストールすることなくVSCodeで編集したtexファイルをコンパイル可能に
@@ -18,7 +21,7 @@
 
 # 設定
 ローカルに空のVSCode用プロジェクトを作成します。
-Activity Barに表示される`CL`アイコンをクリックするとSide Barに二つのボタンが表示されます。
+[Activity Bar](https://code.visualstudio.com/docs/getstarted/userinterface)に表示される`CL`アイコンをクリックするとSide Barに二つのボタンが表示されます。
 
 `Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
 アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
@@ -57,6 +60,8 @@ Activity Barに表示される`CL`アイコンをクリックするとSide Bar�
 ```
 
 入力されたアカウントでログインができると自動でCloud LaTeXサーバからプロジェクトファイルがダウンロードされ、コンパイルが実行されます。
+
+＊ プロジェクトファイルがダウンロードされない時は、一旦vscodeを閉じ、再度開いてみてください
 
 # ファイルの同期とコンパイル
 オンラインの際にはローカルで行ったでファイルの変更が自動で同期されます。
