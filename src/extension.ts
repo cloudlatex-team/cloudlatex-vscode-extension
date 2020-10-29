@@ -11,6 +11,7 @@ import * as path from 'path';
 // #TODO launch app even if user settings' enable
 
 // #TODO do not show logged-in menu after install and login
+
 // #TODO save user info in ~/.cloudlatex or ...
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/environmentPath.ts
@@ -19,7 +20,10 @@ export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
   app.activate();
 
-  vscode.workspace.onDidChangeConfiguration(() => {
+  vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration('cloudlatex.enabled') || e.affectsConfiguration('cloudlatex.projectId')) {
+      app.removeFilesInStoragePath();
+    }
     app.activate();
   });
 
@@ -32,6 +36,7 @@ export function deactivate() {
 
 class VSLatexApp {
   latexApp!: LatexApp;
+  rootPath: string;
   context: vscode.ExtensionContext;
   logger: VSLogger;
   tree!: TargetTreeProvider;
@@ -43,6 +48,11 @@ class VSLatexApp {
   constructor(context: vscode.ExtensionContext) {
     this.context =  context;
     this.activated = false;
+    const rootPath = vscode.workspace.rootPath;
+    if (!rootPath) {
+      throw new Error('The root path can not be obtained!');
+    }
+    this.rootPath = rootPath;
     this.problemPanel = vscode.languages.createDiagnosticCollection('LaTeX');
     this.logPanel = vscode.window.createOutputChannel('Cloud LaTeX');
     this.logPanel.append('Ready\n');
@@ -214,12 +224,11 @@ class VSLatexApp {
       }
       try {
         this.latexApp.setAccount(account);
-        if (!this.sideBarInfo.activated) {
-          return;
-        }
         if (await this.latexApp.validateAccount() === 'valid') {
           this.logger.info('Your account is validated!');
-          this.latexApp.startSync();
+          if (this.sideBarInfo.activated) {
+            this.latexApp.startSync();
+          }
         }
       } catch (e) {
         this.logger.warn(JSON.stringify(e));
@@ -252,17 +261,11 @@ class VSLatexApp {
   }
 
   async configuration(): Promise<Config> {
-    const rootPath = vscode.workspace.rootPath;
-    if (!rootPath) {
-      throw new Error('The root path can not be obtained!');
-    }
-
     const vsconfig = vscode.workspace.getConfiguration('cloudlatex') as any as VSConfig;
 
     // storage path to save meta data
-    const storagePath = this.context.storagePath || rootPath;
     try {
-      await fs.promises.mkdir(storagePath);
+      await fs.promises.mkdir(this.storagePath);
     } catch (e) {
       // directory is already created
     }
@@ -279,10 +282,21 @@ class VSLatexApp {
     return {
       ...vsconfig,
       backend: 'cloudlatex',
-      storagePath,
-      rootPath,
+      storagePath: this.storagePath,
+      rootPath: this.rootPath,
       accountStorePath: accountPath,
     };
+  }
+
+  async removeFilesInStoragePath() {
+    const files = await fs.promises.readdir(this.storagePath);
+    try {
+      await Promise.all(files.map(file => {
+          return fs.promises.unlink(path.join(this.storagePath, file));
+      }));
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   validateVSConfig(): boolean {
@@ -293,9 +307,12 @@ class VSLatexApp {
      // To prevent overwriting files unexpectedly,
      //`enabled` should be defined in workspace configuration.
     const enabledInspect = config.inspect<boolean>('enabled');
-    if (!enabledInspect || enabledInspect.globalValue) {
-      vscode.window.showErrorMessage('Be sure to set cloudlatex.enable to true not at user\'s settings but at workspace settings.');
+    if (!enabledInspect) {
       return false;
+    }
+
+    if (enabledInspect.globalValue) {
+      vscode.window.showErrorMessage('Be sure to set cloudlatex.enable to true not at user\'s settings but at workspace settings.');
     }
 
     if (!enabledInspect.workspaceValue) {
@@ -307,12 +324,23 @@ class VSLatexApp {
      * Project ID
      */
     const projectIdInspect = config.inspect('projectId');
-    if (!projectIdInspect || !projectIdInspect.workspaceValue) {
+    if (!projectIdInspect) {
+      return false;
+    }
+
+    if (projectIdInspect.globalLanguageValue) {
       vscode.window.showErrorMessage('ProjectId should be set in workspace configration file.');
+    }
+
+    if (!projectIdInspect.workspaceValue) {
       return false;
     }
 
     return true;
+  }
+
+  get storagePath(): string {
+    return this.context.storagePath || path.join(this.rootPath, '.latex');
   }
 
   get sideBarInfo(): SideBarInfo {
