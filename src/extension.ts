@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { ExtensionName, ConfigNames, CommandNames} from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import LatexApp, {AppInfo, Config, Account, CompileResult} from 'cloudlatex-cli-plugin';
 import { decideSyncMode, inputAccount } from './interaction';
@@ -8,23 +9,34 @@ import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
-// #TODO launch app even if user settings' enable
-
 // #TODO do not show logged-in menu after install and login
+// #TODO create 'state' of 'before-initial-synced' and show when initially synced
 
 // #TODO save user info in ~/.cloudlatex or ...
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/environmentPath.ts
 
+
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
   app.activate();
 
-  vscode.workspace.onDidChangeConfiguration((e) => {
-    if (e.affectsConfiguration('cloudlatex.enabled') || e.affectsConfiguration('cloudlatex.projectId')) {
+  vscode.workspace.onDidChangeConfiguration(async (e) => {
+    if (e.affectsConfiguration(ConfigNames.enabled)
+      || e.affectsConfiguration(ConfigNames.outDir)
+      || e.affectsConfiguration(ConfigNames.autoCompile)
+      || e.affectsConfiguration(ConfigNames.endpoint)
+      || e.affectsConfiguration(ConfigNames.projectId)
+    ) {
       app.removeFilesInStoragePath();
+      const item = await vscode.window.showInformationMessage(
+        'Configuration has been changed. Please restart to apply it.',
+        { title: 'Restart vscode' });
+      if (!item) {
+        return;
+      }
+      vscode.commands.executeCommand('workbench.action.reloadWindow');
     }
-    app.activate();
   });
 
   console.log(context.globalStoragePath);
@@ -74,19 +86,19 @@ class VSLatexApp {
 
     if (!this.validateVSConfig()) {
       this.activated = false;
-      vscode.commands.executeCommand('cloudlatex.refreshEntry');
+      vscode.commands.executeCommand(CommandNames.refreshEntry);
       return;
     }
 
     this.activated = true;
-    vscode.commands.executeCommand('cloudlatex.refreshEntry');
+    vscode.commands.executeCommand(CommandNames.refreshEntry);
 
     this.latexApp.on('updated-network', () => {
-      vscode.commands.executeCommand('cloudlatex.refreshEntry');
+      vscode.commands.executeCommand(CommandNames.refreshEntry);
     });
 
     this.latexApp.on('loaded-project', () => {
-      vscode.commands.executeCommand('cloudlatex.refreshEntry');
+      vscode.commands.executeCommand(CommandNames.refreshEntry);
     });
 
     this.latexApp.on('start-sync', () => {
@@ -154,7 +166,7 @@ class VSLatexApp {
    */
   setupStatusBar() {
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-    this.statusBarItem.command = 'cloudlatex.open';
+    this.statusBarItem.command = CommandNames.open;
     this.statusBarItem.text = 'CL';
     this.context.subscriptions.push(this.statusBarItem);
   }
@@ -190,31 +202,31 @@ class VSLatexApp {
    * Commands
    */
   setupCommands() {
-    vscode.commands.registerCommand('cloudlatex.refreshEntry', () => {
+    vscode.commands.registerCommand(CommandNames.refreshEntry, () => {
       this.tree.refresh(this.sideBarInfo); // TODO fix error
     });
 
-    vscode.commands.registerCommand('cloudlatex.compile', async () => {
+    vscode.commands.registerCommand(CommandNames.compile, async () => {
       const result = await this.validateAccount();
       if (result === 'valid') {
         this.latexApp.compile();
       }
     });
 
-    vscode.commands.registerCommand('cloudlatex.reload', async () => {
+    vscode.commands.registerCommand(CommandNames.reload, async () => {
       const result = await this.validateAccount();
       if (result === 'valid') {
         this.latexApp.startSync();
       }
     });
 
-    vscode.commands.registerCommand('cloudlatex.open', () => {
-      vscode.commands.executeCommand('workbench.view.extension.cloudlatex').then(
+    vscode.commands.registerCommand(CommandNames.open, () => {
+      vscode.commands.executeCommand(`workbench.view.extension.${ExtensionName}`).then(
         () => vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup')
       );
     });
 
-    vscode.commands.registerCommand('cloudlatex.account', async () => {
+    vscode.commands.registerCommand(CommandNames.account, async () => {
       let account!: Account;
       try {
         account = await inputAccount();
@@ -235,20 +247,20 @@ class VSLatexApp {
       }
     });
 
-    vscode.commands.registerCommand('cloudlatex.setting', async() => {
+    vscode.commands.registerCommand(CommandNames.setting, async() => {
       await vscode.commands.executeCommand( 'workbench.action.openWorkspaceSettings');
-      await vscode.commands.executeCommand( 'workbench.action.openSettings', 'cloudlatex' );
+      await vscode.commands.executeCommand( 'workbench.action.openSettings', ExtensionName );
     });
 
-    vscode.commands.registerCommand('cloudlatex.compilerLog', () => {
+    vscode.commands.registerCommand(CommandNames.compilerLog, () => {
      this.logPanel.show();
     });
 
-    vscode.commands.registerCommand('cloudlatex.resetLocal', async() => {
+    vscode.commands.registerCommand(CommandNames.resetLocal, async() => {
       this.latexApp.resetLocal();
     });
 
-    vscode.commands.registerCommand('cloudlatex.clearAccount', async() => {
+    vscode.commands.registerCommand(CommandNames.clearAccount, async() => {
       try {
         const config = await this.configuration();
         if (config.accountStorePath) {
@@ -261,7 +273,7 @@ class VSLatexApp {
   }
 
   async configuration(): Promise<Config> {
-    const vsconfig = vscode.workspace.getConfiguration('cloudlatex') as any as VSConfig;
+    const vsconfig = vscode.workspace.getConfiguration(ExtensionName) as any as VSConfig;
 
     // storage path to save meta data
     try {
@@ -303,7 +315,7 @@ class VSLatexApp {
     /**
      * Enabled
      */
-    const config = vscode.workspace.getConfiguration('cloudlatex');
+    const config = vscode.workspace.getConfiguration(ExtensionName);
      // To prevent overwriting files unexpectedly,
      //`enabled` should be defined in workspace configuration.
     const enabledInspect = config.inspect<boolean>('enabled');
@@ -312,7 +324,7 @@ class VSLatexApp {
     }
 
     if (enabledInspect.globalValue) {
-      vscode.window.showErrorMessage('Be sure to set cloudlatex.enable to true not at user\'s settings but at workspace settings.');
+      vscode.window.showErrorMessage(`Be sure to set ${ConfigNames.enabled} to true not at user\'s settings but at workspace settings.`);
     }
 
     if (!enabledInspect.workspaceValue) {
