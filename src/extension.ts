@@ -54,12 +54,15 @@ class VSLatexApp {
   tree!: TargetTreeProvider;
   statusBarItem!: vscode.StatusBarItem;
   statusBarAnimationId:  NodeJS.Timeout  | null = null;
-  activated: boolean;
   logPanel: vscode.OutputChannel;
   problemPanel: vscode.DiagnosticCollection;
+  activated: boolean;
+  syncedInitilally: boolean;
+
   constructor(context: vscode.ExtensionContext) {
     this.context =  context;
     this.activated = false;
+    this.syncedInitilally = false;
     const rootPath = vscode.workspace.rootPath;
     if (!rootPath) {
       throw new Error('The root path can not be obtained!');
@@ -113,6 +116,10 @@ class VSLatexApp {
     this.latexApp.on('successfully-synced', () => {
       this.statusBarItem.text = '$(folder-active)';
       this.statusBarItem.show();
+      if (!this.syncedInitilally) {
+        this.syncedInitilally = true;
+        this.logger.info('Project files have been synchronized!');
+      }
     });
 
     this.latexApp.on('start-compile', () => {
