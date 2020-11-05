@@ -9,6 +9,7 @@ export type VSConfig = {
 };
 
 export type SideBarInfo = {
+  isWorkspace: boolean,
   activated: boolean,
   offline: boolean,
   projectName: string | null
