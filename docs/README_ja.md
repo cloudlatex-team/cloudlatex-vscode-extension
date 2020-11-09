@@ -1,5 +1,5 @@
 # Cloud LaTeX Extension for Visual Studio Code
-<span style="color: red; font-size: 16px">開発中のプラグインです。動作確認以外の用途で使用しないでください。</span>
+<span style="font-size: 18px">開発中のプラグインです。重要なプロジェクトには使用しないでください。</span>
 
 <!--
 ＊このプラグインはbetaバージョンです。バグの報告は、[issues](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/issues)で受け付けています。

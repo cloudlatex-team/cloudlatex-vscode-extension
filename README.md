@@ -1,6 +1,6 @@
 # Cloud LaTeX Extension for Visual Studio Code
-<span style="color: red; font-size: 16px">This plugin is under development. 
-Please do not use it for any purpose other than operation validation.
+<span style="font-size: 18px">This plugin is under development. 
+Please do not use it for important projects.
 </span>
 
 
@@ -22,7 +22,7 @@ This is an extension for Visual Studio Code to write tex locally with Cloud LaTe
 - Offline support (auto-sync on return to online)
 
 ## Installation
-Find the cloudlatex plugin in [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/), or run `ext install latex-workshop` in VS Code Quick Open (`ctrl/cmd + P`).
+Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=cloudlatex.cloudlatex), or run `ext install cloudlatex` in VS Code Quick Open (`ctrl/cmd + P`).
 
 # Preparation
 0. If you do not have an account, create your account from [Cloud LaTeX](https://cloudlatex.io/).
@@ -42,22 +42,33 @@ You can also set your account by `cloud LaTeX: Set account` command on the Comma
 
 Click `Project setting` and set `Cloudlatex.projectID` and check　`Clodulatex.Enabled`.
 
-＊ If there are no CloudLaTeX settings on the Settings、try to relaunch VSCode.
 ＊ Make sure to set in `Workspace` tab (not `User` tab).
 
 <img src="docs/setting.png" width="500px">
 
-settings.json
+You can also set `settings.json` under the project.
 ```settings.json
 {
-  "cloudlatex.projectId": Your Project id,
+  "cloudlatex.projectId": 127,
   "cloudlatex.enabled": true,
   "cloudlatex.outDir":  "./.workspace",
-   "latex-workshop.latex.autoCompile.run": "never",
+}
+```
+
+With [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop), you can use pdf review and command completion.
+In this case, it is recommended to add the following settings (match `latex-workshop.latex.outDir` with `cloudlatex.outDir`).
+```setting.json
+{
+  "latex-workshop.latex.autoCompile.run": "never",
   "latex-workshop.latex.outDir": "./.workspace",
 }
 ```
 
+When you change the configuration file, a dialog box asks you to restart VSCode.
+After the restart, the project files are downloaded.
+If the download is successful, a dialog box will appear indicating that the files have been successfully synchronized.
+
+If the project files have not been downloaded, click the `reload` button or close and reopen VSCode.
 
 # Source Code
 https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/master
