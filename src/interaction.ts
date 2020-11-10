@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import LatexApp, {AppInfo, Config, DecideSyncMode, Logger, Account } from 'cloudlatex-cli-plugin';
+import LatexApp, { AppInfo, Config, DecideSyncMode, Logger, Account } from 'cloudlatex-cli-plugin';
 
-export const decideSyncMode: DecideSyncMode = async function(conflictFiles) {
+export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
   const pull: vscode.QuickPickItem = { label: 'Pull', description: 'Apply remote changes to local' };
 
@@ -9,12 +9,12 @@ export const decideSyncMode: DecideSyncMode = async function(conflictFiles) {
     ${conflictFiles.join('\n')}
   `;
   const ResolveConflict = 'Resolve conflict';
-  const selection = await vscode.window.showInformationMessage(explanation, {modal: true}, ResolveConflict);
+  const selection = await vscode.window.showInformationMessage(explanation, { modal: true }, ResolveConflict);
 
   if (selection !== ResolveConflict) {
     throw new Error('The result of decideSyncMode is invalid.');
   }
-  const result = await vscode.window.showQuickPick([pull, push], {placeHolder: explanation});
+  const result = await vscode.window.showQuickPick([pull, push], { placeHolder: explanation });
   if (result === pull) {
     return 'download';
   } else if (result === push) {

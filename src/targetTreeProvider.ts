@@ -21,51 +21,51 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   async getChildren(element?: object) {
     const items = [];
 
-    items.push(new Item('Set account',  vscode.TreeItemCollapsibleState.None,
-    {
-      command: CommandNames.account,
-      title: 'titile',
-      arguments: []
-    }, 'account'));
+    items.push(new Item('Set account', vscode.TreeItemCollapsibleState.None,
+      {
+        command: CommandNames.account,
+        title: 'titile',
+        arguments: []
+      }, 'account'));
 
     if (this.status.isWorkspace) {
       items.push(new Item(
         `Project setting ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
         vscode.TreeItemCollapsibleState.None,
-      {
-        command: CommandNames.setting,
-        title: 'titile',
-        arguments: []
-      }, 'settings'));
+        {
+          command: CommandNames.setting,
+          title: 'titile',
+          arguments: []
+        }, 'settings'));
     }
 
     if (this.status.activated) {
       if (!this.status.offline) {
-        items.push( new Item('Compile', vscode.TreeItemCollapsibleState.None,
-        {
-          command: CommandNames.compile,
-          title: 'titile',
-          arguments: []
-        }, 'debug-start'));
-        items.push( new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
-        {
-          command: CommandNames.compilerLog,
-          title: 'titile',
-          arguments: []
-        }, 'output'));
-        items.push( new Item('Reload', vscode.TreeItemCollapsibleState.None,
-        {
-          command: CommandNames.reload,
-          title: 'titile',
-          arguments: []
-        }, 'debug-restart'));
+        items.push(new Item('Compile', vscode.TreeItemCollapsibleState.None,
+          {
+            command: CommandNames.compile,
+            title: 'titile',
+            arguments: []
+          }, 'debug-start'));
+        items.push(new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
+          {
+            command: CommandNames.compilerLog,
+            title: 'titile',
+            arguments: []
+          }, 'output'));
+        items.push(new Item('Reload', vscode.TreeItemCollapsibleState.None,
+          {
+            command: CommandNames.reload,
+            title: 'titile',
+            arguments: []
+          }, 'debug-restart'));
       } else {
-        items.push( new Item('Offline', vscode.TreeItemCollapsibleState.None,
-        {
-          command: CommandNames.reload,
-          title: 'titile',
-          arguments: []
-        }, 'rss'));
+        items.push(new Item('Offline', vscode.TreeItemCollapsibleState.None,
+          {
+            command: CommandNames.reload,
+            title: 'titile',
+            arguments: []
+          }, 'rss'));
       }
     }
 

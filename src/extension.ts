@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { ExtensionName, ConfigNames, CommandNames} from './const';
+import { ExtensionName, ConfigNames, CommandNames } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import LatexApp, { AppInfo, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
 import { decideSyncMode, inputAccount } from './interaction';
@@ -59,7 +59,7 @@ class VSLatexApp {
   logger: VSLogger;
   tree!: TargetTreeProvider;
   statusBarItem!: vscode.StatusBarItem;
-  statusBarAnimationId:  NodeJS.Timeout  | null = null;
+  statusBarAnimationId: NodeJS.Timeout | null = null;
   logPanel: vscode.OutputChannel;
   problemPanel: vscode.DiagnosticCollection;
   activated: boolean;
@@ -67,7 +67,7 @@ class VSLatexApp {
   accountService: AccountService<Account>;
 
   constructor(context: vscode.ExtensionContext) {
-    this.context =  context;
+    this.context = context;
     this.activated = false;
     this.syncedInitilally = false;
     this.accountService = new AccountService(this.obtainAccountPath());
@@ -147,7 +147,7 @@ class VSLatexApp {
       vscode.commands.executeCommand('latex-workshop.refresh-viewer');
     });
 
-    this.latexApp.on('failed-compile', (result: CompileResult) =>{
+    this.latexApp.on('failed-compile', (result: CompileResult) => {
       this.statusBarItem.text = 'Failed to compile';
       this.statusBarItem.show();
       if (result.logs) {
@@ -165,7 +165,7 @@ class VSLatexApp {
    * SideBar
    */
   setupSideBar() {
-    this.tree =  new TargetTreeProvider(this.sideBarInfo);
+    this.tree = new TargetTreeProvider(this.sideBarInfo);
     const panel = vscode.window.registerTreeDataProvider('cloudlatex-commands', this.tree);
   }
 
@@ -191,18 +191,18 @@ class VSLatexApp {
     }
     const diagsCollection: { [key: string]: vscode.Diagnostic[] } = {};
     logs.forEach((log) => {
-        const range = new vscode.Range(new vscode.Position(log.line - 1, 0), new vscode.Position(log.line - 1, 65535));
-        const diag = new vscode.Diagnostic(range, log.message,
-          log.type ==='warning' ? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error );
-        diag.source = 'LaTeX';
-        if (diagsCollection[log.file] === undefined) {
-            diagsCollection[log.file] = [];
-        }
-        diagsCollection[log.file].push(diag);
+      const range = new vscode.Range(new vscode.Position(log.line - 1, 0), new vscode.Position(log.line - 1, 65535));
+      const diag = new vscode.Diagnostic(range, log.message,
+        log.type === 'warning' ? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error);
+      diag.source = 'LaTeX';
+      if (diagsCollection[log.file] === undefined) {
+        diagsCollection[log.file] = [];
+      }
+      diagsCollection[log.file].push(diag);
     });
 
     for (const file in diagsCollection) {
-        this.problemPanel.set(vscode.Uri.file(file), diagsCollection[file]);
+      this.problemPanel.set(vscode.Uri.file(file), diagsCollection[file]);
     }
   }
 
@@ -278,16 +278,16 @@ class VSLatexApp {
       }
     });
 
-    vscode.commands.registerCommand(CommandNames.setting, async() => {
-      await vscode.commands.executeCommand( 'workbench.action.openWorkspaceSettings');
-      await vscode.commands.executeCommand( 'workbench.action.openSettings', ExtensionName );
+    vscode.commands.registerCommand(CommandNames.setting, async () => {
+      await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
+      await vscode.commands.executeCommand('workbench.action.openSettings', ExtensionName);
     });
 
     vscode.commands.registerCommand(CommandNames.compilerLog, () => {
-     this.logPanel.show();
+      this.logPanel.show();
     });
 
-    vscode.commands.registerCommand(CommandNames.resetLocal, async() => {
+    vscode.commands.registerCommand(CommandNames.resetLocal, async () => {
       if (!this.latexApp) {
         this.logger.warn(`'${CommandNames.resetLocal}' cannot be called without workspace.`);
         return;
@@ -296,7 +296,7 @@ class VSLatexApp {
       this.latexApp.resetLocal();
     });
 
-    vscode.commands.registerCommand(CommandNames.clearAccount, async() => {
+    vscode.commands.registerCommand(CommandNames.clearAccount, async () => {
       try {
         await fs.promises.unlink(this.obtainAccountPath());
       } catch (e) {
@@ -342,7 +342,7 @@ class VSLatexApp {
     const files = await fs.promises.readdir(storagePath);
     try {
       await Promise.all(files.map(file => {
-          return fs.promises.unlink(path.join(storagePath, file));
+        return fs.promises.unlink(path.join(storagePath, file));
       }));
     } catch (e) {
       this.logger.error(e);
@@ -354,8 +354,8 @@ class VSLatexApp {
      * Enabled
      */
     const config = vscode.workspace.getConfiguration(ExtensionName);
-     // To prevent overwriting files unexpectedly,
-     //`enabled` should be defined in workspace configuration.
+    // To prevent overwriting files unexpectedly,
+    //`enabled` should be defined in workspace configuration.
     const enabledInspect = config.inspect<boolean>('enabled');
     if (!enabledInspect) {
       return false;
@@ -390,7 +390,7 @@ class VSLatexApp {
   }
 
   getRootPath(): string | undefined {
-    return vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0].uri.path;
+    return vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0].uri.fsPath;
   }
 
   getStoragePath(): string | undefined {
