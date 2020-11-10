@@ -12,12 +12,14 @@
 - ローカル上のファイルとCloud LaTeXサーバ上のファイルを自動同期
 - オフラインにも対応 (オンライン復帰時に自動同期)
 
+# インストール
+[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=cloudlatex.cloudlatex)からインストール、あるいはクイックオープン(`ctrl/cmd + P`)に `ext install cloudlatex` と入力します.
 
 # 準備
-0. Cloud LaTeXのアカウントを持っていない場合は、[Cloud LaTeX](https://cloudlatex.io/)からアカウントを作成する。
-1. [プロジェクト一覧](https://cloudlatex.io/projects)の右上のユーザ名をクリックし、上から3つ目のプラグイン連携を選択する。トークン生成ダイアログが表示されるので、アカウント情報を入力し、生成されるクライアントID、トークンを記録する。
-2. [プロジェクト一覧](https://cloudlatex.io/projects)からプロジェクトを作成する。
-3. 作成したプロジェクトのプロジェクトIDをURLより記録する。例: `/projects/123/edit` -> プロジェクトIDは `123`
+0. Cloud LaTeXのアカウントを持っていない場合は、[Cloud LaTeX](https://cloudlatex.io/)からアカウントを作成します。
+1. [プロジェクト一覧](https://cloudlatex.io/projects)の右上のユーザ名をクリックし、上から3つ目のプラグイン連携を選択する。トークン生成ダイアログが表示されるので、アカウント情報を入力し、生成されるクライアントID、トークンを記録します。
+2. [プロジェクト一覧](https://cloudlatex.io/projects)からプロジェクトを作成します。
+3. 作成したプロジェクトのプロジェクトIDをURLより記録します。例: `/projects/123/edit` -> プロジェクトIDは `123`
 
 # 設定
 ローカルに空のVSCode用プロジェクトを作成します。

@@ -15,13 +15,13 @@ This is an extension for Visual Studio Code to write tex locally with Cloud LaTe
 
 [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/master/docs/README_ja.md)
 
-## Features
+# Features
 - Tex files you edit with VSCode can be compiled without installing texlive on your PC
 - [Cloud LaTeX](https://cloudlatex.io/) official plugin
 -  Automatic synchronization between files in your PC and the Cloud LaTeX server
 - Offline support (auto-sync on return to online)
 
-## Installation
+# Installation
 Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=cloudlatex.cloudlatex), or run `ext install cloudlatex` in VS Code Quick Open (`ctrl/cmd + P`).
 
 # Preparation
