@@ -9,7 +9,9 @@ import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
-// #TODO do not show logged-in menu after install and login
+// #TODO conflict reject raise exception
+// #TODO show project name in starting with no compilation
+// #TODO fix that not show logged-in menu after install and login?
 
 // #TODO save user info in ~/.cloudlatex or ...
 // https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
@@ -45,8 +47,6 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.executeCommand('workbench.action.reloadWindow');
     }
   });
-
-  console.log(context.globalStoragePath);
 }
 
 export function deactivate() {
@@ -85,16 +85,18 @@ class VSLatexApp {
       this.latexApp.exit();
     }
 
-    if (!this.validateVSConfig()) {
+    let rootPath = '';
+    if (this.validateVSConfig()) {
+      this.activated = true;
+      let _rootPath = this.getRootPath();
+      if (!_rootPath) {
+        this.logger.error('Root path in the workspace is not found.');
+        // no workspace
+        return;
+      }
+      rootPath = _rootPath;
+    } else {
       this.activated = false;
-      vscode.commands.executeCommand(CommandNames.refreshEntry);
-      return;
-    }
-
-    const rootPath = this.getRootPath();
-    if (!rootPath) {
-      // no workspace
-      return;
     }
 
     const config = await this.configuration(rootPath);
@@ -104,7 +106,6 @@ class VSLatexApp {
       accountService: this.accountService
     });
 
-    this.activated = true;
     vscode.commands.executeCommand(CommandNames.refreshEntry);
 
     this.latexApp.on('updated-network', () => {
@@ -158,7 +159,9 @@ class VSLatexApp {
     /**
      * Launch app
      */
-    await this.latexApp.launch();
+    if (this.activated) {
+      await this.latexApp.launch();
+    }
   }
 
   /**
@@ -215,7 +218,7 @@ class VSLatexApp {
     });
 
     vscode.commands.registerCommand(CommandNames.compile, async () => {
-      if (!this.latexApp) {
+      if (!this.latexApp || !this.activated) {
         this.logger.warn(`'${CommandNames.compile}' cannot be called without workspace.`);
         return;
       }
@@ -232,7 +235,7 @@ class VSLatexApp {
     });
 
     vscode.commands.registerCommand(CommandNames.reload, async () => {
-      if (!this.latexApp) {
+      if (!this.latexApp || !this.activated) {
         this.logger.warn(`'${CommandNames.reload}' cannot be called without workspace.`);
         return;
       }
@@ -288,7 +291,7 @@ class VSLatexApp {
     });
 
     vscode.commands.registerCommand(CommandNames.resetLocal, async () => {
-      if (!this.latexApp) {
+      if (!this.latexApp || !this.activated) {
         this.logger.warn(`'${CommandNames.resetLocal}' cannot be called without workspace.`);
         return;
       }

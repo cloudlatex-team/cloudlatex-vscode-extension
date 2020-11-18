@@ -6,19 +6,19 @@ export default class VSLogger extends Logger {
     super();
   }
   _log(m: any, ...o: any[]) {
-    this.logPanel.append(m + '\n');
+    this.logPanel.append([m, ...(o || [])].join(' ') + '\n');
     console.log(m, ...o);
   };
   _info(m: any, ...o: any[]) {
-    this.logPanel.append(m + '\n');
+    this.logPanel.append([m, ...(o || [])].join(' ') + '\n');
     vscode.window.showInformationMessage(m, ...o);
   };
   _warn(m: any, ...o: any[]) {
-    this.logPanel.append(m + '\n');
+    this.logPanel.append([m, ...(o || [])].join(' ') + '\n');
     vscode.window.showWarningMessage(m, ...o);
   };
   _error(m: any, ...o: any[]) {
-    this.logPanel.append(m + '\n');
+    this.logPanel.append([m, ...(o || [])].join(' ') + '\n');
     vscode.window.showErrorMessage(m, ...o);
   };
 }
