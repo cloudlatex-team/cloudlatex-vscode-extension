@@ -12,7 +12,7 @@ export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const selection = await vscode.window.showInformationMessage(explanation, { modal: true }, ResolveConflict);
 
   if (selection !== ResolveConflict) {
-    throw new Error('The result of decideSyncMode is invalid.');
+    throw new Error('Canceled');
   }
   const result = await vscode.window.showQuickPick([pull, push], { placeHolder: explanation });
   if (result === pull) {
@@ -20,7 +20,7 @@ export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   } else if (result === push) {
     return 'upload';
   }
-  throw new Error('The result of decideSyncMode is invalid.');
+  throw new Error('Canceled');
 };
 
 export async function inputAccount(): Promise<Account> {

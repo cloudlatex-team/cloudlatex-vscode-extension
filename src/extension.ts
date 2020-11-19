@@ -9,8 +9,8 @@ import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
-// #TODO conflict reject raise exception
 // #TODO show project name in starting with no compilation
+// #TODO no path error without workspace
 // #TODO fix that not show logged-in menu after install and login?
 
 // #TODO save user info in ~/.cloudlatex or ...
