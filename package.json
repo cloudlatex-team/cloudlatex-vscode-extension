@@ -166,6 +166,7 @@
     "vsce": "vsce package --yarn"
   },
   "devDependencies": {
+    "@types/dateformat": "^3.0.1",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.11.0",
@@ -180,6 +181,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cloudlatex-cli-plugin": "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#v0.0.7"
+    "cloudlatex-cli-plugin": "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#master",
+    "dateformat": "^4.0.0"
   }
 }

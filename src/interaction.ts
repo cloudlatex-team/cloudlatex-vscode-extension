@@ -24,6 +24,9 @@ export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
 };
 
 export async function inputAccount(): Promise<Account> {
+  /**
+   * Email
+   */
   const email = await vscode.window.showInputBox({
     ignoreFocusOut: true,
     prompt: 'Email address'
@@ -32,6 +35,9 @@ export async function inputAccount(): Promise<Account> {
     throw new Error('Email address is empty');
   }
 
+  /**
+   * Client ID
+   */
   const client = await vscode.window.showInputBox({
     ignoreFocusOut: true,
     prompt: 'Client ID'
@@ -40,6 +46,9 @@ export async function inputAccount(): Promise<Account> {
     throw new Error('Client ID is empty');
   }
 
+  /**
+   * Token
+   */
   const token = await vscode.window.showInputBox({
     ignoreFocusOut: true,
     prompt: 'Token',

@@ -73,7 +73,7 @@ class VSLatexApp {
     this.accountService = new AccountService(this.obtainAccountPath());
     this.problemPanel = vscode.languages.createDiagnosticCollection('LaTeX');
     this.logPanel = vscode.window.createOutputChannel('Cloud LaTeX');
-    this.logPanel.append('Ready\n');
+    this.logPanel.appendLine('Ready');
     this.logger = new VSLogger(this.logPanel);
     this.setupStatusBar();
     this.setupCommands();
@@ -277,7 +277,7 @@ class VSLatexApp {
           }
         }
       } catch (e) {
-        this.logger.warn(JSON.stringify(e));
+        this.logger.error('Error in setting account: ' + (e || '').toString() + '\n' + (e && e.trace || ''));
       }
     });
 

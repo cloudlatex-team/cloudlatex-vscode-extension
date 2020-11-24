@@ -33,6 +33,11 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
+"@types/dateformat@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/dateformat/-/dateformat-3.0.1.tgz#98d747a2e5e9a56070c6bf14e27bff56204e34cc"
+  integrity sha512-KlPPdikagvL6ELjWsljbyDIPzNCeliYkqRpI+zea99vBBbCIA5JNshZAwQKTON139c87y9qvTFVgkFd14rtS4g==
+
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
@@ -345,9 +350,9 @@ cliui@^5.0.0:
     strip-ansi "^5.2.0"
     wrap-ansi "^5.1.0"
 
-"cloudlatex-cli-plugin@git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#v0.0.7":
-  version "0.0.7"
-  resolved "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#867a50d4a4d62fa8f81742b6393cfeb6c887f5a3"
+"cloudlatex-cli-plugin@git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#master":
+  version "0.0.6"
+  resolved "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#3c12c3dd746ae9d1f23677022560d1f22a43fe41"
   dependencies:
     "@moritanian/type-db" "^0.1.0"
     "@types/lodash" "^4.14.161"
@@ -407,6 +412,11 @@ cross-spawn@^6.0.5:
     semver "^5.5.0"
     shebang-command "^1.2.0"
     which "^1.2.9"
+
+dateformat@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-4.0.0.tgz#e2eaf8eaf384f0dcf834870c1b8c1b1bccca4539"
+  integrity sha512-zpKyDYpeePyYGJp2HhRxLHlA+jZQNjt+MwmcVmLxCIECeC4Ks3TI3yk/CSMKylbnCJ5htonfOugYtRRTpyoHow==
 
 debug@3.1.0:
   version "3.1.0"
