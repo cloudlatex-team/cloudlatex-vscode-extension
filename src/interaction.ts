@@ -60,3 +60,25 @@ export async function inputAccount(): Promise<Account> {
 
   return { email, client, token };
 }
+
+export async function promptToReload(message: string) {
+  const item = await vscode.window.showInformationMessage(
+    message,
+    { title: 'Restart VSCode' }
+  );
+  if (!item) {
+    return;
+  }
+  vscode.commands.executeCommand('workbench.action.reloadWindow');
+}
+
+export async function promptToShowProblemPanel(message: string) {
+  const item = await vscode.window.showWarningMessage(
+    message,
+    { title: 'Check details' }
+  );
+  if (!item) {
+    return;
+  }
+  vscode.commands.executeCommand('workbench.actions.view.problems');
+}

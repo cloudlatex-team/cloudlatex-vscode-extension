@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { ExtensionName, ConfigNames, CommandNames } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import LatexApp, { AppInfo, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
-import { decideSyncMode, inputAccount } from './interaction';
+import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel } from './interaction';
 import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
@@ -38,13 +38,7 @@ export async function activate(context: vscode.ExtensionContext) {
       app.activated = false;
       vscode.commands.executeCommand(CommandNames.refreshEntry);
 
-      const item = await vscode.window.showInformationMessage(
-        'Configuration has been changed. Please restart to apply it.',
-        { title: 'Restart VSCode' });
-      if (!item) {
-        return;
-      }
-      vscode.commands.executeCommand('workbench.action.reloadWindow');
+      promptToReload('Configuration has been changed. Please restart to apply it.');
     }
   });
 }
@@ -90,8 +84,8 @@ class VSLatexApp {
       this.activated = true;
       let _rootPath = this.getRootPath();
       if (!_rootPath) {
-        this.logger.error('Root path in the workspace is not found.');
         // no workspace
+        this.logger.error('Root path in the workspace is not found.');
         return;
       }
       rootPath = _rootPath;
@@ -145,7 +139,10 @@ class VSLatexApp {
       this.showProblems(result.logs);
 
       // latex workshop support
-      vscode.commands.executeCommand('latex-workshop.refresh-viewer');
+      try {
+        vscode.commands.executeCommand('latex-workshop.refresh-viewer');
+      } catch (e) { // no latexworkshop?
+      }
     });
 
     this.latexApp.on('failed-compile', (result: CompileResult) => {
@@ -154,6 +151,7 @@ class VSLatexApp {
       if (result.logs) {
         this.showProblems(result.logs);
       }
+      promptToShowProblemPanel('Compilation error');
     });
 
     /**
