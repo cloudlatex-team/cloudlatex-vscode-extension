@@ -52,10 +52,10 @@
 ```
 
 [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)と併用することで、pdfのレビューやコマンド補完などが使えるようになります。
-この場合、以下の設定を追加します (`latex-workshop.latex.outDir`は `cloudlatex.outDir` に合わせます)。
+この場合、以下の設定を追加し、Latex Workshopの自動コンパイルを無効化してください (`latex-workshop.latex.outDir`は `cloudlatex.outDir` と同じ値に設定します)。
 ```setting.json
 {
-  "latex-workshop.latex.autoCompile.run": "never",
+  "latex-workshop.latex.autoBuild.run": "never",
   "latex-workshop.latex.outDir": "./.workspace",
 }
 ```
@@ -92,12 +92,13 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 
 # トラブルシューティング
 
-## 「error in syncSession: ...'」 というエラ〜メッセージが表示される
+## 「`error in syncSession: ...`」 というエラ〜メッセージが表示され、ファイルの同期が完了しない
 リモートサーバとのファイルの同期が失敗しています。
 Cloud LaTeX webアプリのプロジェクトにアクセスし、コンパイルターゲットが設定されていない等の問題がないか確認してください。
-問題が解決しない場合、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)を開き、`cloud LaTeX: Reset local` コマンドを実行してください (注: サーバに同期されていないローカルファイルの変更点は失われます)。
+また、ローカルに不正なファイル（.から始まるファイル、LaTeXで利用されない拡張子を持つファイル等）が存在しないか確認し、存在する場合は削除してください。
+問題が解決しない場合、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)を開き、`cloud LaTeX: Reset local` コマンドを実行し、強制的にローカルファイルの状態をサーバの状態に合わせることが可能です (注: サーバに同期されていないローカルファイルの変更点は失われます)。
 
-## コンパイル時に「Target file is not found」というエラーメッセージが表示される
+## コンパイル時に「`Target file is not found`」というエラーメッセージが表示される
 コンパイルターゲットに指定したファイル名を変更または削除すると、コンパイルができなくなります。その場合、Cloud LaTeX webアプリよりコンパイルターゲットを設定しなおしてください。
 
 ## 起動時に「Be sure to set cloudlatex.enabled to true ...」というエラーメッセージが表示される

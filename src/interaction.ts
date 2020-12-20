@@ -7,7 +7,7 @@ export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const pull: vscode.QuickPickItem = { label: 'Pull', description: 'Apply remote changes to local' };
 
   const explanation = `Following files is both changed in the server and local: \n 
-    ${conflictFiles.join('\n')}
+    ${conflictFiles.map(file => file.relativePath).join('\n')}
   `;
   const ResolveConflict = 'Resolve conflict';
   const selection = await vscode.window.showInformationMessage(explanation, { modal: true }, ResolveConflict);

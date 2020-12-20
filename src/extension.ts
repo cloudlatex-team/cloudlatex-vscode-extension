@@ -9,12 +9,9 @@ import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
+// #TODO latex indent error
 // #TODO show project name in starting with no compilation
 // #TODO fix that not show logged-in menu after install and login?
-
-// #TODO save user info in ~/.cloudlatex or ...
-// https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/service/github.oauth.service.ts#L116
-// https://github.com/shanalikhan/code-settings-sync/blob/eb332ba5e8180680e613e94be89119119c5638d1/src/environmentPath.ts
 
 
 export async function activate(context: vscode.ExtensionContext) {
