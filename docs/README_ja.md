@@ -52,7 +52,7 @@
 ```
 
 [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)と併用することで、pdfのレビューやコマンド補完などが使えるようになります。
-この場合、以下の設定を追加することを推奨します (`latex-workshop.latex.outDir`は `cloudlatex.outDir` に合わせます)。
+この場合、以下の設定を追加します (`latex-workshop.latex.outDir`は `cloudlatex.outDir` に合わせます)。
 ```setting.json
 {
   "latex-workshop.latex.autoCompile.run": "never",

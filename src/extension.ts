@@ -1,16 +1,15 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { ExtensionName, ConfigNames, CommandNames } from './const';
+import { ExtensionName, ConfigNames, CommandNames, DataTreeProviderId, StatusBarText } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import LatexApp, { AppInfo, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
-import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel } from './interaction';
+import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount } from './interaction';
 import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
 // #TODO show project name in starting with no compilation
-// #TODO no path error without workspace
 // #TODO fix that not show logged-in menu after install and login?
 
 // #TODO save user info in ~/.cloudlatex or ...
@@ -34,7 +33,7 @@ export async function activate(context: vscode.ExtensionContext) {
         app.removeFilesInStoragePath(storagePath);
       }
 
-      app.latexApp?.exit();
+      app.latexApp?.stopFileWatcher();
       app.activated = false;
       vscode.commands.executeCommand(CommandNames.refreshEntry);
 
@@ -57,6 +56,7 @@ class VSLatexApp {
   logPanel: vscode.OutputChannel;
   problemPanel: vscode.DiagnosticCollection;
   activated: boolean;
+  autoCompile: boolean = false;
   syncedInitilally: boolean;
   accountService: AccountService<Account>;
 
@@ -76,24 +76,25 @@ class VSLatexApp {
 
   async activate() {
     if (this.latexApp) {
-      this.latexApp.exit();
+      this.latexApp.stopFileWatcher();
     }
+
+    this.activated = false;
 
     let rootPath = '';
     if (this.validateVSConfig()) {
-      this.activated = true;
       let _rootPath = this.getRootPath();
-      if (!_rootPath) {
+      if (_rootPath) {
+        this.activated = true;
+        rootPath = _rootPath;
+      } else {
         // no workspace
-        this.logger.error('Root path in the workspace is not found.');
-        return;
+        this.logger.info('No workspace');
       }
-      rootPath = _rootPath;
-    } else {
-      this.activated = false;
     }
 
     const config = await this.configuration(rootPath);
+    this.autoCompile = config.autoCompile || false;
     this.latexApp = await LatexApp.createApp(config, {
       decideSyncMode,
       logger: this.logger,
@@ -102,38 +103,71 @@ class VSLatexApp {
 
     vscode.commands.executeCommand(CommandNames.refreshEntry);
 
-    this.latexApp.on('updated-network', () => {
+    this.latexApp.on('network-updated', () => {
       vscode.commands.executeCommand(CommandNames.refreshEntry);
     });
 
-    this.latexApp.on('loaded-project', () => {
+    this.latexApp.on('project-loaded', () => {
       vscode.commands.executeCommand(CommandNames.refreshEntry);
     });
 
-    this.latexApp.on('start-sync', () => {
-      this.statusBarItem.text = '$(sync~spin)';
+    this.latexApp.on('file-changed', async () => {
+      if (await this.validateAccount() !== 'valid') {
+        return;
+      }
+      this.latexApp!.startSync();
     });
 
-    this.latexApp.on('failed-sync', () => {
+    this.latexApp.on('sync-failed', () => {
       this.statusBarItem.text = '$(issues)';
       this.statusBarItem.show();
     });
 
-    this.latexApp.on('successfully-synced', () => {
+    this.latexApp.on('successfully-synced', (result) => {
       this.statusBarItem.text = '$(folder-active)';
       this.statusBarItem.show();
+      if (!this.syncedInitilally || (result.fileChanged && this.autoCompile)) {
+        this.compile();
+      }
       if (!this.syncedInitilally) {
         this.syncedInitilally = true;
         this.logger.info('Project files have been synchronized!');
       }
     });
 
-    this.latexApp.on('start-compile', () => {
-      this.statusBarItem.text = '$(loading~spin)';
-      this.statusBarItem.show();
-    });
+    /**
+     * Launch app
+     */
+    if (this.activated) {
+      await this.latexApp.startFileWatcher();
+      if (await this.validateAccount() !== 'valid') {
+        return;
+      }
+      this.startSync();
+    }
+  }
 
-    this.latexApp.on('successfully-compiled', (result: CompileResult) => {
+  startSync() {
+    if (!this.latexApp) {
+      this.logger.error('latexApp is not defined');
+      return;
+    }
+    this.latexApp.startSync();
+    this.statusBarItem.text = '$(sync~spin)';
+    this.statusBarItem.show();
+  }
+
+  async compile() {
+    if (!this.latexApp) {
+      this.logger.error('latexApp is not defined');
+      return;
+    }
+    this.statusBarItem.text = '$(loading~spin)';
+    this.statusBarItem.show();
+
+    const result = await this.latexApp.compile();
+
+    if (result.status === 'success') { // Succeeded
       this.statusBarItem.text = 'Compiled';
       this.statusBarItem.show();
       this.showProblems(result.logs);
@@ -143,23 +177,24 @@ class VSLatexApp {
         vscode.commands.executeCommand('latex-workshop.refresh-viewer');
       } catch (e) { // no latexworkshop?
       }
-    });
 
-    this.latexApp.on('failed-compile', (result: CompileResult) => {
+    } else { // Failed
       this.statusBarItem.text = 'Failed to compile';
       this.statusBarItem.show();
       if (result.logs) {
         this.showProblems(result.logs);
       }
       promptToShowProblemPanel('Compilation error');
-    });
-
-    /**
-     * Launch app
-     */
-    if (this.activated) {
-      await this.latexApp.launch();
     }
+  }
+
+  async validateAccount() {
+    const result = await this.latexApp!.validateAccount();
+    if (result === 'invalid') {
+      this.logger.log('Account is invalid');
+      promptToSetAccount('Your account is invalid');
+    }
+    return result;
   }
 
   /**
@@ -167,7 +202,7 @@ class VSLatexApp {
    */
   setupSideBar() {
     this.tree = new TargetTreeProvider(this.sideBarInfo);
-    const panel = vscode.window.registerTreeDataProvider('cloudlatex-commands', this.tree);
+    const panel = vscode.window.registerTreeDataProvider(DataTreeProviderId, this.tree);
   }
 
   /**
@@ -176,7 +211,7 @@ class VSLatexApp {
   setupStatusBar() {
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
     this.statusBarItem.command = CommandNames.open;
-    this.statusBarItem.text = 'CL';
+    this.statusBarItem.text = StatusBarText;
     this.context.subscriptions.push(this.statusBarItem);
   }
 
@@ -221,14 +256,14 @@ class VSLatexApp {
         return;
       }
 
-      const result = await this.latexApp.validateAccount();
+      const result = await this.validateAccount();
 
       if (result === 'offline') {
         this.logger.warn('Cannot connect to the server.');
       }
 
       if (result === 'valid') {
-        this.latexApp.compile();
+        this.compile();
       }
     });
 
@@ -238,14 +273,14 @@ class VSLatexApp {
         return;
       }
 
-      const result = await this.latexApp.validateAccount();
+      const result = await this.validateAccount();
 
       if (result === 'offline') {
         this.logger.warn('Cannot connect to the server.');
       }
 
       if (result === 'valid') {
-        this.latexApp.startSync();
+        this.startSync();
       }
     });
 
@@ -268,10 +303,10 @@ class VSLatexApp {
         if (!this.latexApp) {
           return;
         }
-        if (await this.latexApp.validateAccount() === 'valid') {
+        if (await this.validateAccount() === 'valid') {
           this.logger.info('Your account has been validated!');
           if (this.sideBarInfo.activated) {
-            this.latexApp.startSync();
+            this.startSync();
           }
         }
       } catch (e) {
@@ -295,6 +330,7 @@ class VSLatexApp {
       }
 
       this.latexApp.resetLocal();
+      this.startSync();
     });
 
     vscode.commands.registerCommand(CommandNames.clearAccount, async () => {
@@ -311,15 +347,14 @@ class VSLatexApp {
 
     const storagePath = this.getStoragePath();
     if (!storagePath) {
-      this.logger.error('No storage path');
-      throw new Error('No storage path');
-    }
-
-    // storage path to save meta data
-    try {
-      await fs.promises.mkdir(storagePath);
-    } catch (e) {
-      // directory is already created
+      this.logger.log('No storage path');
+    } else {
+      // storage path to save meta data
+      try {
+        await fs.promises.mkdir(storagePath);
+      } catch (e) {
+        // directory is already created
+      }
     }
 
     return {

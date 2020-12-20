@@ -1,5 +1,8 @@
 export const ExtensionName = 'cloudlatex';
 
+export const DataTreeProviderId = 'cloudlatex-commands';
+export const StatusBarText = 'CL';
+
 export const ConfigNames = {
   enabled: `${ExtensionName}.enabled`,
   outDir: `${ExtensionName}.outDir`,

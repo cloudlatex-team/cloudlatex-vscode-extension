@@ -350,9 +350,9 @@ cliui@^5.0.0:
     strip-ansi "^5.2.0"
     wrap-ansi "^5.1.0"
 
-"cloudlatex-cli-plugin@git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#master":
+"cloudlatex-cli-plugin@git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#5313f14":
   version "0.0.6"
-  resolved "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#3c12c3dd746ae9d1f23677022560d1f22a43fe41"
+  resolved "git+ssh://git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git#5313f14b5643182b670c723b3632cc8c2c49da71"
   dependencies:
     "@moritanian/type-db" "^0.1.0"
     "@types/lodash" "^4.14.161"
@@ -1593,9 +1593,9 @@ uri-js@^4.2.2:
     punycode "^2.1.0"
 
 uuid@^8.1.0:
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.1.tgz#2ba2e6ca000da60fce5a196954ab241131e05a31"
-  integrity sha512-FOmRr+FmWEIG8uhZv6C2bTgEVXsHk08kE7mPlrBbEe+c3r9pjceVPgupIfNIhc4yx55H69OXANrUaSuu9eInKg==
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 v8-compile-cache@^2.0.3:
   version "2.1.0"

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import LatexApp, { AppInfo, Config, DecideSyncMode, Logger, Account } from 'cloudlatex-cli-plugin';
+import { CommandNames } from './const';
 
 export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
@@ -81,4 +82,15 @@ export async function promptToShowProblemPanel(message: string) {
     return;
   }
   vscode.commands.executeCommand('workbench.actions.view.problems');
+}
+
+export async function promptToSetAccount(message: string) {
+  const item = await vscode.window.showWarningMessage(
+    message,
+    { title: 'Set account' }
+  );
+  if (!item) {
+    return;
+  }
+  vscode.commands.executeCommand(CommandNames.account);
 }
