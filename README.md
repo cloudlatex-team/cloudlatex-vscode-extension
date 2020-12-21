@@ -1,5 +1,5 @@
 # Cloud LaTeX Extension for Visual Studio Code
-<span style="font-size: 18px">This plugin is under development. 
+<span style="font-size: 18px; font-weight: bold;">This plugin is under development. 
 Please do not use it for important projects.
 </span>
 

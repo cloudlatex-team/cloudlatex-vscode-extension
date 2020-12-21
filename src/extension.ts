@@ -10,6 +10,7 @@ import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
 // #TODO latex indent error
+// #TODO treat changes of outdir
 // #TODO show project name in starting with no compilation
 // #TODO fix that not show logged-in menu after install and login?
 
@@ -19,15 +20,19 @@ export async function activate(context: vscode.ExtensionContext) {
   app.activate();
 
   vscode.workspace.onDidChangeConfiguration(async (e) => {
-    if (e.affectsConfiguration(ConfigNames.enabled)
-      || e.affectsConfiguration(ConfigNames.outDir)
-      || e.affectsConfiguration(ConfigNames.autoCompile)
-      || e.affectsConfiguration(ConfigNames.endpoint)
-      || e.affectsConfiguration(ConfigNames.projectId)
+    if (
+      [ConfigNames.enabled, ConfigNames.outDir, ConfigNames.autoCompile, ConfigNames.endpoint, ConfigNames.projectId]
+        .some(name => e.affectsConfiguration(name))
     ) {
-      const storagePath = app.getStoragePath();
-      if (storagePath) {
-        app.removeFilesInStoragePath(storagePath);
+
+      if (
+        [ConfigNames.enabled, ConfigNames.endpoint, ConfigNames.projectId]
+          .some(name => e.affectsConfiguration(name))
+      ) {
+        const storagePath = app.getStoragePath();
+        if (storagePath) {
+          app.removeFilesInStoragePath(storagePath);
+        }
       }
 
       app.latexApp?.stopFileWatcher();
@@ -146,7 +151,7 @@ class VSLatexApp {
 
   startSync() {
     if (!this.latexApp) {
-      this.logger.error('latexApp is not defined');
+      this.logger.error('LatexApp is not defined');
       return;
     }
     this.latexApp.startSync();
@@ -156,7 +161,7 @@ class VSLatexApp {
 
   async compile() {
     if (!this.latexApp) {
-      this.logger.error('latexApp is not defined');
+      this.logger.error('LatexApp is not defined');
       return;
     }
     this.statusBarItem.text = '$(loading~spin)';
@@ -292,7 +297,7 @@ class VSLatexApp {
       try {
         account = await inputAccount();
       } catch (e) {
-        this.logger.log('account input is canceled');
+        this.logger.log('Account input is canceled');
         return; // input box is canceled.
       }
       try {
