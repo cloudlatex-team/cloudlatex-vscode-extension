@@ -37,19 +37,19 @@ Click the `CL` icon on the Activity Bar and two buttins are appeared on the Side
 Click `Set account` and enter `email`, `client` and `token`.
 You can also set your account by `cloud LaTeX: Set account` command on the Command Pallete (mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`).
 
-<img src="docs/panel.png" width="300px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="300px">
 
 
 Click `Project setting` and set `Cloudlatex.projectID` and check　`Clodulatex.Enabled`.
 
 ＊ Make sure to set in `Workspace` tab (not `User` tab).
 
-<img src="docs/setting.png" width="500px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/setting.png" alt="setting UI" width="500px">
 
 You can also set `settings.json` under the project.
 ```settings.json
 {
-  "cloudlatex.projectId": 127,
+  "cloudlatex.projectId": 123,
   "cloudlatex.enabled": true,
   "cloudlatex.outDir":  "./.workspace",
 }
@@ -61,6 +61,9 @@ In this case, it is recommended to add the following settings (match `latex-work
 {
   "latex-workshop.latex.autoCompile.run": "never",
   "latex-workshop.latex.outDir": "./.workspace",
+  "[latex]": {
+    "editor.formatOnSave": false,
+  }
 }
 ```
 
@@ -68,7 +71,18 @@ When you change the configuration file, a dialog box asks you to restart VSCode.
 After the restart, the project files are downloaded.
 If the download is successful, a dialog box will appear indicating that the files have been successfully synchronized.
 
-If the project files have not been downloaded, click the `reload` button or close and reopen VSCode.
+\* When you try to re-synchronize project, please be careful not to delete any local files when the extension is enabled (this will cause deletion of the server files). Also, when you try to change the project in the same local directory, please be careful not that local files are overwritten unexpectedly (when you change `projectId`, original local files will be overwritten. ).
+\* If the project files have not been downloaded, click the `reload` button or close and reopen VSCode.
+
+
+| Setting key              | Description                                                                         | Default  | Type      |
+| -------------------------| ----------------------------------------------------------------------------------- | -------- | --------- |
+| `cloudlatex.enabled`     | Set true if enable cloudlatex plugin in this project                                | `false`  | _boolean_ |
+| `cloudlatex.projectId`   | ProjectId. *Do not mistake this value, otherwise your files might be overwritten    | `0`      | _number_  |
+| `cloudlatex.outDir`      | Directory to output compile result                                                  | `""`     | _string_  |
+| `cloudlatex.autoCompile` | Set true if automatically compile when any files are saved                          | `true`   | _boolean_ |
+| `cloudlatex.supressIcon` | Set true to hide cloudlatex icon on the activity bar in the unactivated project     | `false`  | _boolean_ |
+
 
 # Source Code
 https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/master

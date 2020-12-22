@@ -28,7 +28,7 @@
 `Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
 アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
 
-<img src="panel.png" width="300px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="300px">
 
 
 次に`Project setting` ボタンをクリックし表示される項目のうち、
@@ -38,14 +38,14 @@
 
 ＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
 
-<img src="setting.png" width="500px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/setting.png" alt="setting UI" width="500px">
 
 
 プロジェクトの[settings.json](https://code.visualstudio.com/docs/getstarted/settings)から設定することも可能です。
 
 ```settings.json
 {
-  "cloudlatex.projectId": 127,
+  "cloudlatex.projectId": 123,
   "cloudlatex.enabled": true,
   "cloudlatex.outDir":  "./.workspace",
 }
@@ -57,6 +57,9 @@
 {
   "latex-workshop.latex.autoBuild.run": "never",
   "latex-workshop.latex.outDir": "./.workspace",
+  "[latex]": {
+    "editor.formatOnSave": false,
+  }
 }
 ```
 
@@ -64,9 +67,18 @@
 再起動後、プロジェクトファイルがダウンロードされます。
 ダウンロードが成功すると、ファイル同期に成功した旨のダイアログが表示されます。
 
-＊ プロジェクトを同期しなおす際には、同期中にローカルのファイルを削除しないように注意してください。(サーバのファイルも削除されます)　また、　同じローカルディレクトリ内で同期するプロジェクトを変更する際には、ローカルファイルが予期せず上書きされないように注意してください。（projectIdを変更して同期を行うと、元のローカルファイルは上書きされます）
+＊ プロジェクトを同期しなおす際には、同期中にローカルのファイルを削除しないように注意してください。(サーバのファイルも削除されます)　また、　同じローカルディレクトリ内で同期するプロジェクトを変更する際には、ローカルファイルが予期せず上書きされないように注意してください。（`projectId` を変更して同期を行うと、元のローカルファイルは上書きされます）
 
 ＊ プロジェクトファイルがダウンロードされない時は、`reload`ボタンをクリックするか、一旦vscodeを閉じ、再度開いてみてください
+
+
+| Setting key              | Description                                                                         | Default  | Type      |
+| -------------------------| ----------------------------------------------------------------------------------- | -------- | --------- |
+| `cloudlatex.enabled`     | プラグインを有効にするかどうか                                | `false`  | _boolean_ |
+| `cloudlatex.projectId`   | プロジェクトID. *設定を間違えるとローカルファイルが別のプロジェクトファイルの内容に上書きされる可能性があるので注意してください    | `0`      | _number_  |
+| `cloudlatex.outDir`      | コンパイル成果物出力先ディレクトリ                                                  | `""`     | _string_  |
+| `cloudlatex.autoCompile` | 自動コンパイルを有効にするかどうか                          | `true`   | _boolean_ |
+| `cloudlatex.supressIcon` | `true` にするとLaTeXプロジェクト以外のプロジェクトではActivity BarにCLアイコンが表示されなくなります     | `false`  | _boolean_ |
 
 # ファイルの同期とコンパイル
 オンラインの際にはローカルで行ったでファイルの変更が自動で同期されます。
@@ -81,16 +93,16 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 
 コンフリクトを検知すると、以下のダイアログが表示されます。
 
-<img src="conflict.png" width="500px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict.png" alt="conflict dialog" width="500px">
 
 `Resolve conflict` ボタンを押し、`Pull` か `Push` を選択します。
 
-<img src="push_or_pull.png" width="500px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/push_or_pull.png" alt="resolve conflict dialog" width="500px">
 
 - Pull: サーバの変更をダウンロードし、サーバに合わせます
 - Push: サーバにローカルの変更をアップロードすることで、ローカルに合わせます
 
-<img src="conflict_concept.png" width="400px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict_concept.png" alt="concept of conflict" width="400px">
 
 # トラブルシューティング
 
