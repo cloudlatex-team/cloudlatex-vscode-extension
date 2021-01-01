@@ -1,11 +1,6 @@
 # Cloud LaTeX Extension for Visual Studio Code
 <span style="font-size: 18px; font-weight: bold;">開発中のプラグインです。重要なプロジェクトには使用しないでください。</span>
 
-<!--
-＊このプラグインはbetaバージョンです。バグの報告は、[issues](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/issues)で受け付けています。
-また、プルリクエストも歓迎しています。
--->
-
 # 特徴
 - ローカルPCにtexliveをインストールすることなくVSCodeで編集したtexファイルをコンパイル可能に
 - [Cloud LaTeX](https://cloudlatex.io/)公式VSCodeプラグイン

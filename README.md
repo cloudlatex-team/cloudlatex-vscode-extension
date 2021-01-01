@@ -3,12 +3,6 @@
 Please do not use it for important projects.
 </span>
 
-
-<!--
-＊This plusigin is a beta version. Please report some issues at [issues](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/issues).
-Pull requests are also welcome.
--->
-
 *** Write locally and compile on cloud service.
 
 This is an extension for Visual Studio Code to write tex locally with Cloud LaTeX.
