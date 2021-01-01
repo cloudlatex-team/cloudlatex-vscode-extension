@@ -14,7 +14,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cloudlatex-team/cloudlatex-vscode-extension.git"
+    "url": "https://github.com/cloudlatex-team/cloudlatex-vscode-extension.git"
   },
   "homepage": "https://github.com/cloudlatex-team/cloudlatex-vscode-extension",
   "keywords": [
