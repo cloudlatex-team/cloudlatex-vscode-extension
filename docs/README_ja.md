@@ -28,7 +28,7 @@
 `Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
 アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="300px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="240px">
 
 
 次に`Project setting` ボタンをクリックし表示される項目のうち、
@@ -38,7 +38,7 @@
 
 ＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/setting.png" alt="setting UI" width="500px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/setting.png" alt="setting UI" width="600px">
 
 
 プロジェクトの[settings.json](https://code.visualstudio.com/docs/getstarted/settings)から設定することも可能です。
@@ -88,12 +88,20 @@ Cloud LaTeXのwebアプリから行ったファイルの変更もローカルに
 CLアイコンをクリックすることで表示されるサイドパネルの、 `Compile` ボタンからコンパイルすることも可能です。
 コンパイル完了後、`Project setting` の `cloudlatex.outDir` に設定したディレクトリ以下にpdfがダウンロードされます。
 
+
+## コンパイラ出力の確認
+texファイルに構文エラーがあり、コンパイルに失敗した場合、コンパイルに失敗した旨のダイアログが表示されます。
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/err_dialog.png" alt="error dialog" width="400px">
+
+`Check details` ボタンを押して、コンパイラ出力を確認してください。
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/problems.png" alt="problems tab" width="400px">
+
 ## ファイルのコンフリクト
 同一のファイルをローカルとサーバ(Cloudlatex Webエディタ、あるいはDropbox連携機能)の両方で編集すると、ファイルのコンフリクトが発生します。コンフリクトが発生すると、ローカルかサーバ、いずれかの変更に合わせる必要があります。
 
 コンフリクトを検知すると、以下のダイアログが表示されます。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict.png" alt="conflict dialog" width="500px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict.png" alt="conflict dialog" width="400px">
 
 `Resolve conflict` ボタンを押し、`Pull` か `Push` を選択します。
 
