@@ -92,7 +92,7 @@ texファイルに構文エラーがあり、コンパイルに失敗した場�
 <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/err_dialog.png" alt="error dialog" width="400px">
 
 `Check details` ボタンを押して、コンパイラ出力を確認してください。
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/problems.png" alt="problems tab" width="400px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/problems_tab.png" alt="problems tab" width="400px">
 
 ## ファイルのコンフリクト
 同一のファイルをローカルとサーバ(Cloudlatex Webエディタ、あるいはDropbox連携機能)の両方で編集すると、ファイルのコンフリクトが発生します。コンフリクトが発生すると、ローカルかサーバ、いずれかの変更に合わせる必要があります。

@@ -163,7 +163,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "test": "node ./out/test/runTest.js",
-    "vsce": "vsce package --yarn -o build/"
+    "vsce": "vsce package --yarn -o build"
   },
   "devDependencies": {
     "@types/dateformat": "^3.0.1",
@@ -181,7 +181,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cloudlatex-cli-plugin": "git+ssh://git@github.com/cloudlatex-team/cloudlatex-cli-plugin.git#v0.1.0",
+    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#v0.1.0",
     "dateformat": "^4.0.0"
   }
 }
