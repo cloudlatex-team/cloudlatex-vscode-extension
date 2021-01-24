@@ -1,0 +1,43 @@
+name: build
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches:
+    - 'master'
+    - 'release'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - name: Setup NodeJs
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Cache node_modules
+      uses: actions/cache@preview
+      with:
+        path: ~/.cache/yarn
+        key: ${{ runner.os }}-projectname-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+        restore-keys:
+          ${{ runner.os }}-projectname-
+    - name: Install Dependencies
+      run: yarn install --frozen-lockfile
+    - name: Install vsce
+      run: yarn install vsce
+    - name: build vsce
+      run: yarn run vsce
+    - name: Archive vsce result
+      uses: actions/upload-artifact@v2
+      with:
+        name: vsce file
+        path: build

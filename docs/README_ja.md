@@ -1,4 +1,7 @@
 # Cloud LaTeX Extension for Visual Studio Code
+![CI](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/workflows/build/badge.svg)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 <span style="font-size: 18px; font-weight: bold;">開発中のプラグインです。重要なプロジェクトには使用しないでください。</span>
 
 # 特徴

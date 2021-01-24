@@ -163,7 +163,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "test": "node ./out/test/runTest.js",
-    "vsce": "vsce package --yarn"
+    "vsce": "vsce package --yarn -o build/"
   },
   "devDependencies": {
     "@types/dateformat": "^3.0.1",
