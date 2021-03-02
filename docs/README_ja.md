@@ -16,22 +16,27 @@
 # 準備
 0. Cloud LaTeXのアカウントを持っていない場合は、[Cloud LaTeX](https://cloudlatex.io/)からアカウントを作成します。
 1. [プロジェクト一覧](https://cloudlatex.io/projects)の右上のユーザ名をクリックし、上から3つ目のプラグイン連携を選択する。トークン生成ダイアログが表示されるので、アカウント情報を入力し、生成されるクライアントID、トークンを記録します。
-2. [プロジェクト一覧](https://cloudlatex.io/projects)からプロジェクトを作成します。
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/extension_button_jp.png" alt="extension button" width="240px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/token_dialog_jp.png" alt="token dialog" width="320px">
+
+2. [プロジェクト一覧](https://cloudlatex.io/projects)からプロジェクトを作成します。（VSCodeから利用したいプロジェクトが既に存在する場合はスキップしてください。）
 3. 作成したプロジェクトのプロジェクトIDをURLより記録します。例: `/projects/123/edit` -> プロジェクトIDは `123`
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/cl_project_url.png" alt="url of cloudlatex project page" width="420px">
+
 
 # 設定
-ローカルに空のVSCode用プロジェクトを作成します。
+ローカルに空のプロジェクト用フォルダを作成し、VSCodeでそのフォルダを開きます。
 [Activity Bar](https://code.visualstudio.com/docs/getstarted/userinterface)に表示される`CL`アイコンをクリックするとSide Barに二つのボタンが表示されます。
 
 `Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
 アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="240px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="320px">
 
 
 次に`Project setting` ボタンをクリックし表示される項目のうち、
 `Cloudlatex.projectID` に準備の項で確認した値を設定し、
-`Clodulatex.Enabled` にチェックを付けます。
+`Clodulatex.Enabled` にチェックを付けます。(`Project setting` ボタンが表示されていない場合、プロジェクトが開かれているか確認してください。)
 
 
 ＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
@@ -123,6 +128,9 @@ Cloud LaTeX webアプリのプロジェクトにアクセスし、コンパイ�
 
 ## 起動時に「Be sure to set cloudlatex.enabled to true ...」というエラーメッセージが表示される
 `Project setting`の `User` タブの `cloudlatex.autoCompile` のチェックを外してください。(`Project` タブの`cloudlatex.autoCompile` にのみチェックを入れる必要があります)
+
+## 今までファイル同期できていたのにかかわらず、突然「Your account is invalid」という警告メッセージが表示され、同期ができなくなる
+トークンの有効期限が切れた可能性があります。サイトにアクセスし、初回と同様の手順でトークンを発行しなおしてください。
 
 # 注意事項
 - VSCodeでプロジェクトを開いている時にのみファイルの同期が行われます。そのため、プロジェクトを開いていない際に行ったファイル操作は同期されません。
