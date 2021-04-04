@@ -32,6 +32,8 @@ jobs:
           ${{ runner.os }}-projectname-
     - name: Install Dependencies
       run: yarn install --frozen-lockfile
+    - name: lint
+      run: yarn run lint
     - name: Install vsce
       run: yarn add vsce
     - name: build vsce
