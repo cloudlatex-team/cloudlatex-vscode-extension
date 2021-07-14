@@ -2,9 +2,6 @@
 ![CI](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/workflows/build/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-<span style="font-size: 18px; font-weight: bold;">This plugin is under development. 
-Please do not use it for important projects.
-</span>
 
 *** Write locally and compile on cloud service.
 

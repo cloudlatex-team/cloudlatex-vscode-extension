@@ -350,9 +350,9 @@ cliui@^5.0.0:
     strip-ansi "^5.2.0"
     wrap-ansi "^5.1.0"
 
-"cloudlatex-cli-plugin@https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#v0.1.1.1":
-  version "0.1.1"
-  resolved "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#f2a261adbba22b42002a20893ecf446c86b638e6"
+"cloudlatex-cli-plugin@https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#1.0.0":
+  version "1.0.0"
+  resolved "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#5fef4a797e80150bb9691181284bb402fcf3deb1"
   dependencies:
     "@moritanian/type-db" "^0.1.0"
     "@types/lodash" "^4.14.161"
@@ -360,7 +360,7 @@ cliui@^5.0.0:
     chokidar "^3.3.1"
     eventemitter3 "^4.0.0"
     form-data "^3.0.0"
-    lodash "^4.17.20"
+    lodash "^4.17.21"
     node-fetch "^2.6.1"
     pako "^1.0.11"
     text-encoding "^0.7.0"
@@ -1011,7 +1011,7 @@ locate-path@^3.0.0:
     p-locate "^3.0.0"
     path-exists "^3.0.0"
 
-lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.20:
+lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
