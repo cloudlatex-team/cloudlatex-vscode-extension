@@ -306,8 +306,10 @@ class VSLatexApp {
             this.startSync();
           }
         }
-      } catch (e: any) {
-        this.logger.error('Error in setting account: ' + (e || '').toString() + '\n' + (e && e.trace || ''));
+      } catch (e) {
+        this.logger.error(
+          `Error in setting account: ${(e as any|| '').toString()} \n  ${(e && (e as any).trace || '')}`
+        );
       }
     });
 
