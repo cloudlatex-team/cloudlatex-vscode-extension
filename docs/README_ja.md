@@ -6,7 +6,7 @@
 - ローカルPCにtexliveをインストールすることなくVSCodeで編集したtexファイルをコンパイル可能に
 - [Cloud LaTeX](https://cloudlatex.io/)公式VSCodeプラグイン
 - ローカル上のファイルとCloud LaTeXサーバ上のファイルを自動同期
-- オフラインにも対応 (オンライン復帰時に自動同期)
+- オフライン時のファイル編集にも対応 (オンライン復帰時に自動同期)
 
 # インストール
 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=cloudlatex.cloudlatex)からインストール、あるいはクイックオープン(`ctrl/cmd + P`)に `ext install cloudlatex` と入力します.
@@ -15,67 +15,67 @@
 0. Cloud LaTeXのアカウントを持っていない場合は、[Cloud LaTeX](https://cloudlatex.io/)からアカウントを作成します。
 1. [プロジェクト一覧](https://cloudlatex.io/projects)の右上のユーザ名をクリックし、上から3つ目のプラグイン連携を選択する。トークン生成ダイアログが表示されるので、アカウント情報を入力し、生成されるクライアントID、トークンを記録します。
 
- <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/extension_button_jp.png" alt="extension button" width="240px">  
- <br />
- <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/token_dialog_jp.png" alt="token dialog" width="320px">
+    <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/extension_button_jp.png" alt="extension button" width="240px">  
+    <br />
+    <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/token_dialog_jp.png" alt="token dialog" width="320px">
 
 2. [プロジェクト一覧](https://cloudlatex.io/projects)からプロジェクトを作成します。（VSCodeから利用したいプロジェクトが既に存在する場合はスキップしてください。）
 3. 作成したプロジェクトのプロジェクトIDをURLより記録します。例: `/projects/123/edit` -> プロジェクトIDは `123`
 
-
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/cl_project_url.png" alt="url of cloudlatex project page" width="420px">
+    <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/cl_project_url.png" alt="url of cloudlatex project page" width="420px">
 
 
 # 設定
-ローカルに空のプロジェクト用フォルダを作成し、VSCodeでそのフォルダを開きます。
+- ローカルに**空のプロジェクト用フォルダ**を作成し、VSCodeでそのフォルダを開きます。
 [Activity Bar](https://code.visualstudio.com/docs/getstarted/userinterface)に表示される`CL`アイコンをクリックするとSide Barに二つのボタンが表示されます。
 
-`Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
+- `Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
 アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="320px">
+  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="320px">
 
 
-次に`Project setting` ボタンをクリックし表示される項目のうち、
+- 次に`Project setting` ボタンをクリックし表示される項目のうち、
 `Cloudlatex.projectID` に準備の項で確認した値を設定し、
-`Clodulatex.Enabled` にチェックを付けます。(`Project setting` ボタンが表示されていない場合、プロジェクトが開かれているか確認してください。)
+`Clodulatex.Enabled` にチェックを付けます。(`Project setting` ボタンが表示されていない場合、プロジェクトフォルダが開かれているか確認してください。)
 
 
-＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
+  ＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/setting.png" alt="setting UI" width="600px">
+  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/setting.png" alt="setting UI" width="600px">
 
 
-プロジェクトの[settings.json](https://code.visualstudio.com/docs/getstarted/settings)から設定することも可能です。
+- プロジェクトの[settings.json](https://code.visualstudio.com/docs/getstarted/settings)から設定することも可能です。(右上のアイコンクリックで`settings.json`を開きます)
 
-```settings.json
-{
-  "cloudlatex.projectId": 123,
-  "cloudlatex.enabled": true,
-  "cloudlatex.outDir":  "./.workspace",
-}
-```
-
-[LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)と併用することで、pdfのレビューやコマンド補完などが使えるようになります。
-この場合、以下の設定を追加し、Latex Workshopの自動コンパイルを無効化してください (`latex-workshop.latex.outDir`は `cloudlatex.outDir` と同じ値に設定します)。
-```setting.json
-{
-  "latex-workshop.latex.autoBuild.run": "never",
-  "latex-workshop.latex.outDir": "./.workspace",
-  "[latex]": {
-    "editor.formatOnSave": false,
+  ```settings.json
+  {
+    "cloudlatex.projectId": 123,
+    "cloudlatex.enabled": true,
+    "cloudlatex.outDir":  "./.workspace",
   }
-}
-```
+  ```
 
-設定ファイルを変更すると、VSCodeを再起動するよう促すダイアログが表示されるので、ダイアログ中のダイアログ中の `Restart VSCode` ボタンを押して再起動します。
+- [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)と併用することで、pdfのレビューやコマンド補完などが使えるようになります。
+この場合、以下の設定を追加し、Latex Workshopの自動コンパイルを無効化してください (`latex-workshop.latex.outDir`は `cloudlatex.outDir` と同じ値に設定します)。
+  ```setting.json
+  {
+    "latex-workshop.latex.autoBuild.run": "never",
+    "latex-workshop.latex.outDir": "./.workspace",
+    "[latex]": {
+      "editor.formatOnSave": false,
+    }
+  }
+  ```
+
+- 設定ファイルを変更すると、VSCodeを再起動するよう促すダイアログが表示されるので、ダイアログ中のダイアログ中の `Restart VSCode` ボタンを押して再起動します。
 再起動後、プロジェクトファイルがダウンロードされます。
 ダウンロードが成功すると、ファイル同期に成功した旨のダイアログが表示されます。
 
-＊ プロジェクトを同期しなおす際には、同期中にローカルのファイルを削除しないように注意してください。(サーバのファイルも削除されます)　また、　同じローカルディレクトリ内で同期するプロジェクトを変更する際には、ローカルファイルが予期せず上書きされないように注意してください。（`projectId` を変更して同期を行うと、元のローカルファイルは上書きされます）
+  ＊ プロジェクトを同期しなおす際には、同期中にローカルのファイルを削除しないように注意してください。(サーバのファイルも削除されます)　また、　同じローカルディレクトリ内で同期するプロジェクトを変更する際には、ローカルファイルが予期せず上書きされないように注意してください。（`projectId` を変更して同期を行うと、元のローカルファイルは上書きされます）
 
-＊ プロジェクトファイルがダウンロードされない時は、`reload`ボタンをクリックするか、一旦vscodeを閉じ、再度開いてみてください
+  ＊ プロジェクトファイルがダウンロードされない時は、`reload`ボタンをクリックするか、一旦vscodeを閉じ、再度開いてみてください
 
+## 設定項目一覧
 
 | Setting key              | Description                                                                         | Default  | Type      |
 | -------------------------| ----------------------------------------------------------------------------------- | -------- | --------- |
@@ -86,7 +86,7 @@
 | `cloudlatex.supressIcon` | `true` にするとLaTeXプロジェクト以外のプロジェクトではActivity BarにCLアイコンが表示されなくなります     | `false`  | _boolean_ |
 
 # ファイルの同期とコンパイル
-オンラインの際にはローカルで行ったでファイルの変更が自動で同期されます。
+- オンラインの際にはローカルで行ったでファイルの変更が自動で同期されます。
 Cloud LaTeXのwebアプリから行ったファイルの変更もローカルに反映されます。
 
 `Project setting` で `cloudlatex.autoCompile` にチェックを入れることで、ファイル保存時に自動でコンパイルが行われます。
@@ -95,27 +95,30 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 
 
 ## コンパイラ出力の確認
-texファイルに構文エラーがあり、コンパイルに失敗した場合、コンパイルに失敗した旨のダイアログが表示されます。
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/err_dialog.png" alt="error dialog" width="400px">
+- texファイルに構文エラーがあり、コンパイルに失敗した場合、コンパイルに失敗した旨のダイアログが表示されます。
 
-`Check details` ボタンを押して、コンパイラ出力を確認してください。
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/problems_tab.png" alt="problems tab" width="400px">
+  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/err_dialog.png" alt="error dialog" width="400px">
+
+
+- `Check details` ボタンを押して、コンパイラ出力を確認してください。
+
+  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/problems_tab.png" alt="problems tab" width="400px">
 
 ## ファイルのコンフリクト
-同一のファイルをローカルとサーバ(Cloudlatex Webエディタ、あるいはDropbox連携機能)の両方で編集すると、ファイルのコンフリクトが発生します。コンフリクトが発生すると、ローカルかサーバ、いずれかの変更に合わせる必要があります。
+- 同一のファイルをローカルとサーバ(Cloudlatex Webエディタ、あるいはDropbox連携機能)の両方で編集すると、ファイルのコンフリクトが発生します。コンフリクトが発生すると、ローカルかサーバ、いずれかの変更に合わせる必要があります。
 
-コンフリクトを検知すると、以下のダイアログが表示されます。
+- コンフリクトを検知すると、以下のダイアログが表示されます。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict.png" alt="conflict dialog" width="400px">
+  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict.png" alt="conflict dialog" width="400px">
 
-`Resolve conflict` ボタンを押し、`Pull` か `Push` を選択します。
+- `Resolve conflict` ボタンを押し、`Pull` か `Push` を選択します。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/push_or_pull.png" alt="resolve conflict dialog" width="500px">
+  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/push_or_pull.png" alt="resolve conflict dialog" width="500px">
 
-- Pull: サーバの変更をダウンロードし、サーバに合わせます
-- Push: サーバにローカルの変更をアップロードすることで、ローカルに合わせます
+  - Pull: サーバの変更をダウンロードし、サーバに合わせます
+  - Push: サーバにローカルの変更をアップロードすることで、ローカルに合わせます
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict_concept.png" alt="concept of conflict" width="400px">
+  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/conflict_concept.png" alt="concept of conflict" width="400px">
 
 # トラブルシューティング
 
