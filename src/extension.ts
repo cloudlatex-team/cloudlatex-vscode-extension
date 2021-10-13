@@ -306,14 +306,14 @@ class VSLatexApp {
             this.startSync();
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         this.logger.error('Error in setting account: ' + (e || '').toString() + '\n' + (e && e.trace || ''));
       }
     });
 
     vscode.commands.registerCommand(CommandNames.setting, async () => {
-      await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
       await vscode.commands.executeCommand('workbench.action.openSettings', ExtensionName);
+      await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
     });
 
     vscode.commands.registerCommand(CommandNames.compilerLog, () => {
