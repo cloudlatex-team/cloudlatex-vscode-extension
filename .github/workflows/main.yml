@@ -21,16 +21,10 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     - name: Setup NodeJs
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v2.5.1
       with:
         node-version: '14.x'
-    - name: Cache node_modules
-      uses: actions/cache@preview
-      with:
-        path: ~/.cache/yarn
-        key: ${{ runner.os }}-projectname-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
-        restore-keys:
-          ${{ runner.os }}-projectname-
+        cache: yarn
     - name: Install Dependencies
       run: yarn install --frozen-lockfile
     - name: lint
