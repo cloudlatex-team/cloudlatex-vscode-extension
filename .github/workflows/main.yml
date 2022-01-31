@@ -23,7 +23,7 @@ jobs:
     - name: Setup NodeJs
       uses: actions/setup-node@v1
       with:
-        node-version: '10.x'
+        node-version: '16.x'
     - name: Cache node_modules
       uses: actions/cache@preview
       with:
