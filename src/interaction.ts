@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import LatexApp, { AppInfo, Config, DecideSyncMode, Logger, Account } from 'cloudlatex-cli-plugin';
-import { CommandNames } from './const';
+import { commandNames } from './const';
 
 export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
@@ -9,10 +9,10 @@ export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const explanation = `Following files is both changed in the server and local: \n 
     ${conflictFiles.map(file => file.relativePath).join('\n')}
   `;
-  const ResolveConflict = 'Resolve conflict';
-  const selection = await vscode.window.showInformationMessage(explanation, { modal: true }, ResolveConflict);
+  const resolveConflict = 'Resolve conflict';
+  const selection = await vscode.window.showInformationMessage(explanation, { modal: true }, resolveConflict);
 
-  if (selection !== ResolveConflict) {
+  if (selection !== resolveConflict) {
     throw new Error('Canceled');
   }
   const result = await vscode.window.showQuickPick([pull, push], { placeHolder: explanation });
@@ -92,5 +92,5 @@ export async function promptToSetAccount(message: string) {
   if (!item) {
     return;
   }
-  vscode.commands.executeCommand(CommandNames.account);
+  vscode.commands.executeCommand(commandNames.account);
 }
