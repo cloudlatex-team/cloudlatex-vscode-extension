@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CommandNames } from './const';
+import { COMMAND_NAMES } from './const';
 import { SideBarInfo } from './type';
 
 export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {
@@ -23,7 +23,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
 
     items.push(new Item('Set account', vscode.TreeItemCollapsibleState.None,
       {
-        command: CommandNames.account,
+        command: COMMAND_NAMES.account,
         title: 'titile',
         arguments: []
       }, 'account'));
@@ -33,7 +33,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
         `Project setting ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
         vscode.TreeItemCollapsibleState.None,
         {
-          command: CommandNames.setting,
+          command: COMMAND_NAMES.setting,
           title: 'titile',
           arguments: []
         }, 'settings'));
@@ -43,26 +43,26 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
       if (!this.status.offline) {
         items.push(new Item('Compile', vscode.TreeItemCollapsibleState.None,
           {
-            command: CommandNames.compile,
+            command: COMMAND_NAMES.compile,
             title: 'titile',
             arguments: []
           }, 'debug-start'));
         items.push(new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
           {
-            command: CommandNames.compilerLog,
+            command: COMMAND_NAMES.compilerLog,
             title: 'titile',
             arguments: []
           }, 'output'));
         items.push(new Item('Reload', vscode.TreeItemCollapsibleState.None,
           {
-            command: CommandNames.reload,
+            command: COMMAND_NAMES.reload,
             title: 'titile',
             arguments: []
           }, 'debug-restart'));
       } else {
         items.push(new Item('Offline', vscode.TreeItemCollapsibleState.None,
           {
-            command: CommandNames.reload,
+            command: COMMAND_NAMES.reload,
             title: 'titile',
             arguments: []
           }, 'rss'));

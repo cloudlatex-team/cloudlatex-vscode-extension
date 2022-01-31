@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { ExtensionName, ConfigNames, CommandNames, DataTreeProviderId, StatusBarText } from './const';
+import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import LatexApp, { AppInfo, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
 import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount } from './interaction';
@@ -16,12 +16,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidChangeConfiguration(async (e) => {
     if (
-      [ConfigNames.enabled, ConfigNames.outDir, ConfigNames.autoCompile, ConfigNames.endpoint, ConfigNames.projectId]
+      [CONFIG_NAMES.enabled, CONFIG_NAMES.outDir, CONFIG_NAMES.autoCompile, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId]
         .some(name => e.affectsConfiguration(name))
     ) {
 
       if (
-        [ConfigNames.enabled, ConfigNames.endpoint, ConfigNames.projectId]
+        [CONFIG_NAMES.enabled, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId]
           .some(name => e.affectsConfiguration(name))
       ) {
         const storagePath = app.getStoragePath();
@@ -32,7 +32,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
       app.latexApp?.stopFileWatcher();
       app.activated = false;
-      vscode.commands.executeCommand(CommandNames.refreshEntry);
+      vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
 
       promptToReload('Configuration has been changed. Please restart to apply it.');
     }
@@ -98,14 +98,14 @@ class VSLatexApp {
       accountService: this.accountService
     });
 
-    vscode.commands.executeCommand(CommandNames.refreshEntry);
+    vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
 
     this.latexApp.on('network-updated', () => {
-      vscode.commands.executeCommand(CommandNames.refreshEntry);
+      vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
     });
 
     this.latexApp.on('project-loaded', () => {
-      vscode.commands.executeCommand(CommandNames.refreshEntry);
+      vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
     });
 
     this.latexApp.on('file-changed', async () => {
@@ -199,7 +199,7 @@ class VSLatexApp {
    */
   setupSideBar() {
     this.tree = new TargetTreeProvider(this.sideBarInfo);
-    const panel = vscode.window.registerTreeDataProvider(DataTreeProviderId, this.tree);
+    const panel = vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_ID, this.tree);
   }
 
   /**
@@ -207,8 +207,8 @@ class VSLatexApp {
    */
   setupStatusBar() {
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-    this.statusBarItem.command = CommandNames.open;
-    this.statusBarItem.text = StatusBarText;
+    this.statusBarItem.command = COMMAND_NAMES.open;
+    this.statusBarItem.text = STATUS_BAR_TEXT;
     this.context.subscriptions.push(this.statusBarItem);
   }
 
@@ -243,13 +243,13 @@ class VSLatexApp {
    * Commands
    */
   setupCommands() {
-    vscode.commands.registerCommand(CommandNames.refreshEntry, () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.refreshEntry, () => {
       this.tree.refresh(this.sideBarInfo);
     });
 
-    vscode.commands.registerCommand(CommandNames.compile, async () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.compile, async () => {
       if (!this.latexApp || !this.activated) {
-        this.logger.warn(`'${CommandNames.compile}' cannot be called without workspace.`);
+        this.logger.warn(`'${COMMAND_NAMES.compile}' cannot be called without workspace.`);
         return;
       }
 
@@ -264,9 +264,9 @@ class VSLatexApp {
       }
     });
 
-    vscode.commands.registerCommand(CommandNames.reload, async () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.reload, async () => {
       if (!this.latexApp || !this.activated) {
-        this.logger.warn(`'${CommandNames.reload}' cannot be called without workspace.`);
+        this.logger.warn(`'${COMMAND_NAMES.reload}' cannot be called without workspace.`);
         return;
       }
 
@@ -281,13 +281,13 @@ class VSLatexApp {
       }
     });
 
-    vscode.commands.registerCommand(CommandNames.open, () => {
-      vscode.commands.executeCommand(`workbench.view.extension.${ExtensionName}`).then(
+    vscode.commands.registerCommand(COMMAND_NAMES.open, () => {
+      vscode.commands.executeCommand(`workbench.view.extension.${EXTENSION_NAME}`).then(
         () => vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup')
       );
     });
 
-    vscode.commands.registerCommand(CommandNames.account, async () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.account, async () => {
       let account!: Account;
       try {
         account = await inputAccount();
@@ -313,18 +313,18 @@ class VSLatexApp {
       }
     });
 
-    vscode.commands.registerCommand(CommandNames.setting, async () => {
-      await vscode.commands.executeCommand('workbench.action.openSettings', ExtensionName);
+    vscode.commands.registerCommand(COMMAND_NAMES.setting, async () => {
+      await vscode.commands.executeCommand('workbench.action.openSettings', EXTENSION_NAME);
       await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
     });
 
-    vscode.commands.registerCommand(CommandNames.compilerLog, () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.compilerLog, () => {
       this.logPanel.show();
     });
 
-    vscode.commands.registerCommand(CommandNames.resetLocal, async () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.resetLocal, async () => {
       if (!this.latexApp || !this.activated) {
-        this.logger.warn(`'${CommandNames.resetLocal}' cannot be called without workspace.`);
+        this.logger.warn(`'${COMMAND_NAMES.resetLocal}' cannot be called without workspace.`);
         return;
       }
 
@@ -332,7 +332,7 @@ class VSLatexApp {
       this.startSync();
     });
 
-    vscode.commands.registerCommand(CommandNames.clearAccount, async () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.clearAccount, async () => {
       try {
         await fs.promises.unlink(this.obtainAccountPath());
       } catch (e) {
@@ -342,7 +342,7 @@ class VSLatexApp {
   }
 
   async configuration(rootPath: string): Promise<Config> {
-    const vsconfig = vscode.workspace.getConfiguration(ExtensionName) as any as VSConfig;
+    const vsconfig = vscode.workspace.getConfiguration(EXTENSION_NAME) as any as VSConfig;
 
     const storagePath = this.getStoragePath();
     if (!storagePath) {
@@ -388,7 +388,7 @@ class VSLatexApp {
     /**
      * Enabled
      */
-    const config = vscode.workspace.getConfiguration(ExtensionName);
+    const config = vscode.workspace.getConfiguration(EXTENSION_NAME);
     // To prevent overwriting files unexpectedly,
     //`enabled` should be defined in workspace configuration.
     const enabledInspect = config.inspect<boolean>('enabled');
@@ -397,7 +397,7 @@ class VSLatexApp {
     }
 
     if (enabledInspect.globalValue) {
-      vscode.window.showErrorMessage(`Be sure to set ${ConfigNames.enabled} to true not at user\'s settings but at workspace settings.`);
+      vscode.window.showErrorMessage(`Be sure to set ${CONFIG_NAMES.enabled} to true not at user\'s settings but at workspace settings.`);
     }
 
     if (!enabledInspect.workspaceValue) {

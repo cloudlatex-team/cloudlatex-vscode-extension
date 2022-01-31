@@ -1,25 +1,25 @@
-export const ExtensionName = 'cloudlatex';
+export const EXTENSION_NAME = 'cloudlatex';
 
-export const DataTreeProviderId = 'cloudlatex-commands';
-export const StatusBarText = 'CL';
+export const DATA_TREE_PROVIDER_ID = 'cloudlatex-commands';
+export const STATUS_BAR_TEXT = 'CL';
 
-export const ConfigNames = {
-  enabled: `${ExtensionName}.enabled`,
-  outDir: `${ExtensionName}.outDir`,
-  autoCompile: `${ExtensionName}.autoCompile`,
-  endpoint: `${ExtensionName}.endpoint`,
-  projectId: `${ExtensionName}.projectId`,
-  supressIcon: `${ExtensionName}.supressIcon`
+export const CONFIG_NAMES = {
+  enabled: `${EXTENSION_NAME}.enabled`,
+  outDir: `${EXTENSION_NAME}.outDir`,
+  autoCompile: `${EXTENSION_NAME}.autoCompile`,
+  endpoint: `${EXTENSION_NAME}.endpoint`,
+  projectId: `${EXTENSION_NAME}.projectId`,
+  supressIcon: `${EXTENSION_NAME}.supressIcon`
 };
 
-export const CommandNames = {
-  refreshEntry: `${ExtensionName}.refreshEntry`,
-  compile: `${ExtensionName}.compile`,
-  reload: `${ExtensionName}.reload`,
-  open: `${ExtensionName}.open`,
-  account: `${ExtensionName}.account`,
-  setting: `${ExtensionName}.setting`,
-  compilerLog: `${ExtensionName}.compilerLog`,
-  resetLocal: `${ExtensionName}.resetLocal`,
-  clearAccount: `${ExtensionName}.clearAccount`
+export const COMMAND_NAMES = {
+  refreshEntry: `${EXTENSION_NAME}.refreshEntry`,
+  compile: `${EXTENSION_NAME}.compile`,
+  reload: `${EXTENSION_NAME}.reload`,
+  open: `${EXTENSION_NAME}.open`,
+  account: `${EXTENSION_NAME}.account`,
+  setting: `${EXTENSION_NAME}.setting`,
+  compilerLog: `${EXTENSION_NAME}.compilerLog`,
+  resetLocal: `${EXTENSION_NAME}.resetLocal`,
+  clearAccount: `${EXTENSION_NAME}.clearAccount`
 };
