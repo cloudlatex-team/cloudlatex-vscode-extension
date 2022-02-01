@@ -53,13 +53,14 @@ class VSLatexApp {
   logPanel: vscode.OutputChannel;
   problemPanel: vscode.DiagnosticCollection;
   activated: boolean;
-  autoCompile: boolean = false;
+  autoCompile: boolean;
   syncedInitilally: boolean;
   accountService: AccountService<Account>;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.activated = false;
+    this.autoCompile = false;
     this.syncedInitilally = false;
     this.accountService = new AccountService(this.obtainAccountPath());
     this.problemPanel = vscode.languages.createDiagnosticCollection('LaTeX');
@@ -100,7 +101,7 @@ class VSLatexApp {
 
     vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
 
-    this.latexApp.on('network-updated', () => {
+    this.latexApp.on('login-status-updated', () => {
       vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
     });
 
@@ -308,7 +309,7 @@ class VSLatexApp {
         }
       } catch (e) {
         this.logger.error(
-          `Error in setting account: ${(e as any|| '').toString()} \n  ${(e && (e as any).trace || '')}`
+          `Error in setting account: ${(e as any || '').toString()} \n  ${(e && (e as Error).stack || '')}`
         );
       }
     });
@@ -435,9 +436,10 @@ class VSLatexApp {
   get sideBarInfo(): SideBarInfo {
     return {
       isWorkspace: !!this.getRootPath(),
-      offline: this.latexApp && this.latexApp.appInfo.offline || false,
+      loginStatus: this.latexApp?.appInfo.loginStatus || 'offline',
       activated: this.activated,
-      projectName: this.latexApp && this.latexApp.appInfo.projectName || null
+      projectName: this.latexApp?.appInfo.projectName || null,
+      displayUserName: this.accountService.account?.email || '',
     };
   }
 }

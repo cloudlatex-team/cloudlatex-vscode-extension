@@ -19,57 +19,86 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   async getChildren(element?: object) {
-    const items = [];
+    const items: Item[] = [];
 
-    items.push(new Item('Set account', vscode.TreeItemCollapsibleState.None,
-      {
-        command: COMMAND_NAMES.account,
-        title: 'titile',
-        arguments: []
-      }, 'account'));
+    items.push(this.getAccountItem());
 
     if (this.status.isWorkspace) {
-      items.push(new Item(
-        `Project setting ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
-        vscode.TreeItemCollapsibleState.None,
-        {
-          command: COMMAND_NAMES.setting,
-          title: 'titile',
-          arguments: []
-        }, 'settings'));
+      items.push(this.getProjectItem());
     }
 
     if (this.status.activated) {
-      if (!this.status.offline) {
-        items.push(new Item('Compile', vscode.TreeItemCollapsibleState.None,
-          {
-            command: COMMAND_NAMES.compile,
-            title: 'titile',
-            arguments: []
-          }, 'debug-start'));
-        items.push(new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
-          {
-            command: COMMAND_NAMES.compilerLog,
-            title: 'titile',
-            arguments: []
-          }, 'output'));
-        items.push(new Item('Reload', vscode.TreeItemCollapsibleState.None,
-          {
-            command: COMMAND_NAMES.reload,
-            title: 'titile',
-            arguments: []
-          }, 'debug-restart'));
+      if (this.status.loginStatus !== 'offline') {
+        items.push(this.getCompileItem());
+        items.push(this.getCompilerLogItem());
+        items.push(this.getReloadItem());
       } else {
-        items.push(new Item('Offline', vscode.TreeItemCollapsibleState.None,
-          {
-            command: COMMAND_NAMES.reload,
-            title: 'titile',
-            arguments: []
-          }, 'rss'));
+        items.push(this.getOfflineItem());
       }
     }
 
     return items;
+  }
+
+  getAccountItem() {
+    let title = 'Set Account (Not Logged In)';
+    if (this.status.loginStatus === 'valid') {
+      title = `Change Account (${this.status.displayUserName})`;
+    }
+
+    return new Item(title, vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.account,
+        title: 'account',
+        arguments: []
+      }, 'account');
+  }
+
+  getProjectItem() {
+    return new Item(
+      `Project Setting ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
+      vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.setting,
+        title: 'setting',
+        arguments: []
+      }, 'settings');
+  }
+
+  getCompileItem() {
+    return new Item('Compile', vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.compile,
+        title: 'compile',
+        arguments: []
+      }, 'debug-start');
+  }
+
+  getCompilerLogItem() {
+    return new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.compilerLog,
+        title: 'compilerLog',
+        arguments: []
+      }, 'output');
+  }
+
+  getReloadItem() {
+    return new Item('Reload', vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.reload,
+        title: 'reload',
+        arguments: []
+      }, 'debug-restart');
+  }
+
+  getOfflineItem() {
+    return new Item('Offline', vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.reload,
+        title: 'reload',
+        arguments: []
+      }, 'rss');
   }
 }
 

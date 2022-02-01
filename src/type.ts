@@ -1,3 +1,4 @@
+import { LoginStatus } from 'cloudlatex-cli-plugin';
 export type VSConfig = {
   enabled: boolean,
   outDir: string,
@@ -11,6 +12,7 @@ export type VSConfig = {
 export type SideBarInfo = {
   isWorkspace: boolean,
   activated: boolean,
-  offline: boolean,
+  loginStatus: LoginStatus,
+  displayUserName?: string,
   projectName: string | null
 };
