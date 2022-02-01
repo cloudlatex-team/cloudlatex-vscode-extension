@@ -7,7 +7,7 @@
 
 This is an extension for Visual Studio Code to write tex locally with Cloud LaTeX.
 
-[日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/master/docs/README_ja.md)
+[日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md)
 
 # Features
 - Tex files you edit with VSCode can be compiled without installing texlive on your PC
@@ -31,14 +31,14 @@ Click the `CL` icon on the Activity Bar and two buttins are appeared on the Side
 Click `Set account` and enter `email`, `client` and `token`.
 You can also set your account by `cloud LaTeX: Set account` command on the Command Pallete (mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`).
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/panel.png" alt="panel UI" width="240px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/panel.png" alt="panel UI" width="240px">
 
 
 Click `Project setting` and set `Cloudlatex.projectID` and check　`Clodulatex.Enabled`.
 
 ＊ Make sure to set in `Workspace` tab (not `User` tab).
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/master/docs/setting.png" alt="setting UI" width="600px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/setting.png" alt="setting UI" width="600px">
 
 You can also set `settings.json` under the project.
 ```settings.json
@@ -79,7 +79,7 @@ If the download is successful, a dialog box will appear indicating that the file
 
 
 # Source Code
-https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/master
+https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/main
 
 # License
 Apache License 2.0
