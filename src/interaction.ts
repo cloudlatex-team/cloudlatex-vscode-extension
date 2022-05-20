@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import LatexApp, { AppInfo, Config, DecideSyncMode, Logger, Account } from 'cloudlatex-cli-plugin';
+import { DecideSyncMode, Account } from 'cloudlatex-cli-plugin';
 import { COMMAND_NAMES } from './const';
 
 export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
