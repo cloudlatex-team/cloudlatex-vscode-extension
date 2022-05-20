@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { COMMAND_NAMES } from './const';
+import { localeStr } from './interaction';
+import { MESSAGE_TYPE } from './locale';
 import { SideBarInfo } from './type';
 
 export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {
@@ -41,9 +43,9 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   getAccountItem() {
-    let title = 'Set Account (Not Logged In)';
+    let title = `${localeStr(MESSAGE_TYPE.SET_ACCOUNT)} (${localeStr(MESSAGE_TYPE.NOT_LOGGED_IN)})`;
     if (this.status.loginStatus === 'valid') {
-      title = `Change Account (${this.status.displayUserName})`;
+      title = `${localeStr(MESSAGE_TYPE.CHANGE_ACCOUNT)} (${this.status.displayUserName})`;
     }
 
     return new Item(title, vscode.TreeItemCollapsibleState.None,
@@ -56,7 +58,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
 
   getProjectItem() {
     return new Item(
-      `Project Setting ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
+      `${localeStr(MESSAGE_TYPE.PROJECT_SETTING)} ${this.status.projectName ? '(' + this.status.projectName + ')' : ''}`,
       vscode.TreeItemCollapsibleState.None,
       {
         command: COMMAND_NAMES.setting,
@@ -66,7 +68,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   getCompileItem() {
-    return new Item('Compile', vscode.TreeItemCollapsibleState.None,
+    return new Item(localeStr(MESSAGE_TYPE.COMPILE), vscode.TreeItemCollapsibleState.None,
       {
         command: COMMAND_NAMES.compile,
         title: 'compile',
@@ -75,7 +77,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   getCompilerLogItem() {
-    return new Item('View Compiler Log', vscode.TreeItemCollapsibleState.None,
+    return new Item(localeStr(MESSAGE_TYPE.VIEW_COMPILER_LOG), vscode.TreeItemCollapsibleState.None,
       {
         command: COMMAND_NAMES.compilerLog,
         title: 'compilerLog',
@@ -84,7 +86,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   getReloadItem() {
-    return new Item('Reload', vscode.TreeItemCollapsibleState.None,
+    return new Item(localeStr(MESSAGE_TYPE.RELOAD), vscode.TreeItemCollapsibleState.None,
       {
         command: COMMAND_NAMES.reload,
         title: 'reload',
@@ -93,7 +95,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   getOfflineItem() {
-    return new Item('Offline', vscode.TreeItemCollapsibleState.None,
+    return new Item(localeStr(MESSAGE_TYPE.OFFLINE), vscode.TreeItemCollapsibleState.None,
       {
         command: COMMAND_NAMES.reload,
         title: 'reload',

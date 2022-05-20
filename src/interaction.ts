@@ -1,6 +1,13 @@
 import * as vscode from 'vscode';
 import { DecideSyncMode, Account } from 'cloudlatex-cli-plugin';
 import { COMMAND_NAMES } from './const';
+import { MESSAGE_TYPE } from './locale';
+import { jaTranslation } from './locale/ja';
+import { enTranslation } from './locale/en';
+
+export function localeStr(key: keyof typeof MESSAGE_TYPE): string {
+  return vscode.env.language === 'ja' ? jaTranslation[key] : enTranslation[key];
+}
 
 export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };

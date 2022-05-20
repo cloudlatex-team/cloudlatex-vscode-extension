@@ -4,11 +4,12 @@ import * as vscode from 'vscode';
 import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
-import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount } from './interaction';
+import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr } from './interaction';
 import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
+import { MESSAGE_TYPE } from './locale';
 
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
@@ -87,7 +88,7 @@ class VSLatexApp {
         rootPath = _rootPath;
       } else {
         // no workspace
-        vscode.window.showInformationMessage('No workspace');
+        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
       }
     }
 
@@ -103,7 +104,7 @@ class VSLatexApp {
 
     this.latexApp.on(LATEX_APP_EVENTS.LOGIN_SUCCEEDED, () => {
       vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
-      vscode.window.showInformationMessage('Your account has been validated!');
+      vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.LOGIN_SUCCEEDED));
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.LOGIN_FAILED, () => {
@@ -112,10 +113,7 @@ class VSLatexApp {
 
     this.latexApp.on(LATEX_APP_EVENTS.LOGIN_OFFLINE, () => {
       vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
-      vscode.window.showInformationMessage(`The network is offline or some trouble occur with the server.
-        You can edit your files, but your changes will not be reflected on the server
-        until it is enable to communicate with the server.
-        `);
+      vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.OFFLINE_ERROR));
 
     });
 
@@ -133,7 +131,7 @@ class VSLatexApp {
     this.latexApp.on(LATEX_APP_EVENTS.FILE_SYNC_FAILED, () => {
       this.statusBarItem.text = '$(issues)';
       this.statusBarItem.show();
-      vscode.window.showErrorMessage('Failed to sync file');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.FILE_SYNC_FAILED));
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.FILE_SYNC_SUCCEEDED, (result) => {
@@ -144,7 +142,7 @@ class VSLatexApp {
       }
       if (!this.syncedInitilally) {
         this.syncedInitilally = true;
-        vscode.window.showInformationMessage('Project files have been synchronized!');
+        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.FILE_SYNCHRONIZED));
       }
     });
 
@@ -175,11 +173,11 @@ class VSLatexApp {
       if (result.logs) {
         this.showProblems(result.logs);
       }
-      promptToShowProblemPanel('Compilation error');
+      promptToShowProblemPanel(localeStr(MESSAGE_TYPE.COMPILATION_FAILED));
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.UNEXPECTED_ERROR, () => {
-      vscode.window.showErrorMessage('Unexpected error');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
     });
 
     /**
@@ -197,7 +195,7 @@ class VSLatexApp {
   startSync() {
     if (!this.latexApp) {
       this.logger.error('LatexApp is not defined');
-      vscode.window.showErrorMessage('internal error');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
       return;
     }
     this.latexApp.startSync();
@@ -208,7 +206,7 @@ class VSLatexApp {
   compile() {
     if (!this.latexApp) {
       this.logger.error('LatexApp is not defined');
-      vscode.window.showErrorMessage('internal error');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
       return;
     }
 
@@ -218,7 +216,7 @@ class VSLatexApp {
   async validateAccount() {
     const result = await this.latexApp!.validateAccount();
     if (result === 'invalid') {
-      promptToSetAccount('Your account is invalid');
+      promptToSetAccount(localeStr(MESSAGE_TYPE.LOGIN_FAILED));
     }
     return result;
   }
@@ -280,15 +278,14 @@ class VSLatexApp {
       if (!this.latexApp || !this.activated) {
         const msg = `'${COMMAND_NAMES.compile}' cannot be called without workspace.`;
         this.logger.warn(msg);
-        vscode.window.showWarningMessage(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
         return;
       }
 
       const result = await this.validateAccount();
 
       if (result === 'offline') {
-        const msg = 'Cannot connect to the server.';
-        vscode.window.showWarningMessage(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.OFFLINE_ERROR));
       }
 
       if (result === 'valid') {
@@ -300,15 +297,14 @@ class VSLatexApp {
       if (!this.latexApp || !this.activated) {
         const msg = `'${COMMAND_NAMES.reload}' cannot be called without workspace.`;
         this.logger.warn(msg);
-        vscode.window.showWarningMessage(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
         return;
       }
 
       const result = await this.validateAccount();
 
       if (result === 'offline') {
-        const msg = 'Cannot connect to the server.';
-        vscode.window.showWarningMessage(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.OFFLINE_ERROR));
       }
 
       if (result === 'valid') {
@@ -360,7 +356,7 @@ class VSLatexApp {
       if (!this.latexApp || !this.activated) {
         const msg = `'${COMMAND_NAMES.resetLocal}' cannot be called without workspace.`;
         this.logger.warn(msg);
-        vscode.window.showWarningMessage(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
         return;
       }
 
@@ -435,7 +431,7 @@ class VSLatexApp {
     }
 
     if (enabledInspect.globalValue) {
-      vscode.window.showErrorMessage(`Be sure to set ${CONFIG_NAMES.enabled} to true not at user\'s settings but at workspace settings.`);
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONFIG_ENABLED_PLACE_ERROR));
     }
 
     if (!enabledInspect.workspaceValue) {
@@ -452,7 +448,7 @@ class VSLatexApp {
     }
 
     if (projectIdInspect.globalLanguageValue) {
-      vscode.window.showErrorMessage('ProjectId should be set in workspace configration file.');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONFIG_PROJECTID_EMPTY_ERROR));
     }
 
     if (!projectIdInspect.workspaceValue) {
