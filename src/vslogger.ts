@@ -13,17 +13,14 @@ export default class VSLogger extends Logger {
   _info(m: any, ...o: any[]) {
     this._appendToLogPanel('Info ', m, ...o);
     console.info(m, ...o);
-    vscode.window.showInformationMessage(m, ...o);
   };
   _warn(m: any, ...o: any[]) {
     this._appendToLogPanel('Warn ', m, ...o);
     console.warn(m, ...o);
-    vscode.window.showWarningMessage(m, ...o);
   };
   _error(m: any, ...o: any[]) {
     this._appendToLogPanel('Error', m, ...o);
     console.error(m, ...o);
-    vscode.window.showErrorMessage(m, ...o);
   };
 
   _appendToLogPanel(type: string, m: any, ...o: any[]) {

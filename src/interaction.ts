@@ -1,6 +1,13 @@
 import * as vscode from 'vscode';
-import LatexApp, { AppInfo, Config, DecideSyncMode, Logger, Account } from 'cloudlatex-cli-plugin';
+import { DecideSyncMode, Account } from 'cloudlatex-cli-plugin';
 import { COMMAND_NAMES } from './const';
+import { MESSAGE_TYPE } from './locale';
+import { jaTranslation } from './locale/ja';
+import { enTranslation } from './locale/en';
+
+export function localeStr(key: keyof typeof MESSAGE_TYPE): string {
+  return vscode.env.language === 'ja' ? jaTranslation[key] : enTranslation[key];
+}
 
 export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
@@ -84,13 +91,41 @@ export async function promptToShowProblemPanel(message: string) {
   vscode.commands.executeCommand('workbench.actions.view.problems');
 }
 
-export async function promptToSetAccount(message: string) {
+export async function promptToSetAccount() {
+  const message = localeStr(MESSAGE_TYPE.LOGIN_FAILED);
+  const howToGenerateTokenMessage = localeStr('HOW_TO_GENERATE_TOKEN');
+  const setAccountMessage = localeStr('SET_ACCOUNT');
   const item = await vscode.window.showWarningMessage(
     message,
-    { title: 'Set account' }
+    { title: howToGenerateTokenMessage },
+    { title: setAccountMessage }
   );
-  if (!item) {
-    return;
+
+  if (item?.title === howToGenerateTokenMessage) {
+    // Open github readme in browser
+    vscode.commands.executeCommand(COMMAND_NAMES.openHelpPage);
+
+    // Show message again
+    await promptToSetAccount();
+
+  } else if (item?.title === setAccountMessage) {
+    // Show input account dialog
+    vscode.commands.executeCommand(COMMAND_NAMES.account);
+
+    // Show message again
+    await promptToSetAccount();
   }
-  vscode.commands.executeCommand(COMMAND_NAMES.account);
+
+}
+
+
+export async function promptToFixConfigEnabledPlace() {
+  const detailMessage = localeStr('DETAIL');
+  const item = await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONFIG_ENABLED_PLACE_ERROR),
+    { title: detailMessage },
+  );
+
+  if (item?.title === detailMessage) {
+    vscode.commands.executeCommand(COMMAND_NAMES.openHelpPage);
+  }
 }

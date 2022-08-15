@@ -14,6 +14,7 @@ export const CONFIG_NAMES = {
 
 export const COMMAND_NAMES = {
   refreshEntry: `${EXTENSION_NAME}.refreshEntry`,
+  openHelpPage: `${EXTENSION_NAME}.openHelpPage`,
   compile: `${EXTENSION_NAME}.compile`,
   reload: `${EXTENSION_NAME}.reload`,
   open: `${EXTENSION_NAME}.open`,

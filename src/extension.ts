@@ -3,12 +3,13 @@
 import * as vscode from 'vscode';
 import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
-import LatexApp, { AppInfo, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
-import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount } from './interaction';
+import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
+import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace } from './interaction';
 import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
+import { MESSAGE_TYPE } from './locale';
 
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
@@ -53,13 +54,14 @@ class VSLatexApp {
   logPanel: vscode.OutputChannel;
   problemPanel: vscode.DiagnosticCollection;
   activated: boolean;
-  autoCompile: boolean = false;
+  autoCompile: boolean;
   syncedInitilally: boolean;
   accountService: AccountService<Account>;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.activated = false;
+    this.autoCompile = false;
     this.syncedInitilally = false;
     this.accountService = new AccountService(this.obtainAccountPath());
     this.problemPanel = vscode.languages.createDiagnosticCollection('LaTeX');
@@ -86,7 +88,7 @@ class VSLatexApp {
         rootPath = _rootPath;
       } else {
         // no workspace
-        this.logger.info('No workspace');
+        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
       }
     }
 
@@ -100,27 +102,39 @@ class VSLatexApp {
 
     vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
 
-    this.latexApp.on('network-updated', () => {
+    this.latexApp.on(LATEX_APP_EVENTS.LOGIN_SUCCEEDED, () => {
+      vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
+      vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.LOGIN_SUCCEEDED));
+    });
+
+    this.latexApp.on(LATEX_APP_EVENTS.LOGIN_FAILED, () => {
       vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
     });
 
-    this.latexApp.on('project-loaded', () => {
+    this.latexApp.on(LATEX_APP_EVENTS.LOGIN_OFFLINE, () => {
+      vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
+      vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.OFFLINE_ERROR));
+
+    });
+
+    this.latexApp.on(LATEX_APP_EVENTS.PROJECT_LOADED, () => {
       vscode.commands.executeCommand(COMMAND_NAMES.refreshEntry);
     });
 
-    this.latexApp.on('file-changed', async () => {
+    this.latexApp.on(LATEX_APP_EVENTS.FILE_CHANGED, async () => {
       if (await this.validateAccount() !== 'valid') {
         return;
       }
       this.latexApp!.startSync();
     });
 
-    this.latexApp.on('sync-failed', () => {
+    this.latexApp.on(LATEX_APP_EVENTS.FILE_SYNC_FAILED, () => {
       this.statusBarItem.text = '$(issues)';
       this.statusBarItem.show();
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.FILE_SYNC_FAILED));
     });
 
-    this.latexApp.on('successfully-synced', (result) => {
+    this.latexApp.on(LATEX_APP_EVENTS.FILE_SYNC_SUCCEEDED, (result) => {
       this.statusBarItem.text = '$(folder-active)';
       this.statusBarItem.show();
       if (!this.syncedInitilally || (result.fileChanged && this.autoCompile)) {
@@ -128,8 +142,42 @@ class VSLatexApp {
       }
       if (!this.syncedInitilally) {
         this.syncedInitilally = true;
-        this.logger.info('Project files have been synchronized!');
+        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.FILE_SYNCHRONIZED));
       }
+    });
+
+    this.latexApp.on(LATEX_APP_EVENTS.FILE_CHANGE_ERROR, (detail: string) => {
+      vscode.window.showErrorMessage('File change error', detail);
+    });
+
+    this.latexApp.on(LATEX_APP_EVENTS.COMPILATION_STARTED, () => {
+      this.statusBarItem.text = '$(loading~spin)';
+      this.statusBarItem.show();
+    });
+
+    this.latexApp.on(LATEX_APP_EVENTS.COMPILATION_SUCCEEDED, (result) => {
+      this.statusBarItem.text = 'Compiled';
+      this.statusBarItem.show();
+      this.showProblems(result.logs);
+
+      // latex workshop support
+      try {
+        vscode.commands.executeCommand('latex-workshop.refresh-viewer');
+      } catch (e) { // no latexworkshop?
+      }
+    });
+
+    this.latexApp.on(LATEX_APP_EVENTS.COMPILATION_FAILED, (result) => {
+      this.statusBarItem.text = 'Failed to compile';
+      this.statusBarItem.show();
+      if (result.logs) {
+        this.showProblems(result.logs);
+      }
+      promptToShowProblemPanel(localeStr(MESSAGE_TYPE.COMPILATION_FAILED));
+    });
+
+    this.latexApp.on(LATEX_APP_EVENTS.UNEXPECTED_ERROR, () => {
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
     });
 
     /**
@@ -147,6 +195,7 @@ class VSLatexApp {
   startSync() {
     if (!this.latexApp) {
       this.logger.error('LatexApp is not defined');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
       return;
     }
     this.latexApp.startSync();
@@ -154,42 +203,20 @@ class VSLatexApp {
     this.statusBarItem.show();
   }
 
-  async compile() {
+  compile() {
     if (!this.latexApp) {
       this.logger.error('LatexApp is not defined');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
       return;
     }
-    this.statusBarItem.text = '$(loading~spin)';
-    this.statusBarItem.show();
 
-    const result = await this.latexApp.compile();
-
-    if (result.status === 'success') { // Succeeded
-      this.statusBarItem.text = 'Compiled';
-      this.statusBarItem.show();
-      this.showProblems(result.logs);
-
-      // latex workshop support
-      try {
-        vscode.commands.executeCommand('latex-workshop.refresh-viewer');
-      } catch (e) { // no latexworkshop?
-      }
-
-    } else { // Failed
-      this.statusBarItem.text = 'Failed to compile';
-      this.statusBarItem.show();
-      if (result.logs) {
-        this.showProblems(result.logs);
-      }
-      promptToShowProblemPanel('Compilation error');
-    }
+    this.latexApp.compile();
   }
 
   async validateAccount() {
     const result = await this.latexApp!.validateAccount();
     if (result === 'invalid') {
-      this.logger.log('Account is invalid');
-      promptToSetAccount('Your account is invalid');
+      promptToSetAccount();
     }
     return result;
   }
@@ -247,16 +274,22 @@ class VSLatexApp {
       this.tree.refresh(this.sideBarInfo);
     });
 
+    vscode.commands.registerCommand(COMMAND_NAMES.openHelpPage, () => {
+      vscode.env.openExternal(vscode.Uri.parse(localeStr('SETTING_README_URL')));
+    });
+
     vscode.commands.registerCommand(COMMAND_NAMES.compile, async () => {
       if (!this.latexApp || !this.activated) {
-        this.logger.warn(`'${COMMAND_NAMES.compile}' cannot be called without workspace.`);
+        const msg = `'${COMMAND_NAMES.compile}' cannot be called without workspace.`;
+        this.logger.warn(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
         return;
       }
 
       const result = await this.validateAccount();
 
       if (result === 'offline') {
-        this.logger.warn('Cannot connect to the server.');
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.OFFLINE_ERROR));
       }
 
       if (result === 'valid') {
@@ -266,14 +299,16 @@ class VSLatexApp {
 
     vscode.commands.registerCommand(COMMAND_NAMES.reload, async () => {
       if (!this.latexApp || !this.activated) {
-        this.logger.warn(`'${COMMAND_NAMES.reload}' cannot be called without workspace.`);
+        const msg = `'${COMMAND_NAMES.reload}' cannot be called without workspace.`;
+        this.logger.warn(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
         return;
       }
 
       const result = await this.validateAccount();
 
       if (result === 'offline') {
-        this.logger.warn('Cannot connect to the server.');
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.OFFLINE_ERROR));
       }
 
       if (result === 'valid') {
@@ -301,15 +336,14 @@ class VSLatexApp {
           return;
         }
         if (await this.validateAccount() === 'valid') {
-          this.logger.info('Your account has been validated!');
-          if (this.sideBarInfo.activated) {
+          if (this.activated) {
             this.startSync();
           }
         }
       } catch (e) {
-        this.logger.error(
-          `Error in setting account: ${(e as any|| '').toString()} \n  ${(e && (e as any).trace || '')}`
-        );
+        const msg = `Error in setting account: ${(e as any || '').toString()} \n  ${(e && (e as Error).stack || '')}`;
+        this.logger.error(msg);
+        vscode.window.showErrorMessage(msg, { modal: true });
       }
     });
 
@@ -324,7 +358,9 @@ class VSLatexApp {
 
     vscode.commands.registerCommand(COMMAND_NAMES.resetLocal, async () => {
       if (!this.latexApp || !this.activated) {
-        this.logger.warn(`'${COMMAND_NAMES.resetLocal}' cannot be called without workspace.`);
+        const msg = `'${COMMAND_NAMES.resetLocal}' cannot be called without workspace.`;
+        this.logger.warn(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
         return;
       }
 
@@ -337,6 +373,7 @@ class VSLatexApp {
         await fs.promises.unlink(this.obtainAccountPath());
       } catch (e) {
         this.logger.error(e);
+        vscode.window.showErrorMessage((e as Error).toString());
       }
     });
   }
@@ -381,6 +418,7 @@ class VSLatexApp {
       }));
     } catch (e) {
       this.logger.error(e);
+      vscode.window.showErrorMessage((e as Error).toString());
     }
   }
 
@@ -397,7 +435,7 @@ class VSLatexApp {
     }
 
     if (enabledInspect.globalValue) {
-      vscode.window.showErrorMessage(`Be sure to set ${CONFIG_NAMES.enabled} to true not at user\'s settings but at workspace settings.`);
+      promptToFixConfigEnabledPlace();
     }
 
     if (!enabledInspect.workspaceValue) {
@@ -414,7 +452,7 @@ class VSLatexApp {
     }
 
     if (projectIdInspect.globalLanguageValue) {
-      vscode.window.showErrorMessage('ProjectId should be set in workspace configration file.');
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONFIG_PROJECTID_EMPTY_ERROR));
     }
 
     if (!projectIdInspect.workspaceValue) {
@@ -435,9 +473,10 @@ class VSLatexApp {
   get sideBarInfo(): SideBarInfo {
     return {
       isWorkspace: !!this.getRootPath(),
-      offline: this.latexApp && this.latexApp.appInfo.offline || false,
+      loginStatus: this.latexApp?.appInfo.loginStatus || 'offline',
       activated: this.activated,
-      projectName: this.latexApp && this.latexApp.appInfo.projectName || null
+      projectName: this.latexApp?.appInfo.projectName || null,
+      displayUserName: this.accountService.account?.email || '',
     };
   }
 }
