@@ -106,6 +106,12 @@
         }
       },
       {
+        "command": "cloudlatex.openHelpPage",
+        "title": "Help",
+        "category": "Cloud LaTeX",
+        "icon": "$(question)"
+      },
+      {
         "command": "cloudlatex.compile",
         "title": "Compile",
         "category": "Cloud LaTeX"
@@ -149,7 +155,7 @@
     "menus": {
       "view/title": [
         {
-          "command": "cloudlatex.refreshEntry",
+          "command": "cloudlatex.openHelpPage",
           "when": "view == cloudlatex-commands",
           "group": "navigation"
         }

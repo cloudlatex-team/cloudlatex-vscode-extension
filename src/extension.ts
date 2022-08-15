@@ -274,6 +274,10 @@ class VSLatexApp {
       this.tree.refresh(this.sideBarInfo);
     });
 
+    vscode.commands.registerCommand(COMMAND_NAMES.openHelpPage, () => {
+      vscode.env.openExternal(vscode.Uri.parse(localeStr('HOW_TO_GENERATE_TOKEN_URL')));
+    });
+
     vscode.commands.registerCommand(COMMAND_NAMES.compile, async () => {
       if (!this.latexApp || !this.activated) {
         const msg = `'${COMMAND_NAMES.compile}' cannot be called without workspace.`;

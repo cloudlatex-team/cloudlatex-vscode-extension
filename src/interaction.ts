@@ -102,7 +102,7 @@ export async function promptToSetAccount(message: string) {
 
   if (item?.title === howToGenerateTokenMessage) {
     // Open github readme in browser
-    vscode.env.openExternal(vscode.Uri.parse(localeStr('HOW_TO_GENERATE_TOKEN_URL')));
+    vscode.commands.executeCommand(COMMAND_NAMES.openHelpPage);
 
     // Show message again
     await promptToSetAccount(message);
