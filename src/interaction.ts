@@ -92,12 +92,27 @@ export async function promptToShowProblemPanel(message: string) {
 }
 
 export async function promptToSetAccount(message: string) {
+  const howToGenerateTokenMessage = localeStr('HOW_TO_GENERATE_TOKEN');
+  const setAccountMessage = localeStr('SET_ACCOUNT');
   const item = await vscode.window.showWarningMessage(
     message,
-    { title: 'Set account' }
+    { title: howToGenerateTokenMessage },
+    { title: setAccountMessage }
   );
-  if (!item) {
-    return;
+
+  if (item?.title === howToGenerateTokenMessage) {
+    // Open github readme in browser
+    vscode.env.openExternal(vscode.Uri.parse(localeStr('HOW_TO_GENERATE_TOKEN_URL')));
+
+    // Show message again
+    await promptToSetAccount(message);
+
+  } else if (item?.title === setAccountMessage) {
+    // Show input account dialog
+    vscode.commands.executeCommand(COMMAND_NAMES.account);
+
+    // Show message again
+    await promptToSetAccount(message);
   }
-  vscode.commands.executeCommand(COMMAND_NAMES.account);
+
 }
