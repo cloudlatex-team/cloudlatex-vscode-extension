@@ -12,6 +12,7 @@ export const enTranslation: Translation = {
   RELOAD: 'Reload',
   OFFLINE: 'Offline',
 
+  DETAIL: 'Detail',
   NO_WORKSPACE_ERROR: 'No workspace found. Please open a workspace first.',
   LOGIN_SUCCEEDED: 'Login to Cloud LaTeX succeeded.',
   LOGIN_FAILED: `Login to Cloud LaTeX failed. 
@@ -29,5 +30,5 @@ export const enTranslation: Translation = {
   CONFIG_ENABLED_PLACE_ERROR: `Be sure to set ${CONFIG_NAMES.enabled} to true not at user\'s settings but at workspace settings.`,
   CONFIG_PROJECTID_EMPTY_ERROR: 'ProjectId should be set in workspace configration file.',
   HOW_TO_GENERATE_TOKEN: 'How to generate token',
-  HOW_TO_GENERATE_TOKEN_URL: 'https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting'
+  SETTING_README_URL: 'https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting'
 };

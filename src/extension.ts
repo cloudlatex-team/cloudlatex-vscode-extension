@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
-import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr } from './interaction';
+import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace } from './interaction';
 import VSLogger from './vslogger';
 import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
@@ -216,7 +216,7 @@ class VSLatexApp {
   async validateAccount() {
     const result = await this.latexApp!.validateAccount();
     if (result === 'invalid') {
-      promptToSetAccount(localeStr(MESSAGE_TYPE.LOGIN_FAILED));
+      promptToSetAccount();
     }
     return result;
   }
@@ -275,7 +275,7 @@ class VSLatexApp {
     });
 
     vscode.commands.registerCommand(COMMAND_NAMES.openHelpPage, () => {
-      vscode.env.openExternal(vscode.Uri.parse(localeStr('HOW_TO_GENERATE_TOKEN_URL')));
+      vscode.env.openExternal(vscode.Uri.parse(localeStr('SETTING_README_URL')));
     });
 
     vscode.commands.registerCommand(COMMAND_NAMES.compile, async () => {
@@ -435,7 +435,7 @@ class VSLatexApp {
     }
 
     if (enabledInspect.globalValue) {
-      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONFIG_ENABLED_PLACE_ERROR));
+      promptToFixConfigEnabledPlace();
     }
 
     if (!enabledInspect.workspaceValue) {

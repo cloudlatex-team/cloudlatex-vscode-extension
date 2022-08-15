@@ -12,6 +12,7 @@ export const jaTranslation: Translation = {
   RELOAD: 'リロード',
   OFFLINE: 'オフライン',
 
+  DETAIL: '詳細',
   NO_WORKSPACE_ERROR: 'ワークスペースが見つかりません. 最初にワークスペースを開いてください.',
   LOGIN_SUCCEEDED: 'ログインに成功しました.',
   LOGIN_FAILED: `Cloud LaTeXのログインに失敗しました.
@@ -27,5 +28,5 @@ export const jaTranslation: Translation = {
   CONFIG_ENABLED_PLACE_ERROR: `ユーザの設定ではなくワークスペースの設定内の ${CONFIG_NAMES.enabled} を有効化してください`,
   CONFIG_PROJECTID_EMPTY_ERROR: 'ProjectId はワークスペースの設定内に設定されている必要があります',
   HOW_TO_GENERATE_TOKEN: 'トークン生成方法',
-  HOW_TO_GENERATE_TOKEN_URL: 'https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99',
+  SETTING_README_URL: 'https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99',
 };

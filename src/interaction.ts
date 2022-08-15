@@ -91,7 +91,8 @@ export async function promptToShowProblemPanel(message: string) {
   vscode.commands.executeCommand('workbench.actions.view.problems');
 }
 
-export async function promptToSetAccount(message: string) {
+export async function promptToSetAccount() {
+  const message = localeStr(MESSAGE_TYPE.LOGIN_FAILED);
   const howToGenerateTokenMessage = localeStr('HOW_TO_GENERATE_TOKEN');
   const setAccountMessage = localeStr('SET_ACCOUNT');
   const item = await vscode.window.showWarningMessage(
@@ -105,14 +106,26 @@ export async function promptToSetAccount(message: string) {
     vscode.commands.executeCommand(COMMAND_NAMES.openHelpPage);
 
     // Show message again
-    await promptToSetAccount(message);
+    await promptToSetAccount();
 
   } else if (item?.title === setAccountMessage) {
     // Show input account dialog
     vscode.commands.executeCommand(COMMAND_NAMES.account);
 
     // Show message again
-    await promptToSetAccount(message);
+    await promptToSetAccount();
   }
 
+}
+
+
+export async function promptToFixConfigEnabledPlace() {
+  const detailMessage = localeStr('DETAIL');
+  const item = await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONFIG_ENABLED_PLACE_ERROR),
+    { title: detailMessage },
+  );
+
+  if (item?.title === detailMessage) {
+    vscode.commands.executeCommand(COMMAND_NAMES.openHelpPage);
+  }
 }
