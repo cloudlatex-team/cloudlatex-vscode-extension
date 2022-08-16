@@ -8,7 +8,7 @@ export const enTranslation: Translation = {
   CHANGE_ACCOUNT: 'Change Account',
   PROJECT_SETTING: 'Project Setting',
   COMPILE: 'Compile',
-  VIEW_COMPILER_LOG: 'View Copiler Log',
+  VIEW_LOG: 'View Log',
   RELOAD: 'Reload',
   OFFLINE: 'Offline',
 

@@ -77,7 +77,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   }
 
   getCompilerLogItem() {
-    return new Item(localeStr(MESSAGE_TYPE.VIEW_COMPILER_LOG), vscode.TreeItemCollapsibleState.None,
+    return new Item(localeStr(MESSAGE_TYPE.VIEW_LOG), vscode.TreeItemCollapsibleState.None,
       {
         command: COMMAND_NAMES.compilerLog,
         title: 'compilerLog',
