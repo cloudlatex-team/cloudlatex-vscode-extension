@@ -29,13 +29,15 @@
 - ローカルに**空のプロジェクト用フォルダ**を作成し、VSCodeでそのフォルダを開きます。
 [Activity Bar](https://code.visualstudio.com/docs/getstarted/userinterface)に表示される`CL`アイコンをクリックするとSide Barに二つのボタンが表示されます。
 
-- `Set account`ボタンをクリックし、`email`, `client`, `token` を設定します。
+- `Set account`ボタン（`アカウント設定` ボタン）をクリックし、`email`, `client`, `token` を設定します。
 アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
+
+    ＊ VSCodeの言語設定で日本語が設定されている場合は当拡張機能の表示も日本語化されます。キャプチャ画像は英語のものです。（[詳細](#ui言語設定)）
 
   <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/panel.png" alt="panel UI" width="320px">
 
 
-- 次に`Project setting` ボタンをクリックし表示される項目のうち、
+- 次に`Project setting` ボタン (`プロジェクト設定` ボタン) をクリックし表示される項目のうち、
 `Cloudlatex.projectID` に準備の項で確認した値を設定し、
 `Clodulatex.Enabled` にチェックを付けます。(`Project setting` ボタンが表示されていない場合、プロジェクトフォルダが開かれているか確認してください。)
 
@@ -56,9 +58,12 @@
   ```
 
 - [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)と併用することで、pdfのレビューやコマンド補完などが使えるようになります。
-この場合、以下の設定を追加し、Latex Workshopの自動コンパイルを無効化してください (`latex-workshop.latex.outDir`は `cloudlatex.outDir` と同じ値に設定します)。
+この場合、以下のようにしてLatex Workshopの自動コンパイルを無効化してください (`latex-workshop.latex.outDir`は `cloudlatex.outDir` と同じ値に設定します)。
   ```setting.json
   {
+    "cloudlatex.projectId": 123,
+    "cloudlatex.enabled": true,
+    "cloudlatex.outDir":  "./.workspace",
     "latex-workshop.latex.autoBuild.run": "never",
     "latex-workshop.latex.outDir": "./.workspace",
     "[latex]": {
@@ -71,9 +76,9 @@
 再起動後、プロジェクトファイルがダウンロードされます。
 ダウンロードが成功すると、ファイル同期に成功した旨のダイアログが表示されます。
 
-  ＊ プロジェクトを同期しなおす際には、同期中にローカルのファイルを削除しないように注意してください。(サーバのファイルも削除されます)　また、　同じローカルディレクトリ内で同期するプロジェクトを変更する際には、ローカルファイルが予期せず上書きされないように注意してください。（`projectId` を変更して同期を行うと、元のローカルファイルは上書きされます）
+  ＊ **プロジェクトを同期しなおす際には、同期中にローカルのファイルを削除しないように注意してください。(サーバのファイルも削除されます)　また、　同じローカルディレクトリ内で同期するプロジェクトを変更する際には、ローカルファイルが予期せず上書きされないように注意してください。（`projectId` を変更して同期を行うと、元のローカルファイルは上書きされます）**
 
-  ＊ プロジェクトファイルがダウンロードされない時は、`reload`ボタンをクリックするか、一旦vscodeを閉じ、再度開いてみてください
+  ＊ プロジェクトファイルがダウンロードされない時は、`reload`ボタン(`リロード` ボタン)をクリックするか、一旦VSCodeを閉じ、再度開いてみてください
 
 ## 設定項目一覧
 
@@ -84,6 +89,10 @@
 | `cloudlatex.outDir`      | コンパイル成果物出力先ディレクトリ                                                  | `""`     | _string_  |
 | `cloudlatex.autoCompile` | 自動コンパイルを有効にするかどうか                          | `true`   | _boolean_ |
 | `cloudlatex.supressIcon` | `true` にするとLaTeXプロジェクト以外のプロジェクトではActivity BarにCLアイコンが表示されなくなります     | `false`  | _boolean_ |
+
+## UI言語設定
+VSCodeの言語設定で日本語が設定されている場合は当拡張機能のUIも日本語表示になります。
+日本語表示にするには[こちら](https://marketplace.visualstudio.com/items?itemName=MS-CEINTL.vscode-language-pack-ja) からJapanese Language Packをインストールしてください
 
 # ファイルの同期とコンパイル
 - オンラインの際にはローカルで行ったでファイルの変更が自動で同期されます。
@@ -122,7 +131,7 @@ CLアイコンをクリックすることで表示されるサイドパネルの
 
 # トラブルシューティング
 
-## 「`error in syncSession: ...`」 というエラ〜メッセージが表示され、ファイルの同期が完了しない
+## 「`error in syncSession: ...`」 というエラーメッセージが表示され、ファイルの同期が完了しない
 リモートサーバとのファイルの同期が失敗しています。
 Cloud LaTeX webアプリのプロジェクトにアクセスし、コンパイルターゲットが設定されていない等の問題がないか確認してください。
 また、ローカルに不正なファイル（.から始まるファイル、LaTeXで利用されない拡張子を持つファイル等）が存在しないか確認し、存在する場合は削除してください。
