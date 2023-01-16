@@ -20,6 +20,7 @@ export const COMMAND_NAMES = {
   open: `${EXTENSION_NAME}.open`,
   account: `${EXTENSION_NAME}.account`,
   setting: `${EXTENSION_NAME}.setting`,
+  viewError: `${EXTENSION_NAME}.viewError`,
   compilerLog: `${EXTENSION_NAME}.compilerLog`,
   resetLocal: `${EXTENSION_NAME}.resetLocal`,
   clearAccount: `${EXTENSION_NAME}.clearAccount`

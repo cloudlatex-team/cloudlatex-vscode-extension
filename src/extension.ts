@@ -352,6 +352,10 @@ class VSLatexApp {
       await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
     });
 
+    vscode.commands.registerCommand(COMMAND_NAMES.viewError, () => {
+      vscode.commands.executeCommand('workbench.action.showErrorsWarnings');
+    });
+
     vscode.commands.registerCommand(COMMAND_NAMES.compilerLog, () => {
       this.logPanel.show();
     });
