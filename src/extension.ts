@@ -403,7 +403,7 @@ class VSLatexApp {
 
   obtainAccountPath(): string {
     // global storage path to save account data and global meta data.
-    const globalStoragePath = this.context.globalStoragePath;
+    const globalStoragePath = this.context.globalStorageUri.fsPath;
     fs.promises.mkdir(globalStoragePath).catch(() => {
       // directory is already created
     });
@@ -467,7 +467,7 @@ class VSLatexApp {
   }
 
   getStoragePath(): string | undefined {
-    return this.context.storagePath;
+    return this.context.storageUri?.fsPath;
   }
 
   get sideBarInfo(): SideBarInfo {
