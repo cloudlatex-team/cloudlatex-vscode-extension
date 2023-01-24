@@ -25,7 +25,7 @@ export default class VSLogger extends Logger {
 
   _appendToLogPanel(type: string, m: any, ...o: any[]) {
     const now = new Date();
-    const timeStr = dateformat(now, 'hh:MM:ss');
+    const timeStr = dateformat(now, 'HH:MM:ss');
     const message = [m, ...(o || [])].map(o => {
       if (typeof o === 'string') {
         return o;
