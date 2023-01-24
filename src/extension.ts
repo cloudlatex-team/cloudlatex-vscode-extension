@@ -147,7 +147,7 @@ class VSLatexApp {
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.FILE_CHANGE_ERROR, (detail: string) => {
-      vscode.window.showErrorMessage('File change error', detail);
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.FILE_CHANGE_ERROR));
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.COMPILATION_STARTED, () => {
