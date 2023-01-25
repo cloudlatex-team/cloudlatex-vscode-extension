@@ -122,6 +122,8 @@
             "**/*.snm",
             "**/*.fdb_latexmk",
             "**/*.synctex.gz",
+            "**/*.synctex\\(busy\\)",
+            "**/*.synctex.gz\\(busy\\)",
             "**/*.run.xml",
             "**/.vscode/**",
             "**/.!(latexmkrc)*"

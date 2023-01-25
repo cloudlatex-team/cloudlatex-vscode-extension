@@ -89,6 +89,55 @@
 | `cloudlatex.outDir`      | コンパイル成果物出力先ディレクトリ                                                  | `""`     | _string_  |
 | `cloudlatex.autoCompile` | 自動コンパイルを有効にするかどうか                          | `true`   | _boolean_ |
 | `cloudlatex.supressIcon` | `true` にするとLaTeXプロジェクト以外のプロジェクトではActivity BarにCLアイコンが表示されなくなります     | `false`  | _boolean_ |
+| `cloudlatex.ignoreFiles` | 同期を行わないファイルを指定    | 次項参照  | _Array\<string\>_ |
+
+### 同期を行わないファイルの指定
+`cloudlatex.ignoreFiles` で指定されたglobパターンにマッチしたファイルはファイル同期処理から無視されます。  **絶対ファイルパス** に対してパターンのマッチング処理が行われます。
+指定できるパターンは [anymatch](https://github.com/micromatch/anymatch)と互換性があります。
+
+例: `**/README.md` , `**/*.bin`
+
+デフォルトでは `.latexmkrc` を除く `.`から始まるファイル名とLaTeXのコンパイル成果物に関係する拡張子が指定されています。
+またパフォーマンス上の理由から `cloudlatex.ignoreFiles` の設定値によらず、`.git`, `node_modules`は常に同期されません。
+
+<details>
+<summary>cloudlatex.ignoreFiles のデフォルト値 </summary>
+
+```
+[
+  "**/*.aux",
+  "**/*.bbl",
+  "**/*.bcf",
+  "**/*.blg",
+  "**/*.idx",
+  "**/*.ind",
+  "**/*.lof",
+  "**/*.lot",
+  "**/*.out",
+  "**/*.toc",
+  "**/*.acn",
+  "**/*.acr",
+  "**/*.alg",
+  "**/*.glg",
+  "**/*.glo",
+  "**/*.gls",
+  "**/*.ist",
+  "**/*.fls",
+  "**/*.log",
+  "**/*.nav",
+  "**/*.snm",
+  "**/*.fdb_latexmk",
+  "**/*.synctex.gz",
+  "**/*.synctex\\(busy\\)",
+  "**/*.synctex.gz\\(busy\\)",
+  "**/*.run.xml",
+  "**/.vscode/**",
+  "**/.!(latexmkrc)*"
+]
+```
+
+</details>
+
 
 ## UI言語設定
 VSCodeの言語設定で日本語が設定されている場合は当拡張機能のUIも日本語表示になります。
