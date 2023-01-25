@@ -83,3 +83,6 @@ https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/main
 
 # License
 Apache License 2.0
+
+# Development
+See [development](docs/development.md)

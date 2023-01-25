@@ -154,3 +154,6 @@ https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/main
 
 # ライセンス
 Apache License 2.0
+
+# 開発方法
+[development](development.md) 参照
