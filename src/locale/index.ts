@@ -10,6 +10,7 @@ export const MESSAGE_TYPE = {
   VIEW_LOG: 'VIEW_LOG',
   RELOAD: 'RELOAD',
   OFFLINE: 'OFFLINE',
+  VIEW_PDF: 'VIEW_PDF',
 
   /** Message */
   DETAIL: 'DETAIL',

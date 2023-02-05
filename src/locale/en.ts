@@ -12,6 +12,7 @@ export const enTranslation: Translation = {
   VIEW_LOG: 'View Log',
   RELOAD: 'Reload',
   OFFLINE: 'Offline',
+  VIEW_PDF: 'View LaTeX PDF',
 
   DETAIL: 'Detail',
   NO_WORKSPACE_ERROR: 'No workspace found. Please open a workspace first.',

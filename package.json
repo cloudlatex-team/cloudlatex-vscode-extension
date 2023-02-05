@@ -147,6 +147,11 @@
         "category": "Cloud LaTeX"
       },
       {
+        "command": "cloudlatex.viewPDF",
+        "title": "View LaTeX PDF",
+        "category": "Cloud LaTeX"
+      },
+      {
         "command": "cloudlatex.resetLocal",
         "title": "Reset local",
         "category": "Cloud LaTeX"

@@ -3,6 +3,7 @@ import { COMMAND_NAMES } from './const';
 import { localeStr } from './interaction';
 import { MESSAGE_TYPE } from './locale';
 import { SideBarInfo } from './type';
+import * as latexWorkshop from './external/latexWorkshop';
 
 export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {
   private _onDidChangeTreeData: vscode.EventEmitter<Item | undefined> = new vscode.EventEmitter<Item | undefined>();
@@ -32,6 +33,9 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
     if (this.status.activated) {
       if (this.status.loginStatus !== 'offline') {
         items.push(this.getCompileItem());
+        if (latexWorkshop.checkInstalled()) {
+          items.push(this.getViewPDFItem());
+        }
         items.push(this.getViewCompilerErrorItem());
         items.push(this.getCompilerLogItem());
         items.push(this.getReloadItem());
@@ -112,6 +116,15 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
         arguments: []
       }, 'rss');
   }
+
+  getViewPDFItem() {
+    return new Item(localeStr(MESSAGE_TYPE.VIEW_PDF), vscode.TreeItemCollapsibleState.None,
+    {
+      command: COMMAND_NAMES.viewPDF,
+      title: 'view PDF',
+      arguments: []
+    }, 'file-pdf', 'view PDF (Open LaTeX Workshop viewer)');
+  }
 }
 
 class Item extends vscode.TreeItem {
@@ -119,7 +132,8 @@ class Item extends vscode.TreeItem {
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly command?: vscode.Command,
-    public readonly codicon?: string
+    public readonly codicon?: string,
+    public readonly tooltip?: string,
   ) {
     super(label, collapsibleState);
     if (codicon) {

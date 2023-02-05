@@ -22,6 +22,7 @@ export const COMMAND_NAMES = {
   setting: `${EXTENSION_NAME}.setting`,
   viewCompilerError: `${EXTENSION_NAME}.viewCompilerError`,
   compilerLog: `${EXTENSION_NAME}.compilerLog`,
+  viewPDF: `${EXTENSION_NAME}.viewPDF`,
   resetLocal: `${EXTENSION_NAME}.resetLocal`,
-  clearAccount: `${EXTENSION_NAME}.clearAccount`
+  clearAccount: `${EXTENSION_NAME}.clearAccount`,
 };

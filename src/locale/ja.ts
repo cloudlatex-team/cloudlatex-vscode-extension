@@ -12,6 +12,7 @@ export const jaTranslation: Translation = {
   VIEW_LOG: 'ログ表示',
   RELOAD: 'リロード',
   OFFLINE: 'オフライン',
+  VIEW_PDF: 'PDF 表示',
 
   DETAIL: '詳細',
   NO_WORKSPACE_ERROR: 'ワークスペースが見つかりません. 最初にワークスペースを開いてください.',
