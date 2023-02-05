@@ -137,8 +137,8 @@
         "category": "Cloud LaTeX"
       },
       {
-        "command": "cloudlatex.viewError",
-        "title": "View Compilation Error",
+        "command": "cloudlatex.viewCompilerError",
+        "title": "View Compiler Error",
         "category": "Cloud LaTeX"
       },
       {

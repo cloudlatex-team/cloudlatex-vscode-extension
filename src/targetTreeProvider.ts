@@ -32,7 +32,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
     if (this.status.activated) {
       if (this.status.loginStatus !== 'offline') {
         items.push(this.getCompileItem());
-        items.push(this.getViewErrorItem());
+        items.push(this.getViewCompilerErrorItem());
         items.push(this.getCompilerLogItem());
         items.push(this.getReloadItem());
       } else {
@@ -77,10 +77,10 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
       }, 'debug-start');
   }
 
-  getViewErrorItem() {
-    return new Item(localeStr(MESSAGE_TYPE.VIEW_ERROR), vscode.TreeItemCollapsibleState.None,
+  getViewCompilerErrorItem() {
+    return new Item(localeStr(MESSAGE_TYPE.VIEW_COMPILER_ERROR), vscode.TreeItemCollapsibleState.None,
       {
-        command: COMMAND_NAMES.viewError,
+        command: COMMAND_NAMES.viewCompilerError,
         title: 'error',
         arguments: []
       }, 'alert');
