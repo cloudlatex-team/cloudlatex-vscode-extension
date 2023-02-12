@@ -8,9 +8,11 @@ export const enTranslation: Translation = {
   CHANGE_ACCOUNT: 'Change Account',
   PROJECT_SETTING: 'Project Setting',
   COMPILE: 'Compile',
+  VIEW_COMPILER_ERROR: 'View Compiler Error',
   VIEW_LOG: 'View Log',
   RELOAD: 'Reload',
   OFFLINE: 'Offline',
+  VIEW_PDF: 'View LaTeX PDF',
 
   DETAIL: 'Detail',
   NO_WORKSPACE_ERROR: 'No workspace found. Please open a workspace first.',

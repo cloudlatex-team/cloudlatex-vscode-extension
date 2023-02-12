@@ -137,8 +137,18 @@
         "category": "Cloud LaTeX"
       },
       {
+        "command": "cloudlatex.viewCompilerError",
+        "title": "View Compiler Error",
+        "category": "Cloud LaTeX"
+      },
+      {
         "command": "cloudlatex.compilerLog",
         "title": "View Compiler Log",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.viewPDF",
+        "title": "View LaTeX PDF",
         "category": "Cloud LaTeX"
       },
       {

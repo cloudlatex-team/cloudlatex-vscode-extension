@@ -8,9 +8,11 @@ export const jaTranslation: Translation = {
   CHANGE_ACCOUNT: 'アカウント変更',
   PROJECT_SETTING: 'プロジェクト設定',
   COMPILE: 'コンパイル',
+  VIEW_COMPILER_ERROR: 'コンパイルエラー表示',
   VIEW_LOG: 'ログ表示',
   RELOAD: 'リロード',
   OFFLINE: 'オフライン',
+  VIEW_PDF: 'PDF 表示',
 
   DETAIL: '詳細',
   NO_WORKSPACE_ERROR: 'ワークスペースが見つかりません. 最初にワークスペースを開いてください.',

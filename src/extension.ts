@@ -10,6 +10,7 @@ import { VSConfig, SideBarInfo } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
 import { MESSAGE_TYPE } from './locale';
+import * as latexWorkshop from './external/latexWorkshop';
 
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
@@ -161,10 +162,7 @@ class VSLatexApp {
       this.showProblems(result.logs);
 
       // latex workshop support
-      try {
-        vscode.commands.executeCommand('latex-workshop.refresh-viewer');
-      } catch (e) { // no latexworkshop?
-      }
+      latexWorkshop.refreshViewer();
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.COMPILATION_FAILED, (result) => {
@@ -352,8 +350,16 @@ class VSLatexApp {
       await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
     });
 
+    vscode.commands.registerCommand(COMMAND_NAMES.viewCompilerError, () => {
+      vscode.commands.executeCommand('workbench.action.showErrorsWarnings');
+    });
+
     vscode.commands.registerCommand(COMMAND_NAMES.compilerLog, () => {
       this.logPanel.show();
+    });
+
+    vscode.commands.registerCommand(COMMAND_NAMES.viewPDF, () => {
+      latexWorkshop.viewPDF();
     });
 
     vscode.commands.registerCommand(COMMAND_NAMES.resetLocal, async () => {
