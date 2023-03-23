@@ -20,7 +20,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidChangeConfiguration(async (e) => {
     if (
-      [CONFIG_NAMES.enabled, CONFIG_NAMES.outDir, CONFIG_NAMES.autoCompile, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId, CONFIG_NAMES.ignoreFiles]
+      [CONFIG_NAMES.enabled, CONFIG_NAMES.outDir, CONFIG_NAMES.autoCompile, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId, CONFIG_NAMES.ignoredFiles]
         .some(name => e.affectsConfiguration(name))
     ) {
 

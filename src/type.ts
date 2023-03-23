@@ -7,7 +7,7 @@ export type VSConfig = {
   endpoint: string,
   projectId: number,
   supressIcon: boolean,
-  ignoreFiles: Array<string>,
+  ignoredFiles: Array<string>,
 };
 
 export type SideBarInfo = {

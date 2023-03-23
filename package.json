@@ -93,7 +93,7 @@
           "default": "https://cloudlatex.io/api",
           "description": "API endpoint. *Do not edit this value under normal usage."
         },
-        "cloudlatex.ignoreFiles": {
+        "cloudlatex.ignoredFiles": {
           "type": "array",
           "items": {
             "type": "string"
