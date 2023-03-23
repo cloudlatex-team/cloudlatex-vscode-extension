@@ -120,7 +120,7 @@ For performance reasons, `.git` and `node_modules` are also ignored from the fil
   "**/*.synctex.gz\\(busy\\)",
   "**/*.run.xml",
   "**/.vscode/**",
-  "**/.!(latexmkrc)*"
+  "**/.!(latexmkrc)"
 ]
 ```
 

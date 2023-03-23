@@ -132,7 +132,7 @@
   "**/*.synctex.gz\\(busy\\)",
   "**/*.run.xml",
   "**/.vscode/**",
-  "**/.!(latexmkrc)*"
+  "**/.!(latexmkrc)"
 ]
 ```
 

@@ -126,7 +126,7 @@
             "**/*.synctex.gz\\(busy\\)",
             "**/*.run.xml",
             "**/.vscode/**",
-            "**/.!(latexmkrc)*"
+            "**/.!(latexmkrc)"
           ],
           "description": "Ignore file patterns"
         }
