@@ -157,7 +157,12 @@ class VSLatexApp {
         return;
       }
 
-      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.FILE_SYNC_FAILED));
+      const ret = await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.FILE_SYNC_FAILED), {
+        title: localeStr(MESSAGE_TYPE.CHECK_DETAILS)
+      });
+      if (ret) {
+        this.logPanel.show();
+      }
     }
 
     this.updateAppInfo(result.appInfo);

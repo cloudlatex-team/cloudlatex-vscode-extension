@@ -83,7 +83,7 @@ export async function promptToReload(message: string) {
 export async function promptToShowProblemPanel(message: string) {
   const item = await vscode.window.showWarningMessage(
     message,
-    { title: 'Check details' }
+    { title: localeStr(MESSAGE_TYPE.CHECK_DETAILS) }
   );
   if (!item) {
     return;
