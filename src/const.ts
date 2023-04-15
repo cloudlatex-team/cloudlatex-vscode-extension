@@ -1,18 +1,21 @@
+import { VSConfig } from './type';
+
 export const EXTENSION_NAME = 'cloudlatex';
 
 export const DATA_TREE_PROVIDER_ID = 'cloudlatex-commands';
 export const STATUS_BAR_TEXT = 'CL';
 
-export const CONFIG_NAMES = {
+export const CONFIG_NAMES: { [k in keyof VSConfig]: `${typeof EXTENSION_NAME}.${keyof VSConfig}` } = {
   enabled: `${EXTENSION_NAME}.enabled`,
   outDir: `${EXTENSION_NAME}.outDir`,
   autoCompile: `${EXTENSION_NAME}.autoCompile`,
   endpoint: `${EXTENSION_NAME}.endpoint`,
   projectId: `${EXTENSION_NAME}.projectId`,
-  supressIcon: `${EXTENSION_NAME}.supressIcon`
+  supressIcon: `${EXTENSION_NAME}.supressIcon`,
+  ignoreFiles: `${EXTENSION_NAME}.ignoreFiles`,
 };
 
-export const COMMAND_NAMES = {
+export const COMMAND_NAMES: { [k: string]: `${typeof EXTENSION_NAME}.${string}` } = {
   refreshEntry: `${EXTENSION_NAME}.refreshEntry`,
   openHelpPage: `${EXTENSION_NAME}.openHelpPage`,
   compile: `${EXTENSION_NAME}.compile`,

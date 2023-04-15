@@ -6,7 +6,8 @@ export type VSConfig = {
   autoCompile: boolean,
   endpoint: string,
   projectId: number,
-  supressIcon: boolean
+  supressIcon: boolean,
+  ignoreFiles: Array<string>,
 };
 
 export type SideBarInfo = {

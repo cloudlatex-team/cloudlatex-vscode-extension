@@ -18,7 +18,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidChangeConfiguration(async (e) => {
     if (
-      [CONFIG_NAMES.enabled, CONFIG_NAMES.outDir, CONFIG_NAMES.autoCompile, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId]
+      [CONFIG_NAMES.enabled, CONFIG_NAMES.outDir, CONFIG_NAMES.autoCompile, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId, CONFIG_NAMES.ignoreFiles]
         .some(name => e.affectsConfiguration(name))
     ) {
 
@@ -148,7 +148,7 @@ class VSLatexApp {
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.FILE_CHANGE_ERROR, (detail: string) => {
-      vscode.window.showErrorMessage('File change error', detail);
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.FILE_CHANGE_ERROR));
     });
 
     this.latexApp.on(LATEX_APP_EVENTS.COMPILATION_STARTED, () => {
@@ -409,7 +409,7 @@ class VSLatexApp {
 
   obtainAccountPath(): string {
     // global storage path to save account data and global meta data.
-    const globalStoragePath = this.context.globalStoragePath;
+    const globalStoragePath = this.context.globalStorageUri.fsPath;
     fs.promises.mkdir(globalStoragePath).catch(() => {
       // directory is already created
     });
@@ -473,7 +473,7 @@ class VSLatexApp {
   }
 
   getStoragePath(): string | undefined {
-    return this.context.storagePath;
+    return this.context.storageUri?.fsPath;
   }
 
   get sideBarInfo(): SideBarInfo {

@@ -71,12 +71,60 @@ If the download is successful, a dialog box will appear indicating that the file
 
 | Setting key              | Description                                                                         | Default  | Type      |
 | -------------------------| ----------------------------------------------------------------------------------- | -------- | --------- |
-| `cloudlatex.enabled`     | Set true if enable cloudlatex plugin in this project                                | `false`  | _boolean_ |
+| `cloudlatex.enabled`     | Set true to enable cloudlatex plugin in this project                                | `false`  | _boolean_ |
 | `cloudlatex.projectId`   | ProjectId. *Do not mistake this value, otherwise your files might be overwritten    | `0`      | _number_  |
 | `cloudlatex.outDir`      | Directory to output compile result                                                  | `""`     | _string_  |
-| `cloudlatex.autoCompile` | Set true if automatically compile when any files are saved                          | `true`   | _boolean_ |
+| `cloudlatex.autoCompile` | Set true to automatically compile when any files are saved                          | `true`   | _boolean_ |
 | `cloudlatex.supressIcon` | Set true to hide cloudlatex icon on the activity bar in the unactivated project     | `false`  | _boolean_ |
+| `cloudlatex.ignoreFiles` | Files to be ignored from file synchronization | See the next section  | _Array\<string\>_ |
 
+
+### Specifying files not to be synchronized
+Files matching the glob pattern specified in `cloudlatex.ignoreFiles` are ignored from the file synchronization process. The glob patterns are matched against the absolute file pattern. 
+Patterns are compatible with [anymatch](https://github.com/micromatch/anymatch).
+
+Example: `**/README.md` , `**/*.bin`
+
+By default, file names starting with `.` except for `.latexmkrc` and extensions related to LaTeX compiled artifacts are set.  
+For performance reasons, `.git` and `node_modules` are also ignored from the file synchronization process, regardless of `cloudlatex.ignoreFiles`.
+
+<details>
+<summary>Default value of cloudlatex.ignoreFiles </summary>
+
+```
+[
+  "**/*.aux",
+  "**/*.bbl",
+  "**/*.bcf",
+  "**/*.blg",
+  "**/*.idx",
+  "**/*.ind",
+  "**/*.lof",
+  "**/*.lot",
+  "**/*.out",
+  "**/*.toc",
+  "**/*.acn",
+  "**/*.acr",
+  "**/*.alg",
+  "**/*.glg",
+  "**/*.glo",
+  "**/*.gls",
+  "**/*.ist",
+  "**/*.fls",
+  "**/*.log",
+  "**/*.nav",
+  "**/*.snm",
+  "**/*.fdb_latexmk",
+  "**/*.synctex.gz",
+  "**/*.synctex\\(busy\\)",
+  "**/*.synctex.gz\\(busy\\)",
+  "**/*.run.xml",
+  "**/.vscode/**",
+  "**/.!(latexmkrc)*"
+]
+```
+
+</details>
 
 # Source Code
 https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/main
