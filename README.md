@@ -88,7 +88,11 @@ If the download is successful, a dialog box will appear indicating that the file
 Files matching the glob pattern specified in `cloudlatex.ignoredFiles` are ignored from the file synchronization process. The glob patterns are matched against the absolute file pattern.
 Patterns are compatible with [anymatch](https://github.com/micromatch/anymatch).
 
-Example: `**/README.md` , `**/*.bin`
+Examples
+
+- Do not synchoronize files named 'README.md' : `**/README.md`
+- Do not synchoronize files with 'bin' extension: `**/*.bin`
+- Do not synchoronize files under 'test' directory: `**/test/**`
 
 By default, file names starting with `.` except for `.latexmkrc` and extensions related to LaTeX compiled artifacts are set.  
 For performance reasons, `.git` and `node_modules` are also ignored from the file synchronization process, regardless of `cloudlatex.ignoredFiles`.

@@ -94,7 +94,11 @@
 `cloudlatex.ignoredFiles` で指定された glob パターンにマッチしたファイルはファイル同期処理から無視されます。 **絶対ファイルパス** に対してパターンのマッチング処理が行われます。
 指定できるパターンは [anymatch](https://github.com/micromatch/anymatch)と互換性があります。
 
-例: `**/README.md` , `**/*.bin`
+例
+
+- 'README.md' ファイルを同期させない: `**/README.md`
+- 'bin' 拡張子を持つファイルを同期させない: `**/*.bin`
+- 'test' ディレクトリ以下を同期させない: `**/test/**`
 
 デフォルトでは `.latexmkrc` を除く `.`から始まるファイル名と LaTeX のコンパイル成果物に関係する拡張子が指定されています。
 またパフォーマンス上の理由から `cloudlatex.ignoredFiles` の設定値によらず、`.git`, `node_modules`は常に同期されません。
