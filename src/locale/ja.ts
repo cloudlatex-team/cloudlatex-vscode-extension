@@ -31,4 +31,5 @@ export const jaTranslation: Translation = {
   CONFIG_PROJECTID_EMPTY_ERROR: 'ProjectId はワークスペースの設定内に設定されている必要があります',
   HOW_TO_GENERATE_TOKEN: 'トークン生成方法',
   SETTING_README_URL: 'https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99',
+  CHECK_DETAILS: '詳細を確認'
 };

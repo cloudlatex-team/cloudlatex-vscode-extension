@@ -12,7 +12,7 @@ export const CONFIG_NAMES: { [k in keyof VSConfig]: `${typeof EXTENSION_NAME}.${
   endpoint: `${EXTENSION_NAME}.endpoint`,
   projectId: `${EXTENSION_NAME}.projectId`,
   supressIcon: `${EXTENSION_NAME}.supressIcon`,
-  ignoreFiles: `${EXTENSION_NAME}.ignoreFiles`,
+  ignoredFiles: `${EXTENSION_NAME}.ignoredFiles`,
 };
 
 export const COMMAND_NAMES: { [k: string]: `${typeof EXTENSION_NAME}.${string}` } = {

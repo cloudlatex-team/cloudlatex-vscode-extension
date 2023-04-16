@@ -50,7 +50,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   getAccountItem() {
     let title = `${localeStr(MESSAGE_TYPE.SET_ACCOUNT)} (${localeStr(MESSAGE_TYPE.NOT_LOGGED_IN)})`;
     if (this.status.loginStatus === 'valid') {
-      title = `${localeStr(MESSAGE_TYPE.CHANGE_ACCOUNT)} (${this.status.displayUserName})`;
+      title = `${localeStr(MESSAGE_TYPE.CHANGE_ACCOUNT)} (${this.status.displayUserName || ''})`;
     }
 
     return new Item(title, vscode.TreeItemCollapsibleState.None,
