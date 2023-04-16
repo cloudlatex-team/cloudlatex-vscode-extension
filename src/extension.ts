@@ -3,15 +3,14 @@
 import * as vscode from 'vscode';
 import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
-import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService } from 'cloudlatex-cli-plugin';
-import { decideSyncMode, inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace } from './interaction';
+import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult } from 'cloudlatex-cli-plugin';
+import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution } from './interaction';
 import VSLogger from './vslogger';
 import { SideBarInfo, VSConfig } from './type';
 import * as fs from 'fs';
 import * as path from 'path';
 import { MESSAGE_TYPE } from './locale';
 import * as latexWorkshop from './external/latexWorkshop';
-import { AppInfo } from 'cloudlatex-cli-plugin/dist/src/types';
 import { getRootPath, getStoragePath, getVSConfig, obtainAccountPath } from './config';
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -103,7 +102,6 @@ class VSLatexApp {
     const config = await this.configuration(rootPath);
     this.autoCompile = (getVSConfig() as any as VSConfig).autoCompile || false;
     this.latexApp = await LatexApp.createApp(config, {
-      decideSyncMode,
       logger: this.logger,
       accountService: this.accountService
     });
@@ -127,7 +125,7 @@ class VSLatexApp {
     }
   }
 
-  async startSync() {
+  async startSync(conflictSolution?: ConflictSolution) {
     if (!this.latexApp) {
       this.logger.error('LatexApp is not defined');
       vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
@@ -137,7 +135,14 @@ class VSLatexApp {
     this.statusBarItem.text = '$(sync~spin)';
     this.statusBarItem.show();
 
-    const result = await this.latexApp.sync();
+    const result = await this.latexApp.sync(conflictSolution);
+
+    // Show no message if offline status continue
+    if (result.status === 'offline' && this.appInfo.loginStatus === 'offline') {
+      return;
+    }
+    this.updateAppInfo(result.appInfo);
+
     if (result.status === 'success') {
       this.statusBarItem.text = '$(folder-active)';
       this.statusBarItem.show();
@@ -149,14 +154,16 @@ class VSLatexApp {
         vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.FILE_SYNCHRONIZED));
       }
 
+    } else if (result.status === 'conflict') {
+      this.statusBarItem.text = '$(warning)';
+      this.statusBarItem.show();
+
+      await this.handleConflict(result);
     } else {
       this.statusBarItem.text = '$(issues)';
       this.statusBarItem.show();
 
-     if (result.status === 'offline' && this.appInfo.loginStatus === 'offline') {
-        return;
-      }
-
+      // Show sync error dialog
       const ret = await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.FILE_SYNC_FAILED), {
         title: localeStr(MESSAGE_TYPE.CHECK_DETAILS)
       });
@@ -165,7 +172,15 @@ class VSLatexApp {
       }
     }
 
-    this.updateAppInfo(result.appInfo);
+  }
+
+  async handleConflict(result: SyncResult) {
+    try {
+      const conflictSolution = await decideConflictSolution(result.appInfo.conflictFiles);
+      this.startSync(conflictSolution);
+    } catch (err) {
+      this.logger.info('Conflict solution decision process is canceled');
+    }
   }
 
   async compile(autoCompilation: boolean = false) {
