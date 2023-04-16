@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DecideSyncMode, Account } from 'cloudlatex-cli-plugin';
+import { ConflictSolution, Account, FileInfo } from 'cloudlatex-cli-plugin';
 import { COMMAND_NAMES } from './const';
 import { MESSAGE_TYPE } from './locale';
 import { jaTranslation } from './locale/ja';
@@ -9,7 +9,7 @@ export function localeStr(key: keyof typeof MESSAGE_TYPE): string {
   return vscode.env.language === 'ja' ? jaTranslation[key] : enTranslation[key];
 }
 
-export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
+export const decideConflictSolution = async function (conflictFiles: FileInfo[]): Promise<ConflictSolution> {
   const push: vscode.QuickPickItem = { label: 'Push', description: 'Apply local changes to remote.' };
   const pull: vscode.QuickPickItem = { label: 'Pull', description: 'Apply remote changes to local' };
 
@@ -24,9 +24,9 @@ export const decideSyncMode: DecideSyncMode = async function (conflictFiles) {
   }
   const result = await vscode.window.showQuickPick([pull, push], { placeHolder: explanation });
   if (result === pull) {
-    return 'download';
+    return 'pull';
   } else if (result === push) {
-    return 'upload';
+    return 'push';
   }
   throw new Error('Canceled');
 };
@@ -117,7 +117,6 @@ export async function promptToSetAccount() {
   }
 
 }
-
 
 export async function promptToFixConfigEnabledPlace() {
   const detailMessage = localeStr('DETAIL');
