@@ -390,9 +390,9 @@ cliui@^7.0.2:
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
 
-"cloudlatex-cli-plugin@https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#e33e6dccc6573e386ab58ac780c3ffdca02c5251":
-  version "1.0.0"
-  resolved "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#e33e6dccc6573e386ab58ac780c3ffdca02c5251"
+"cloudlatex-cli-plugin@https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#3.0.0":
+  version "3.0.0"
+  resolved "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#6094c9eff02b30d71c31fc4a87ce7a543ca952ef"
   dependencies:
     "@moritanian/type-db" "^0.1.0"
     anymatch "^3.1.3"
