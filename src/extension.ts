@@ -117,7 +117,7 @@ class VSLatexApp {
      */
     if (this.activated) {
       const result = await this.latexApp.start();
-      this.updateAppInfo(result.appInfo, {forceOfflineErrLog: true});
+      this.updateAppInfo(result.appInfo, { forceOfflineErrLog: true });
 
       if (result.status === 'success') {
         this.startSync();
@@ -203,19 +203,24 @@ class VSLatexApp {
 
       // latex workshop support
       latexWorkshop.refreshViewer();
-    } else if (compileResult.status === 'compiler-error') {
+    } else {
       this.statusBarItem.text = 'Failed to compile';
       this.statusBarItem.show();
 
-      if (compileResult.logs) {
-        this.showProblems(compileResult.logs);
-      }
-      promptToShowProblemPanel(localeStr(MESSAGE_TYPE.COMPILATION_FAILED));
-    } else if (compileResult.status === 'no-target-error') {
+      if (compileResult.status === 'compiler-error') {
+        if (compileResult.logs) {
+          this.showProblems(compileResult.logs);
+        }
+        promptToShowProblemPanel(localeStr(MESSAGE_TYPE.COMPILATION_FAILED));
 
+      } else if (compileResult.status === 'no-target-error') {
+        vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.NO_COMPILATION_TARGET));
+      } else {
+        vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNKNOWN_ERROR));
+      }
     }
 
-    this.updateAppInfo(compileResult.appInfo, {forceOfflineErrLog: !autoCompilation});
+    this.updateAppInfo(compileResult.appInfo, { forceOfflineErrLog: !autoCompilation });
   }
 
   /**
@@ -317,7 +322,7 @@ class VSLatexApp {
         }
 
         const loginResult = await this.latexApp.login();
-        this.updateAppInfo(loginResult.appInfo, {forceLoginSucceededLog: true, forceOfflineErrLog: true});
+        this.updateAppInfo(loginResult.appInfo, { forceLoginSucceededLog: true, forceOfflineErrLog: true });
         if (loginResult.status === 'success') {
           if (this.activated) {
             this.startSync();
@@ -443,7 +448,7 @@ class VSLatexApp {
     return true;
   }
 
-  updateAppInfo(appInfo: AppInfo, option?: {forceOfflineErrLog?: boolean, forceLoginSucceededLog?: boolean}) {
+  updateAppInfo(appInfo: AppInfo, option?: { forceOfflineErrLog?: boolean, forceLoginSucceededLog?: boolean }) {
     // Login status
     if (appInfo.loginStatus === 'valid') {
       if (option?.forceLoginSucceededLog || appInfo.loginStatus !== this.appInfo.loginStatus) {

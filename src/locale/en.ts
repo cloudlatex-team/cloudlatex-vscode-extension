@@ -33,5 +33,7 @@ export const enTranslation: Translation = {
   CONFIG_PROJECTID_EMPTY_ERROR: 'ProjectId should be set in workspace configration file.',
   HOW_TO_GENERATE_TOKEN: 'How to generate token',
   SETTING_README_URL: 'https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting',
-  CHECK_DETAILS: 'Check details'
+  CHECK_DETAILS: 'Check details',
+  NO_COMPILATION_TARGET: 'Compilation target is not set',
+  UNKNOWN_ERROR: 'Unknown error happens'
 };
