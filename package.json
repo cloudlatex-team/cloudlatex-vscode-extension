@@ -235,7 +235,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#e33e6dccc6573e386ab58ac780c3ffdca02c5251",
+    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#3.0.0",
     "dateformat": "^4.0.0"
   }
 }
