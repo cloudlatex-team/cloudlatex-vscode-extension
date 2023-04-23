@@ -1,0 +1,8 @@
+{
+  "cloudlatex.config.enabled": "プラグインを有効にする",
+  "cloudlatex.config.projectId": "プロジェクト ID. *設定を間違えるとローカルファイルが別のプロジェクトファイルの内容に上書きされる可能性があるので注意してください",
+  "cloudlatex.config.outDir": "コンパイル成果物出力先ディレクトリ",
+  "cloudlatex.config.autoCompile": "自動コンパイルを有効にする",
+  "cloudlatex.config.supressIcon": "LaTeX プロジェクト以外のプロジェクトでは Activity Bar に CL アイコンが表示されなくなります",
+  "cloudlatex.config.ignoredFiles": "同期を行わないファイル"
+}

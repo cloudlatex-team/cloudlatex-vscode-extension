@@ -1,0 +1,9 @@
+{
+  "cloudlatex.config.enabled": "Set true if enable cloudlatex plugin in this project.",
+  "cloudlatex.config.projectId": "ProjectId. *Do not mistake this value, otherwise your files might be overwritten.",
+  "cloudlatex.config.outDir": "Directory to output compile result",
+  "cloudlatex.config.autoCompile": "Set true if automatically compile when any files are saved.",
+  "cloudlatex.config.supressIcon": "Set true to hide cloudlatex icon on the activity bar in the unactivated project.",
+  "cloudlatex.config.ignoredFiles": "Ignore file patterns",
+  "cloudlatex.config.endpoint": "API endpoint. *Do not edit this value under normal usage."
+}
