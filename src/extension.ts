@@ -50,7 +50,7 @@ class VSLatexApp {
   latexApp?: LatexApp;
   context: vscode.ExtensionContext;
   logger: VSLogger;
-  tree!: TargetTreeProvider;
+  tree?: TargetTreeProvider;
   statusBarItem!: vscode.StatusBarItem;
   statusBarAnimationId: NodeJS.Timeout | null = null;
   logPanel: vscode.OutputChannel;
@@ -75,9 +75,6 @@ class VSLatexApp {
     this.logPanel = vscode.window.createOutputChannel('Cloud LaTeX');
     this.logPanel.appendLine('Ready');
     this.logger = new VSLogger(this.logPanel);
-    this.setupStatusBar();
-    this.setupCommands();
-    this.setupSideBar();
   }
 
   async activate() {
@@ -87,16 +84,20 @@ class VSLatexApp {
 
     this.activated = false;
 
-    let rootPath = '';
+    this.setupCommands();
+
+
+    const rootPath = getRootPath();
+    if (!rootPath) {
+      // no workspace
+      return;
+    }
+
+    this.setupStatusBar();
+    this.setupSideBar();
+
     if (this.validateVSConfig()) {
-      let _rootPath = getRootPath();
-      if (_rootPath) {
-        this.activated = true;
-        rootPath = _rootPath;
-      } else {
-        // no workspace
-        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
-      }
+      this.activated = true;
     }
 
     const config = await this.configuration(rootPath);
@@ -477,6 +478,6 @@ class VSLatexApp {
   }
 
   rerenderSideBar() {
-    this.tree.refresh(this.sideBarInfo);
+    this.tree?.refresh(this.sideBarInfo);
   }
 }

@@ -5,5 +5,6 @@
   "cloudlatex.config.autoCompile": "Set true if automatically compile when any files are saved.",
   "cloudlatex.config.supressIcon": "Set true to hide cloudlatex icon on the activity bar in the unactivated project.",
   "cloudlatex.config.ignoredFiles": "Ignore file patterns",
-  "cloudlatex.config.endpoint": "API endpoint. *Do not edit this value under normal usage."
+  "cloudlatex.config.endpoint": "API endpoint. *Do not edit this value under normal usage.",
+  "cloudlatex.viewsWelcome.noWorkspace": "In order to start to use CloudLaTeX extension, you need to create empty folder and open it.\n[Open Folder](command:vscode.openFolder)\nTo learn more about the extension, read document: \n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)."
 }

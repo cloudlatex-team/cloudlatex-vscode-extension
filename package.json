@@ -215,7 +215,13 @@
           "group": "navigation"
         }
       ]
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "cloudlatex-commands",
+        "contents": "%cloudlatex.viewsWelcome.noWorkspace%"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
