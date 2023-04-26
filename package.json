@@ -47,6 +47,11 @@
           "id": "cloudlatex-commands",
           "name": "Commands",
           "when": "config.cloudlatex.enabled || !config.cloudlatex.supressIcon"
+        },
+        {
+          "id": "cloudlatex-tutorial",
+          "name": "Tutorial",
+          "when": "config.cloudlatex.enabled || !config.cloudlatex.supressIcon"
         }
       ]
     },
@@ -218,8 +223,14 @@
     },
     "viewsWelcome": [
       {
-        "view": "cloudlatex-commands",
-        "contents": "%cloudlatex.viewsWelcome.noWorkspace%"
+        "view": "cloudlatex-tutorial",
+        "contents": "%cloudlatex.viewsWelcome.emptyWorkbench%",
+        "when": "workbenchState == empty"
+      },
+      {
+        "view": "cloudlatex-tutorial",
+        "contents": "%cloudlatex.viewsWelcome.inWorkbench%",
+        "when": "workbenchState != empty"
       }
     ]
   },

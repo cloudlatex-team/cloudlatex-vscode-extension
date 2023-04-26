@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_ID, STATUS_BAR_TEXT } from './const';
+import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_COMMDNS_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult } from 'cloudlatex-cli-plugin';
 import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution } from './interaction';
@@ -229,7 +229,7 @@ class VSLatexApp {
    */
   setupSideBar() {
     this.tree = new TargetTreeProvider(this.sideBarInfo);
-    const panel = vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_ID, this.tree);
+    const panel = vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_COMMDNS_ID, this.tree);
   }
 
   /**
