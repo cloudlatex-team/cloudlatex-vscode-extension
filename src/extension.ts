@@ -349,7 +349,11 @@ class VSLatexApp {
       this.logPanel.show();
     });
 
-    vscode.commands.registerCommand(COMMAND_NAMES.viewPDF, () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.viewPDF, async () => {
+      // Open target file
+      await this.openTargetTexFile();
+
+      // Open PDF
       latexWorkshop.viewPDF();
     });
 
@@ -479,5 +483,35 @@ class VSLatexApp {
 
   rerenderSideBar() {
     this.tree?.refresh(this.sideBarInfo);
+  }
+
+  async openTargetTexFile() {
+    // Obtain target tex file uri
+    const rootPath = getRootPath();
+    if (!rootPath) {
+      this.logger.warn('rootPath is not defined');
+      return;
+    }
+
+    const targetName = this.appInfo.targetName;
+    if (!targetName) {
+      this.logger.warn('targetName is not defined');
+      return;
+    }
+
+    const target = vscode.Uri.joinPath(vscode.Uri.parse(rootPath), `${targetName}.tex`);
+
+    // Do nothing if target file is already opened
+    if (vscode.window.activeTextEditor?.document.uri.fsPath === target.fsPath) {
+      return;
+    }
+
+    // Execute open file command
+    try {
+      await vscode.commands.executeCommand<vscode.TextDocumentShowOptions>('vscode.open', target);
+    } catch (e) {
+      const msg = `Error in opening target file: ${(e as any || '').toString()} \n  ${(e && (e as Error).stack || '')}`;
+      this.logger.error(msg);
+    }
   }
 }
