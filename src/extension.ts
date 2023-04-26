@@ -15,7 +15,7 @@ import { getRootPath, getStoragePath, getVSConfig, obtainAccountPath } from './c
 
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
-  app.activate();
+  await app.activate();
 
   vscode.workspace.onDidChangeConfiguration(async (e) => {
     if (
@@ -121,7 +121,7 @@ class VSLatexApp {
       this.updateAppInfo(result.appInfo, { forceOfflineErrLog: true });
 
       if (result.status === 'success') {
-        this.startSync();
+        await this.startSync();
       }
     }
   }
@@ -140,6 +140,8 @@ class VSLatexApp {
 
     // Show no message if offline status continue
     if (result.status === 'offline' && this.appInfo.loginStatus === 'offline') {
+      this.statusBarItem.text = '$(issue-opened)';
+      this.statusBarItem.show();
       return;
     }
     this.updateAppInfo(result.appInfo);
@@ -161,7 +163,7 @@ class VSLatexApp {
 
       await this.handleConflict(result);
     } else {
-      this.statusBarItem.text = '$(issues)';
+      this.statusBarItem.text = '$(issue-opened)';
       this.statusBarItem.show();
 
       // Show sync error dialog
