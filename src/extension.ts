@@ -501,16 +501,16 @@ class VSLatexApp {
       return;
     }
 
-    const target = vscode.Uri.joinPath(vscode.Uri.parse(rootPath), `${targetName}.tex`);
+    const target = path.join(rootPath, `${targetName}.tex`);
 
     // Do nothing if target file is already opened
-    if (vscode.window.activeTextEditor?.document.uri.fsPath === target.fsPath) {
+    if (vscode.window.activeTextEditor?.document.uri.fsPath === target) {
       return;
     }
 
     // Execute open file command
     try {
-      await vscode.commands.executeCommand<vscode.TextDocumentShowOptions>('vscode.open', target);
+      await vscode.commands.executeCommand<vscode.TextDocumentShowOptions>('vscode.open', vscode.Uri.file(target));
     } catch (e) {
       const msg = `Error in opening target file: ${(e as any || '').toString()} \n  ${(e && (e as Error).stack || '')}`;
       this.logger.error(msg);
