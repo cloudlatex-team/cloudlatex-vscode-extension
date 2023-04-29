@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_ID, STATUS_BAR_TEXT } from './const';
+import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_COMMDNS_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult } from 'cloudlatex-cli-plugin';
 import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution } from './interaction';
@@ -15,7 +15,7 @@ import { getRootPath, getStoragePath, getVSConfig, obtainAccountPath } from './c
 
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
-  app.activate();
+  await app.activate();
 
   vscode.workspace.onDidChangeConfiguration(async (e) => {
     if (
@@ -50,7 +50,7 @@ class VSLatexApp {
   latexApp?: LatexApp;
   context: vscode.ExtensionContext;
   logger: VSLogger;
-  tree!: TargetTreeProvider;
+  tree?: TargetTreeProvider;
   statusBarItem!: vscode.StatusBarItem;
   statusBarAnimationId: NodeJS.Timeout | null = null;
   logPanel: vscode.OutputChannel;
@@ -75,9 +75,6 @@ class VSLatexApp {
     this.logPanel = vscode.window.createOutputChannel('Cloud LaTeX');
     this.logPanel.appendLine('Ready');
     this.logger = new VSLogger(this.logPanel);
-    this.setupStatusBar();
-    this.setupCommands();
-    this.setupSideBar();
   }
 
   async activate() {
@@ -87,16 +84,20 @@ class VSLatexApp {
 
     this.activated = false;
 
-    let rootPath = '';
+    this.setupCommands();
+
+
+    const rootPath = getRootPath();
+    if (!rootPath) {
+      // no workspace
+      return;
+    }
+
+    this.setupStatusBar();
+    this.setupSideBar();
+
     if (this.validateVSConfig()) {
-      let _rootPath = getRootPath();
-      if (_rootPath) {
-        this.activated = true;
-        rootPath = _rootPath;
-      } else {
-        // no workspace
-        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
-      }
+      this.activated = true;
     }
 
     const config = await this.configuration(rootPath);
@@ -120,7 +121,7 @@ class VSLatexApp {
       this.updateAppInfo(result.appInfo, { forceOfflineErrLog: true });
 
       if (result.status === 'success') {
-        this.startSync();
+        await this.startSync();
       }
     }
   }
@@ -139,6 +140,8 @@ class VSLatexApp {
 
     // Show no message if offline status continue
     if (result.status === 'offline' && this.appInfo.loginStatus === 'offline') {
+      this.statusBarItem.text = '$(issue-opened)';
+      this.statusBarItem.show();
       return;
     }
     this.updateAppInfo(result.appInfo);
@@ -160,7 +163,7 @@ class VSLatexApp {
 
       await this.handleConflict(result);
     } else {
-      this.statusBarItem.text = '$(issues)';
+      this.statusBarItem.text = '$(issue-opened)';
       this.statusBarItem.show();
 
       // Show sync error dialog
@@ -228,7 +231,7 @@ class VSLatexApp {
    */
   setupSideBar() {
     this.tree = new TargetTreeProvider(this.sideBarInfo);
-    const panel = vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_ID, this.tree);
+    const panel = vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_COMMDNS_ID, this.tree);
   }
 
   /**
@@ -348,7 +351,11 @@ class VSLatexApp {
       this.logPanel.show();
     });
 
-    vscode.commands.registerCommand(COMMAND_NAMES.viewPDF, () => {
+    vscode.commands.registerCommand(COMMAND_NAMES.viewPDF, async () => {
+      // Open target file
+      await this.openTargetTexFile();
+
+      // Open PDF
       latexWorkshop.viewPDF();
     });
 
@@ -477,6 +484,36 @@ class VSLatexApp {
   }
 
   rerenderSideBar() {
-    this.tree.refresh(this.sideBarInfo);
+    this.tree?.refresh(this.sideBarInfo);
+  }
+
+  async openTargetTexFile() {
+    // Obtain target tex file uri
+    const rootPath = getRootPath();
+    if (!rootPath) {
+      this.logger.warn('rootPath is not defined');
+      return;
+    }
+
+    const targetName = this.appInfo.targetName;
+    if (!targetName) {
+      this.logger.warn('targetName is not defined');
+      return;
+    }
+
+    const target = path.join(rootPath, `${targetName}.tex`);
+
+    // Do nothing if target file is already opened
+    if (vscode.window.activeTextEditor?.document.uri.fsPath === target) {
+      return;
+    }
+
+    // Execute open file command
+    try {
+      await vscode.commands.executeCommand<vscode.TextDocumentShowOptions>('vscode.open', vscode.Uri.file(target));
+    } catch (e) {
+      const msg = `Error in opening target file: ${(e as any || '').toString()} \n  ${(e && (e as Error).stack || '')}`;
+      this.logger.error(msg);
+    }
   }
 }

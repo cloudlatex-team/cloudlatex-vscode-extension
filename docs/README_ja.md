@@ -32,7 +32,9 @@
 
 - ローカルに**空のプロジェクト用フォルダ**を作成し、VSCode でそのフォルダを開きます。
   [Activity Bar](https://code.visualstudio.com/docs/getstarted/userinterface)に表示される`CL`アイコンをクリックすると Side Bar に二つのボタンが表示されます。
+
   <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/panel.png" alt="panel UI" width="320px">
+
 - `Set account`ボタン（`アカウント設定` ボタン）をクリックし、`email`, `client`, `token` を設定します。
   アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
 - VSCode の言語設定で日本語が設定されている場合は当拡張機能の表示も日本語化されます。キャプチャ画像は英語のものです。（[詳細](#ui言語設定)）
@@ -216,4 +218,5 @@ https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/main
 Apache License 2.0
 
 # 開発方法
+
 [development](development.md) 参照

@@ -1,0 +1,10 @@
+{
+  "cloudlatex.config.enabled": "プラグインを有効にする",
+  "cloudlatex.config.projectId": "プロジェクト ID. *設定を間違えるとローカルファイルが別のプロジェクトファイルの内容に上書きされる可能性があるので注意してください",
+  "cloudlatex.config.outDir": "コンパイル成果物出力先ディレクトリ",
+  "cloudlatex.config.autoCompile": "自動コンパイルを有効にする",
+  "cloudlatex.config.supressIcon": "LaTeX プロジェクト以外のプロジェクトでは Activity Bar に CL アイコンが表示されなくなります",
+  "cloudlatex.config.ignoredFiles": "同期を行わないファイル",
+  "cloudlatex.viewsWelcome.emptyWorkbench": "CloudLaTeX プラグインの利用を開始するためには空のフォルダを作成し開く必要があります。\n[Open Folder](command:vscode.openFolder)\n詳しい利用方法はドキュメントを参照してください:\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)",
+  "cloudlatex.viewsWelcome.inWorkbench": "1. [Cloud LaTeX プロジェクト一覧ページ](https://cloudlatex.io/projects?locale=ja) の右上メニューよりアクセストークンを発行 \n 2. 発行したアクセストークンを使って、アカウント設定を行う\n3. プロジェクトの設定を行い、拡張機能を有効化する  \n\n詳しい利用方法はドキュメントを参照してください:\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)"
+}

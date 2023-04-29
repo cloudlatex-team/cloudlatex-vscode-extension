@@ -47,6 +47,11 @@
           "id": "cloudlatex-commands",
           "name": "Commands",
           "when": "config.cloudlatex.enabled || !config.cloudlatex.supressIcon"
+        },
+        {
+          "id": "cloudlatex-tutorial",
+          "name": "Tutorial",
+          "when": "config.cloudlatex.enabled || !config.cloudlatex.supressIcon"
         }
       ]
     },
@@ -66,32 +71,32 @@
         "cloudlatex.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Set true if enable cloudlatex plugin in this project."
+          "description": "%cloudlatex.config.enabled%",
+          "order": 1
         },
         "cloudlatex.projectId": {
           "type": "number",
           "default": 0,
-          "description": "ProjectId. *Do not mistake this value, otherwise your files might be overwritten."
+          "description": "%cloudlatex.config.projectId%",
+          "order": 2
         },
         "cloudlatex.outDir": {
           "type": "string",
           "default": "",
-          "description": "Directory to output compile result"
+          "description": "%cloudlatex.config.outDir%",
+          "order": 3
         },
         "cloudlatex.autoCompile": {
           "type": "boolean",
           "default": true,
-          "description": "Set true if automatically compile when any files are saved."
+          "description": "%cloudlatex.config.autoCompile%",
+          "order": 4
         },
         "cloudlatex.supressIcon": {
           "type": "boolean",
           "default": false,
-          "description": "Set true to hide cloudlatex icon on the activity bar in the unactivated project."
-        },
-        "cloudlatex.endpoint": {
-          "type": "string",
-          "default": "https://cloudlatex.io/api",
-          "description": "API endpoint. *Do not edit this value under normal usage."
+          "description": "%cloudlatex.config.supressIcon%",
+          "order": 5
         },
         "cloudlatex.ignoredFiles": {
           "type": "array",
@@ -129,7 +134,14 @@
             "**/.vscode/**",
             "**/.!(latexmkrc)"
           ],
-          "description": "Ignore file patterns"
+          "description": "%cloudlatex.config.ignoredFiles%",
+          "order": 6
+        },
+        "cloudlatex.endpoint": {
+          "type": "string",
+          "default": "https://cloudlatex.io/api",
+          "description": "%cloudlatex.config.endpoint%",
+          "order": 7
         }
       }
     },
@@ -208,7 +220,19 @@
           "group": "navigation"
         }
       ]
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "cloudlatex-tutorial",
+        "contents": "%cloudlatex.viewsWelcome.emptyWorkbench%",
+        "when": "workbenchState == empty"
+      },
+      {
+        "view": "cloudlatex-tutorial",
+        "contents": "%cloudlatex.viewsWelcome.inWorkbench%",
+        "when": "workbenchState != empty"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
