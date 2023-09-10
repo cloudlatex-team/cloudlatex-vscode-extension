@@ -12,6 +12,7 @@ import * as path from 'path';
 import { MESSAGE_TYPE } from './locale';
 import * as latexWorkshop from './external/latexWorkshop';
 import { getRootPath, getStoragePath, getVSConfig, obtainAccountPath } from './config';
+import { CLFileDecorationProvider } from './clFileDecorationProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
@@ -51,6 +52,7 @@ class VSLatexApp {
   context: vscode.ExtensionContext;
   logger: VSLogger;
   tree?: TargetTreeProvider;
+  fileDecorationProvider?: CLFileDecorationProvider;
   statusBarItem!: vscode.StatusBarItem;
   statusBarAnimationId: NodeJS.Timeout | null = null;
   logPanel: vscode.OutputChannel;
@@ -232,6 +234,8 @@ class VSLatexApp {
   setupSideBar() {
     this.tree = new TargetTreeProvider(this.sideBarInfo);
     const panel = vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_COMMDNS_ID, this.tree);
+
+    this.fileDecorationProvider = new CLFileDecorationProvider(this.sideBarInfo, this.logger);
   }
 
   /**
@@ -480,11 +484,13 @@ class VSLatexApp {
       activated: this.activated,
       projectName: this.appInfo.projectName || null,
       displayUserName: this.accountService.account?.email,
+      targetFileName: this.appInfo.targetName,
     };
   }
 
   rerenderSideBar() {
     this.tree?.refresh(this.sideBarInfo);
+    this.fileDecorationProvider?.refresh(this.sideBarInfo);
   }
 
   async openTargetTexFile() {
