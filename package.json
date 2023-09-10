@@ -202,6 +202,11 @@
         "category": "Cloud LaTeX"
       },
       {
+        "command": "cloudlatex.setTarget",
+        "title": "Set As LaTeX Compile Target",
+        "category": "Cloud LaTeX"
+      },
+      {
         "command": "cloudlatex.resetLocal",
         "title": "Reset local",
         "category": "Cloud LaTeX"
@@ -218,6 +223,11 @@
           "command": "cloudlatex.openHelpPage",
           "when": "view == cloudlatex-commands",
           "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "cloudlatex.setTarget"
         }
       ]
     },

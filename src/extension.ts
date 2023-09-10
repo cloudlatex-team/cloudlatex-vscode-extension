@@ -65,6 +65,7 @@ class VSLatexApp {
     loginStatus: 'offline',
     loaded: false,
     conflictFiles: [],
+    files: [],
   };
 
   constructor(context: vscode.ExtensionContext) {
@@ -382,6 +383,18 @@ class VSLatexApp {
         this.logger.error(e);
         vscode.window.showErrorMessage((e as Error).toString());
       }
+    });
+
+    vscode.commands.registerCommand(COMMAND_NAMES.setTarget, async (uri: vscode.Uri) => {
+      const relativePath = path.relative(getRootPath() || '', uri.fsPath);
+      const targetFile = this.appInfo.files.find(file => file.relativePath === relativePath);
+      if (!targetFile) {
+        const errMsg = `Request of setTarget is rejected. Target file not found: ${relativePath}`;
+        this.logger.error(errMsg);
+        vscode.window.showErrorMessage(errMsg);
+        return;
+      }
+      await this.latexApp?.updateProjectInfo({ compile_target_file_id: targetFile.id });
     });
   }
 
