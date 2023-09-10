@@ -16,5 +16,5 @@ export type SideBarInfo = {
   loginStatus: LoginStatus,
   displayUserName?: string,
   projectName: string | null,
-  targetFileName?: string,
+  targetRelativeFilePath?: string,
 };

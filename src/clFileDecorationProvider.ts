@@ -15,8 +15,8 @@ export class CLFileDecorationProvider implements vscode.FileDecorationProvider {
 	}
 
   refresh(status: SideBarInfo): void {
-    const oldTarget = this.status.targetFileName;
-    const newTarget = status.targetFileName;
+    const oldTarget = this.status.targetRelativeFilePath;
+    const newTarget = status.targetRelativeFilePath;
 
     if (oldTarget === newTarget) {
       return;
@@ -24,10 +24,10 @@ export class CLFileDecorationProvider implements vscode.FileDecorationProvider {
 
     const uris = [];
     if (oldTarget) {
-      uris.push(vscode.Uri.file(path.join(getRootPath() || '', `${oldTarget}.tex`)));
+      uris.push(vscode.Uri.file(path.join(getRootPath() || '', oldTarget)));
     }
     if (newTarget) {
-      uris.push(vscode.Uri.file(path.join(getRootPath() || '', `${newTarget}.tex`)));
+      uris.push(vscode.Uri.file(path.join(getRootPath() || '',newTarget)));
     }
 
     this._onDidChangeDecorations.fire(uris);
@@ -35,8 +35,9 @@ export class CLFileDecorationProvider implements vscode.FileDecorationProvider {
   }
 
   provideFileDecoration(uri: vscode.Uri): vscode.FileDecoration | undefined {
+    this.logger.log(`provideFileDecoration is called: with ${uri.fsPath}`);
     const relativePath = path.relative(getRootPath() || '', uri.fsPath);
-    if (path.basename(relativePath, '.tex') === this.status.targetFileName) {
+    if (relativePath === this.status.targetRelativeFilePath) {
      return new vscode.FileDecoration('T', 'Tex Target');
     }
 	}

@@ -484,7 +484,7 @@ class VSLatexApp {
       activated: this.activated,
       projectName: this.appInfo.projectName || null,
       displayUserName: this.accountService.account?.email,
-      targetFileName: this.appInfo.targetName,
+      targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
     };
   }
 
@@ -501,13 +501,13 @@ class VSLatexApp {
       return;
     }
 
-    const targetName = this.appInfo.targetName;
-    if (!targetName) {
-      this.logger.warn('targetName is not defined');
+    const targetRelativePath = this.appInfo.targetFile?.relativePath;
+    if (!targetRelativePath) {
+      this.logger.warn('Compile target file is not defined');
       return;
     }
 
-    const target = path.join(rootPath, `${targetName}.tex`);
+    const target = path.join(rootPath, targetRelativePath);
 
     // Do nothing if target file is already opened
     if (vscode.window.activeTextEditor?.document.uri.fsPath === target) {
