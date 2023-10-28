@@ -35,5 +35,6 @@ export const enTranslation: Translation = {
   SETTING_README_URL: 'https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting',
   CHECK_DETAILS: 'Check details',
   NO_COMPILATION_TARGET: 'Compilation target is not set',
-  UNKNOWN_ERROR: 'Unknown error happens'
+  UNKNOWN_ERROR: 'Unknown error happens',
+  PROJECT_UPDATED: 'Project setting has been updated'
 };

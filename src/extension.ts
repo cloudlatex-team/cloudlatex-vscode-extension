@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_COMMDNS_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult } from 'cloudlatex-cli-plugin';
-import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution } from './interaction';
+import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution, showTargetFileSelector } from './interaction';
 import VSLogger from './vslogger';
 import { SideBarInfo, VSConfig } from './type';
 import * as fs from 'fs';
@@ -385,16 +385,42 @@ class VSLatexApp {
       }
     });
 
-    vscode.commands.registerCommand(COMMAND_NAMES.setTarget, async (uri: vscode.Uri) => {
-      const relativePath = path.relative(getRootPath() || '', uri.fsPath);
-      const targetFile = this.appInfo.files.find(file => file.relativePath === relativePath);
-      if (!targetFile) {
-        const errMsg = `Request of setTarget is rejected. Target file not found: ${relativePath}`;
-        this.logger.error(errMsg);
-        vscode.window.showErrorMessage(errMsg);
+    vscode.commands.registerCommand(COMMAND_NAMES.setTarget, async (uri?: vscode.Uri) => {
+      this.logger.info(`Command setTarget(${uri?.fsPath}) is called`);
+
+      if (!this.latexApp) {
+        this.logger.error('LatexApp is not defined');
+        vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
         return;
       }
-      await this.latexApp?.updateProjectInfo({ compile_target_file_id: targetFile.id });
+
+      let targetFile;
+      if (!uri) {
+        // Show target file picker
+        targetFile = await showTargetFileSelector(this.targetFileCandidates);
+        if (!targetFile) {
+          this.logger.info('Target file picker is canceled');
+          return;
+        }
+      } else {
+        const relativePath = path.relative(getRootPath() || '', uri.fsPath);
+        targetFile = this.appInfo.files.find(file => file.relativePath === relativePath);
+        if (!targetFile) {
+          const errMsg = `Request of setTarget is rejected. Target file not found: ${relativePath}`;
+          this.logger.error(errMsg);
+          vscode.window.showErrorMessage(errMsg);
+          return;
+        }
+      }
+
+      const result = await this.latexApp.updateProjectInfo({
+        compileTargetFileRemoteId: targetFile.remoteId
+      });
+      this.updateAppInfo(result.appInfo, {forceOfflineErrLog: true});
+
+      if (result?.status === 'success') {
+        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.PROJECT_UPDATED));
+      }
     });
   }
 
@@ -499,6 +525,13 @@ class VSLatexApp {
       displayUserName: this.accountService.account?.email,
       targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
     };
+  }
+
+  get targetFileCandidates() {
+    return this.appInfo.files.filter(
+      file => file.relativePath.split(path.posix.sep).length === 1
+        && path.posix.extname(file.relativePath) === '.tex'
+    );
   }
 
   rerenderSideBar() {

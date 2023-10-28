@@ -128,3 +128,13 @@ export async function promptToFixConfigEnabledPlace() {
     vscode.commands.executeCommand(COMMAND_NAMES.openHelpPage);
   }
 }
+
+export async function showTargetFileSelector(files: FileInfo[]) {
+  const items  = files.map(file => ({
+    label: file.relativePath,
+    id: file.id,
+  }));
+  const explanation = 'Select target file';
+  const result = await vscode.window.showQuickPick(items, { placeHolder: explanation });
+  return result && files.find(file => file.id === result.id);
+}
