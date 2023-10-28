@@ -227,6 +227,7 @@
       ],
       "explorer/context": [
         {
+          "when": "(resourceLangId == latex || resourceLangId == tex) && treeElementHasParent == false",
           "command": "cloudlatex.setTarget"
         }
       ]
