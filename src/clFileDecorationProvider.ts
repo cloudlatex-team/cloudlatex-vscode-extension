@@ -35,7 +35,6 @@ export class CLFileDecorationProvider implements vscode.FileDecorationProvider {
   }
 
   provideFileDecoration(uri: vscode.Uri): vscode.FileDecoration | undefined {
-    this.logger.log(`provideFileDecoration is called: with ${uri.fsPath}`);
     const relativePath = path.relative(getRootPath() || '', uri.fsPath);
     if (relativePath === this.status.targetRelativeFilePath) {
      return new vscode.FileDecoration('T', 'Tex Target');
