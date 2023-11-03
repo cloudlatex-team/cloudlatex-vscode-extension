@@ -184,6 +184,16 @@ CL アイコンをクリックすることで表示されるサイドパネル�
 
   <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/conflict_concept.png" alt="concept of conflict" width="400px">
 
+## コンパイルターゲットの変更
+
+現在のコンパイルターゲットはファイルエクスプローラ上の `T` マークで確認できます
+
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/compile_target.png" alt="panel UI" width="240px">
+
+コンパイルターゲットはコンテキストメニューの `コンパイルターゲットに設定` より変更できます
+
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/set_as_target_jp.png" alt="panel UI" width="240px">
+
 # トラブルシューティング
 
 ## 「`error in syncSession: ...`」 というエラーメッセージが表示され、ファイルの同期が完了しない

@@ -135,6 +135,16 @@ For performance reasons, `.git` and `node_modules` are also ignored from the fil
 
 </details>
 
+## Change compile target
+
+Current compile target is shown as `T` in the explorer.
+
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/compile_target.png" alt="panel UI" width="240px">
+
+Compile target can be changed from `Set As LaTeX Compile Target` in the context menu.
+
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/set_as_target.png" alt="panel UI" width="240px">
+
 # Source Code
 
 https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/main
@@ -144,4 +154,5 @@ https://github.com/cloudlatex-team/cloudlatex-vscode-extension/tree/main
 Apache License 2.0
 
 # Development
+
 See [development](docs/development.md)
