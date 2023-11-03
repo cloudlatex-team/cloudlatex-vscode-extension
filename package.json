@@ -157,13 +157,13 @@
       },
       {
         "command": "cloudlatex.openHelpPage",
-        "title": "Help",
+        "title": "%cloudlatex.command.openHelpPage%",
         "category": "Cloud LaTeX",
         "icon": "$(question)"
       },
       {
         "command": "cloudlatex.compile",
-        "title": "Compile",
+        "title": "%cloudlatex.command.compile%",
         "category": "Cloud LaTeX"
       },
       {
@@ -178,32 +178,32 @@
       },
       {
         "command": "cloudlatex.account",
-        "title": "Set account",
+        "title": "%cloudlatex.command.account%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.setting",
-        "title": "Setting",
+        "title": "%cloudlatex.command.setting%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.viewCompilerError",
-        "title": "View Compiler Error",
+        "title": "%cloudlatex.command.viewCompilerError%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.compilerLog",
-        "title": "View Compiler Log",
+        "title": "%cloudlatex.command.compilerLog%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.viewPDF",
-        "title": "View LaTeX PDF",
+        "title": "%cloudlatex.command.viewPDF%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.setTarget",
-        "title": "Set As LaTeX Compile Target",
+        "title": "%cloudlatex.command.setTarget%",
         "category": "Cloud LaTeX"
       },
       {
