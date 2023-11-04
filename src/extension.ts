@@ -66,6 +66,7 @@ class VSLatexApp {
     loaded: false,
     conflictFiles: [],
     files: [],
+    targetFileCandidates: [],
   };
 
   constructor(context: vscode.ExtensionContext) {
@@ -397,7 +398,7 @@ class VSLatexApp {
       let targetFile;
       if (!uri) {
         // Show target file picker
-        targetFile = await showTargetFileSelector(this.targetFileCandidates);
+        targetFile = await showTargetFileSelector(this.appInfo.targetFileCandidates);
         if (!targetFile) {
           this.logger.info('Target file picker is canceled');
           return;
@@ -525,13 +526,6 @@ class VSLatexApp {
       displayUserName: this.accountService.account?.email,
       targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
     };
-  }
-
-  get targetFileCandidates() {
-    return this.appInfo.files.filter(
-      file => file.relativePath.split(path.posix.sep).length === 1
-        && path.posix.extname(file.relativePath) === '.tex'
-    );
   }
 
   rerenderSideBar() {
