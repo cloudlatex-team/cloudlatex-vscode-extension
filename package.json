@@ -270,7 +270,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#3.0.0",
+    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#3.1.0",
     "dateformat": "^4.0.0"
   }
 }
