@@ -29,4 +29,5 @@ export const COMMAND_NAMES: { [k: string]: `${typeof EXTENSION_NAME}.${string}` 
   viewPDF: `${EXTENSION_NAME}.viewPDF`,
   resetLocal: `${EXTENSION_NAME}.resetLocal`,
   clearAccount: `${EXTENSION_NAME}.clearAccount`,
+  setTarget: `${EXTENSION_NAME}.setTarget`,
 };

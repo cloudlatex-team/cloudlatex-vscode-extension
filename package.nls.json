@@ -7,5 +7,13 @@
   "cloudlatex.config.ignoredFiles": "Ignore file patterns",
   "cloudlatex.config.endpoint": "API endpoint. *Do not edit this value under normal usage.",
   "cloudlatex.viewsWelcome.emptyWorkbench": "In order to start to use CloudLaTeX extension, you need to create empty folder and open it.\n[Open Folder](command:vscode.openFolder)\nTo learn more about the extension, read document: \n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [JA](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)",
-  "cloudlatex.viewsWelcome.inWorkbench": "1. Generate an access token from the menu in the upper right corner of [Cloud LaTeX Projects page](https://cloudlatex.io/projects)\n2. Set account with generated token \n 3. Configure project setting and activate the extension  \n\nTo learn more about the extension, read document: \n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [JA](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)"
+  "cloudlatex.viewsWelcome.inWorkbench": "1. Generate an access token from the menu in the upper right corner of [Cloud LaTeX Projects page](https://cloudlatex.io/projects)\n2. Set account with generated token \n 3. Configure project setting and activate the extension  \n\nTo learn more about the extension, read document: \n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [JA](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)",
+  "cloudlatex.command.openHelpPage": "Open Help Page",
+  "cloudlatex.command.compile": "Compile",
+  "cloudlatex.command.account": "Set Account",
+  "cloudlatex.command.setting": "Setting",
+  "cloudlatex.command.viewCompilerError": "View Compile Error",
+  "cloudlatex.command.compilerLog": "View Compiler Log",
+  "cloudlatex.command.viewPDF": "View LaTeX PDF",
+  "cloudlatex.command.setTarget": "Set As LaTeX Compile Target"
 }

@@ -15,5 +15,6 @@ export type SideBarInfo = {
   activated: boolean,
   loginStatus: LoginStatus,
   displayUserName?: string,
-  projectName: string | null
+  projectName: string | null,
+  targetRelativeFilePath?: string,
 };

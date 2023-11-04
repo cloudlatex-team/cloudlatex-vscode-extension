@@ -31,6 +31,7 @@ export const MESSAGE_TYPE = {
   CHECK_DETAILS: 'CHECK_DETAILS',
   NO_COMPILATION_TARGET: 'NO_COMPILATION_TARGET',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+  PROJECT_UPDATED: 'PROJECT_UPDATED',
 } as const;
 /* eslint-enable @typescript-eslint/naming-convention */
 

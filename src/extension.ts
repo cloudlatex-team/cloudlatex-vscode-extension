@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_COMMDNS_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult } from 'cloudlatex-cli-plugin';
-import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution } from './interaction';
+import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution, showTargetFileSelector } from './interaction';
 import VSLogger from './vslogger';
 import { SideBarInfo, VSConfig } from './type';
 import * as fs from 'fs';
@@ -12,6 +12,7 @@ import * as path from 'path';
 import { MESSAGE_TYPE } from './locale';
 import * as latexWorkshop from './external/latexWorkshop';
 import { getRootPath, getStoragePath, getVSConfig, obtainAccountPath } from './config';
+import { CLFileDecorationProvider } from './clFileDecorationProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
   const app = new VSLatexApp(context);
@@ -51,6 +52,7 @@ class VSLatexApp {
   context: vscode.ExtensionContext;
   logger: VSLogger;
   tree?: TargetTreeProvider;
+  fileDecorationProvider?: CLFileDecorationProvider;
   statusBarItem!: vscode.StatusBarItem;
   statusBarAnimationId: NodeJS.Timeout | null = null;
   logPanel: vscode.OutputChannel;
@@ -63,6 +65,8 @@ class VSLatexApp {
     loginStatus: 'offline',
     loaded: false,
     conflictFiles: [],
+    files: [],
+    targetFileCandidates: [],
   };
 
   constructor(context: vscode.ExtensionContext) {
@@ -232,6 +236,8 @@ class VSLatexApp {
   setupSideBar() {
     this.tree = new TargetTreeProvider(this.sideBarInfo);
     const panel = vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_COMMDNS_ID, this.tree);
+
+    this.fileDecorationProvider = new CLFileDecorationProvider(this.sideBarInfo, this.logger);
   }
 
   /**
@@ -379,6 +385,44 @@ class VSLatexApp {
         vscode.window.showErrorMessage((e as Error).toString());
       }
     });
+
+    vscode.commands.registerCommand(COMMAND_NAMES.setTarget, async (uri?: vscode.Uri) => {
+      this.logger.info(`Command setTarget(${uri?.fsPath}) is called`);
+
+      if (!this.latexApp) {
+        this.logger.error('LatexApp is not defined');
+        vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
+        return;
+      }
+
+      let targetFile;
+      if (!uri) {
+        // Show target file picker
+        targetFile = await showTargetFileSelector(this.appInfo.targetFileCandidates);
+        if (!targetFile) {
+          this.logger.info('Target file picker is canceled');
+          return;
+        }
+      } else {
+        const relativePath = path.relative(getRootPath() || '', uri.fsPath);
+        targetFile = this.appInfo.files.find(file => file.relativePath === relativePath);
+        if (!targetFile) {
+          const errMsg = `Request of setTarget is rejected. Target file not found: ${relativePath}`;
+          this.logger.error(errMsg);
+          vscode.window.showErrorMessage(errMsg);
+          return;
+        }
+      }
+
+      const result = await this.latexApp.updateProjectInfo({
+        compileTargetFileRemoteId: targetFile.remoteId
+      });
+      this.updateAppInfo(result.appInfo, { forceOfflineErrLog: true });
+
+      if (result?.status === 'success') {
+        vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.PROJECT_UPDATED));
+      }
+    });
   }
 
   async configuration(rootPath: string): Promise<Config> {
@@ -480,11 +524,13 @@ class VSLatexApp {
       activated: this.activated,
       projectName: this.appInfo.projectName || null,
       displayUserName: this.accountService.account?.email,
+      targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
     };
   }
 
   rerenderSideBar() {
     this.tree?.refresh(this.sideBarInfo);
+    this.fileDecorationProvider?.refresh(this.sideBarInfo);
   }
 
   async openTargetTexFile() {
@@ -495,13 +541,13 @@ class VSLatexApp {
       return;
     }
 
-    const targetName = this.appInfo.targetName;
-    if (!targetName) {
-      this.logger.warn('targetName is not defined');
+    const targetRelativePath = this.appInfo.targetFile?.relativePath;
+    if (!targetRelativePath) {
+      this.logger.warn('Compile target file is not defined');
       return;
     }
 
-    const target = path.join(rootPath, `${targetName}.tex`);
+    const target = path.join(rootPath, targetRelativePath);
 
     // Do nothing if target file is already opened
     if (vscode.window.activeTextEditor?.document.uri.fsPath === target) {

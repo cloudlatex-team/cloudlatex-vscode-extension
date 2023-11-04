@@ -157,13 +157,13 @@
       },
       {
         "command": "cloudlatex.openHelpPage",
-        "title": "Help",
+        "title": "%cloudlatex.command.openHelpPage%",
         "category": "Cloud LaTeX",
         "icon": "$(question)"
       },
       {
         "command": "cloudlatex.compile",
-        "title": "Compile",
+        "title": "%cloudlatex.command.compile%",
         "category": "Cloud LaTeX"
       },
       {
@@ -178,27 +178,32 @@
       },
       {
         "command": "cloudlatex.account",
-        "title": "Set account",
+        "title": "%cloudlatex.command.account%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.setting",
-        "title": "Setting",
+        "title": "%cloudlatex.command.setting%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.viewCompilerError",
-        "title": "View Compiler Error",
+        "title": "%cloudlatex.command.viewCompilerError%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.compilerLog",
-        "title": "View Compiler Log",
+        "title": "%cloudlatex.command.compilerLog%",
         "category": "Cloud LaTeX"
       },
       {
         "command": "cloudlatex.viewPDF",
-        "title": "View LaTeX PDF",
+        "title": "%cloudlatex.command.viewPDF%",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.setTarget",
+        "title": "%cloudlatex.command.setTarget%",
         "category": "Cloud LaTeX"
       },
       {
@@ -218,6 +223,12 @@
           "command": "cloudlatex.openHelpPage",
           "when": "view == cloudlatex-commands",
           "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "(resourceLangId == latex || resourceLangId == tex) && treeElementHasParent == false",
+          "command": "cloudlatex.setTarget"
         }
       ]
     },
@@ -259,7 +270,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#3.0.0",
+    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#3.1.0",
     "dateformat": "^4.0.0"
   }
 }
