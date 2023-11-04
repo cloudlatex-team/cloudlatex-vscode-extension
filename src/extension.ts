@@ -416,7 +416,7 @@ class VSLatexApp {
       const result = await this.latexApp.updateProjectInfo({
         compileTargetFileRemoteId: targetFile.remoteId
       });
-      this.updateAppInfo(result.appInfo, {forceOfflineErrLog: true});
+      this.updateAppInfo(result.appInfo, { forceOfflineErrLog: true });
 
       if (result?.status === 'success') {
         vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.PROJECT_UPDATED));

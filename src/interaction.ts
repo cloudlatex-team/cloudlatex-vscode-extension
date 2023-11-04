@@ -130,7 +130,7 @@ export async function promptToFixConfigEnabledPlace() {
 }
 
 export async function showTargetFileSelector(files: FileInfo[]) {
-  const items  = files.map(file => ({
+  const items = files.map(file => ({
     label: file.relativePath,
     id: file.id,
   }));
