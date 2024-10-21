@@ -59,6 +59,7 @@ class VSLatexApp {
   syncedInitilally: boolean;
   accountService: AccountService<Account>;
   appInfo: AppInfo = {
+    activation: false,
     loginStatus: 'offline',
     loaded: false,
     conflictFiles: [],
@@ -196,6 +197,11 @@ class VSLatexApp {
     if (!this.latexApp) {
       this.logger.error('LatexApp is not defined');
       vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
+      return;
+    }
+
+    if (!this.appInfo.activation) {
+      this.logger.info('Project is not activated');
       return;
     }
 
@@ -523,7 +529,7 @@ class VSLatexApp {
     return {
       isWorkspace: !!getRootPath(),
       loginStatus: this.appInfo.loginStatus || 'offline',
-      activated: this.activated,
+      activated: this.activated && this.appInfo.activation,
       projectName: this.appInfo.projectName || null,
       displayUserName: this.accountService.account?.email,
       targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
