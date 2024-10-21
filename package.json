@@ -156,6 +156,11 @@
         }
       },
       {
+        "command": "cloudlatex.selectProject",
+        "title": "%cloudlatex.command.selectProject%",
+        "category": "Cloud LaTeX"
+      },
+      {
         "command": "cloudlatex.openHelpPage",
         "title": "%cloudlatex.command.openHelpPage%",
         "category": "Cloud LaTeX",
@@ -233,6 +238,11 @@
       ]
     },
     "viewsWelcome": [
+      {
+        "view": "cloudlatex-tutorial",
+        "contents": "%cloudlatex.viewsWelcome.selectProject%",
+        "when": "workbenchState == empty"
+      },
       {
         "view": "cloudlatex-tutorial",
         "contents": "%cloudlatex.viewsWelcome.emptyWorkbench%",

@@ -19,6 +19,7 @@ export const CONFIG_NAMES: { [k in keyof VSConfig]: `${typeof EXTENSION_NAME}.${
 export const COMMAND_NAMES: { [k: string]: `${typeof EXTENSION_NAME}.${string}` } = {
   refreshEntry: `${EXTENSION_NAME}.refreshEntry`,
   openHelpPage: `${EXTENSION_NAME}.openHelpPage`,
+  selectProject: `${EXTENSION_NAME}.selectProject`,
   compile: `${EXTENSION_NAME}.compile`,
   reload: `${EXTENSION_NAME}.reload`,
   open: `${EXTENSION_NAME}.open`,

@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_COMMDNS_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
-import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult } from 'cloudlatex-cli-plugin';
+import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult, ProjectInfo } from 'cloudlatex-cli-plugin';
 import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution, showTargetFileSelector } from './interaction';
 import VSLogger from './vslogger';
 import { SideBarInfo, VSConfig } from './type';
@@ -297,6 +297,79 @@ class VSLatexApp {
       vscode.env.openExternal(vscode.Uri.parse(localeStr('SETTING_README_URL')));
     });
 
+    vscode.commands.registerCommand(COMMAND_NAMES.selectProject, async () => {
+      if (!this.latexApp || !this.activated) {
+        const msg = `'${COMMAND_NAMES.compile}' cannot be called without workspace.`;
+        this.logger.warn(msg);
+        vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.NO_WORKSPACE_ERROR));
+        return;
+      }
+
+      // login
+      const loginResult = await this.latexApp.login();
+      if (loginResult.status === 'invalid-account') {
+        // TODO set account
+
+        const loginResult2 = await this.latexApp.login();
+        if (loginResult2.status !== 'success') {
+        }
+
+      } else if (loginResult.status !== 'success') {
+        this.logger.error('Login failed, project selection is canceled');
+        return;
+      }
+
+      const listProjectsResult = await this.latexApp.listProjects();
+
+      if (listProjectsResult.status !== 'success') {
+        vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
+        return;
+      }
+
+      // Show project picker with delete button
+      const pick = vscode.window.createQuickPick();
+      pick.items = listProjectsResult.projects.map(project => ({
+        label: project.title,
+        description: project.title,
+        buttons: [
+          { iconPath: new vscode.ThemeIcon('trash'), tooltip: 'Delete' }
+        ]
+      }));
+      pick.onDidAccept(async () => {
+        const selectedProject = pick.selectedItems[0];
+        if (!selectedProject) {
+          return;
+        }
+        const selectedProjectInfo = listProjectsResult.projects.find(project => project.title === selectedProject.label);
+        if (!selectedProjectInfo) {
+          this.logger.warn(`Selected project is not found in the list: ${selectedProject.label}`);
+          return;
+        }
+
+        const uris = await vscode.window.showOpenDialog({ canSelectFolders: true, canSelectFiles: false, canSelectMany: false, openLabel: 'Directory to clone' });
+        const cloneDirectory = uris?.[0].fsPath;
+        if (!cloneDirectory) {
+          this.logger.info('Directory to clone is not selected');
+          return;
+        }
+
+        this.logger.info(`Clone project ${selectedProjectInfo.title} in ${cloneDirectory}`);
+
+        // Setup directory
+        const createprojectDirResult = await this.createProjectDirectory(selectedProjectInfo, cloneDirectory);
+        if (!createprojectDirResult) {
+          return;
+        }
+
+        // Open directory in new window
+        const projectPath = path.join(cloneDirectory, selectedProjectInfo.title);
+        vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projectPath));
+      });
+
+      pick.onDidHide(() => pick.dispose());
+      pick.show();
+    });
+
     vscode.commands.registerCommand(COMMAND_NAMES.compile, async () => {
       if (!this.latexApp || !this.activated) {
         const msg = `'${COMMAND_NAMES.compile}' cannot be called without workspace.`;
@@ -569,5 +642,10 @@ class VSLatexApp {
       const msg = `Error in opening target file: ${(e as any || '').toString()} \n  ${(e && (e as Error).stack || '')}`;
       this.logger.error(msg);
     }
+  }
+
+  async createProjectDirectory(projectInfo: ProjectInfo, cloneDirectory: string): Promise<boolean> {
+    // TODO
+    return true;
   }
 }
