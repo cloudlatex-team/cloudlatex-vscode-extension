@@ -28,10 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
         [CONFIG_NAMES.enabled, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId]
           .some(name => e.affectsConfiguration(name))
       ) {
-        const storagePath = getStoragePath(context);
-        if (storagePath) {
-          app.removeFilesInStoragePath(storagePath);
-        }
+        await app.latexApp?.resetLocal();
       }
 
       app.latexApp?.stop();
