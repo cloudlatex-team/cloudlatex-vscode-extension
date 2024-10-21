@@ -59,7 +59,7 @@ class VSLatexApp {
   syncedInitilally: boolean;
   accountService: AccountService<Account>;
   appInfo: AppInfo = {
-    activation: false,
+    activationStatus: 'inactive',
     loginStatus: 'offline',
     loaded: false,
     conflictFiles: [],
@@ -200,7 +200,7 @@ class VSLatexApp {
       return;
     }
 
-    if (!this.appInfo.activation) {
+    if (this.appInfo.activationStatus !== 'active') {
       this.logger.info('Project is not activated');
       return;
     }
@@ -529,7 +529,7 @@ class VSLatexApp {
     return {
       isWorkspace: !!getRootPath(),
       loginStatus: this.appInfo.loginStatus || 'offline',
-      activated: this.activated && this.appInfo.activation,
+      activated: this.activated && this.appInfo.activationStatus === 'active',
       projectName: this.appInfo.projectName || null,
       displayUserName: this.accountService.account?.email,
       targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
