@@ -142,6 +142,11 @@ class VSLatexApp {
 
     const result = await this.latexApp.sync(conflictSolution);
 
+    if (result.status === 'not-empty-directory') {
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.NOT_EMPTY_DIRECTORY));
+      return;
+    }
+
     // Show no message if offline status continue
     if (result.status === 'offline' && this.appInfo.loginStatus === 'offline') {
       this.statusBarItem.text = '$(issue-opened)';

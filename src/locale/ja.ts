@@ -34,5 +34,7 @@ export const jaTranslation: Translation = {
   CHECK_DETAILS: '詳細を確認',
   NO_COMPILATION_TARGET: 'コンパイルターゲットが設定されていません',
   UNKNOWN_ERROR: '不明なエラーが発生しました',
-  PROJECT_UPDATED: 'プロジェクト設定が更新されました'
+  PROJECT_UPDATED: 'プロジェクト設定が更新されました',
+  FIRST_SYNC_NOTIFICATION: 'プロジェクト \'$project_name\' を同期しますか？',
+  NOT_EMPTY_DIRECTORY: 'ディレクトリにファイルが存在します。ファイルの上書きを防ぐため、同期を行うディレクトリは空である必要があります。',
 };
