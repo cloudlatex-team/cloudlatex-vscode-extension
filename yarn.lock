@@ -36,10 +36,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@moritanian/type-db@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@moritanian/type-db/-/type-db-0.1.0.tgz#82b1a357b0be3041e2dfa411c28efa4ddeeff9a3"
-  integrity sha512-2c1Ns7nQLk9AqQvXH5mF/54M8ICP9Pv3EGHaAQYPeCn32ORqeytqMON/4X/0Wh9zP+QFXtGJX6s3LkAHaiiadQ==
+"@moritanian/type-db@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@moritanian/type-db/-/type-db-0.2.0.tgz#20720aaec1ff3c7314f5d35066ae6bbe5be0712a"
+  integrity sha512-IzIz4/yAK3FUyDuZYGFl/IgUu/P1eVlFLf5rtIhG4f+ted3u2D2IsI3GbcHnUXN9i36P5Xf29Fqj25dXaoJezQ==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -390,11 +390,11 @@ cliui@^7.0.2:
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
 
-"cloudlatex-cli-plugin@https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#3.1.0":
+"cloudlatex-cli-plugin@https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#80f8a54aee96aabf80ab86518e47bad5ba147640":
   version "3.1.0"
-  resolved "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#d5c527681f274111fb55652296b184ae79f196bf"
+  resolved "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#80f8a54aee96aabf80ab86518e47bad5ba147640"
   dependencies:
-    "@moritanian/type-db" "^0.1.0"
+    "@moritanian/type-db" "^0.2.0"
     anymatch "^3.1.3"
     chokidar "^3.3.1"
     eventemitter3 "^4.0.0"

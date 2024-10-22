@@ -138,3 +138,12 @@ export async function showTargetFileSelector(files: FileInfo[]) {
   const result = await vscode.window.showQuickPick(items, { placeHolder: explanation });
   return result && files.find(file => file.id === result.id);
 }
+
+export async function informFirstSync(projectName: string, existingFiles: string[]) {
+  const explanation = localeStr(MESSAGE_TYPE.FIRST_SYNC_NOTIFICATION).replace('$project_name', projectName);
+
+  const CANCEL = 'CANCEL';
+  const OK = 'OK';
+  const selection = await vscode.window.showInformationMessage(explanation, { modal: true }, CANCEL, OK);
+  return selection === OK;
+}

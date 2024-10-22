@@ -36,5 +36,7 @@ export const enTranslation: Translation = {
   CHECK_DETAILS: 'Check details',
   NO_COMPILATION_TARGET: 'Compilation target is not set',
   UNKNOWN_ERROR: 'Unknown error happens',
-  PROJECT_UPDATED: 'Project setting has been updated'
+  PROJECT_UPDATED: 'Project setting has been updated',
+  FIRST_SYNC_NOTIFICATION: 'Do you want to sync the project \'$project_name\' ?',
+  NOT_EMPTY_DIRECTORY: 'The directory contains files. To prevent overwriting files, the directory to be synchronized must be empty.'
 };

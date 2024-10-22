@@ -28,10 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
         [CONFIG_NAMES.enabled, CONFIG_NAMES.endpoint, CONFIG_NAMES.projectId]
           .some(name => e.affectsConfiguration(name))
       ) {
-        const storagePath = getStoragePath(context);
-        if (storagePath) {
-          app.removeFilesInStoragePath(storagePath);
-        }
+        await app.latexApp?.resetLocal();
       }
 
       app.latexApp?.stop();
@@ -62,6 +59,7 @@ class VSLatexApp {
   syncedInitilally: boolean;
   accountService: AccountService<Account>;
   appInfo: AppInfo = {
+    activationStatus: 'inactive',
     loginStatus: 'offline',
     loaded: false,
     conflictFiles: [],
@@ -142,6 +140,11 @@ class VSLatexApp {
 
     const result = await this.latexApp.sync(conflictSolution);
 
+    if (result.status === 'not-empty-directory') {
+      vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.NOT_EMPTY_DIRECTORY));
+      return;
+    }
+
     // Show no message if offline status continue
     if (result.status === 'offline' && this.appInfo.loginStatus === 'offline') {
       this.statusBarItem.text = '$(issue-opened)';
@@ -194,6 +197,11 @@ class VSLatexApp {
     if (!this.latexApp) {
       this.logger.error('LatexApp is not defined');
       vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.UNEXPECTED_ERROR));
+      return;
+    }
+
+    if (this.appInfo.activationStatus !== 'active') {
+      this.logger.info('Project is not activated');
       return;
     }
 
@@ -521,7 +529,7 @@ class VSLatexApp {
     return {
       isWorkspace: !!getRootPath(),
       loginStatus: this.appInfo.loginStatus || 'offline',
-      activated: this.activated,
+      activated: this.activated && this.appInfo.activationStatus === 'active',
       projectName: this.appInfo.projectName || null,
       displayUserName: this.accountService.account?.email,
       targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
