@@ -3,7 +3,7 @@
   "displayName": "Cloud LaTeX",
   "description": "Compile LaTeX document with Cloud LaTeX on VSCode.",
   "publisher": "cloudlatex",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "engines": {
     "vscode": "^1.63.0"
   },
