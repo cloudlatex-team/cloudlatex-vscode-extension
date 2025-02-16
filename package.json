@@ -3,7 +3,7 @@
   "displayName": "Cloud LaTeX",
   "description": "Compile LaTeX document with Cloud LaTeX on VSCode.",
   "publisher": "cloudlatex",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "engines": {
     "vscode": "^1.63.0"
   },
@@ -270,7 +270,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#80f8a54aee96aabf80ab86518e47bad5ba147640",
+    "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#9f804efcb519e7e2e03cd7366af06d2743785519",
     "dateformat": "^4.0.0"
   }
 }
