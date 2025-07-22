@@ -14,6 +14,6 @@
   "cloudlatex.command.setting": "Setting",
   "cloudlatex.command.viewCompilerError": "View Compile Error",
   "cloudlatex.command.compilerLog": "View Compiler Log",
-  "cloudlatex.command.viewPDF": "View LaTeX PDF",
+  "cloudlatex.command.viewPDF": "View PDF",
   "cloudlatex.command.setTarget": "Set As LaTeX Compile Target"
 }
