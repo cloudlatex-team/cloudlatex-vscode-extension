@@ -18,7 +18,7 @@ export const enTranslation: Translation = {
   NO_WORKSPACE_ERROR: 'No workspace found. Please open a workspace first.',
   LOGIN_SUCCEEDED: 'Login to Cloud LaTeX succeeded.',
   LOGIN_FAILED: `Login to Cloud LaTeX failed. 
-  Please generate a token from the Cloud LaTeX website and enter the generated token using the \'Set Account\' button in the lower right.
+  Please generate a token from the Cloud LaTeX website and enter the generated token using the 'Set Account' button in the lower right.
   (* The token will be deactivated after a certain period of time. In that case, you need to generate a new token.)`,
   OFFLINE_ERROR: `The network is offline or some trouble has occurred with the server.
   You can edit your files, but your changes will not be reflected on the server
