@@ -78,6 +78,7 @@ class VSLatexApp {
   private lastSyncedAt?: number;
   private rememberedProject?: string;
   private trustedRegistrationEndpoint?: string;
+  private dirtyPathsKey?: string;
   // Discard outdated UI results; this does not cancel backend I/O already running.
   private backendGeneration = 0;
   private readonly syncDisplayState = new SyncDisplayState();
@@ -109,7 +110,8 @@ class VSLatexApp {
     try {
       folderConnected = await completeFolderConnection(this.context);
     } catch {
-      await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONNECT_FAILED));
+      // A notification resolves only when dismissed; never block command registration on it.
+      void vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONNECT_FAILED));
       folderConnectionFailed = true;
     }
     if (this.latexApp) {
@@ -127,11 +129,10 @@ class VSLatexApp {
     if (folderConnectionFailed) {
       return;
     }
-    const refreshFiles = () => this.refreshProjectViews();
     this.context.subscriptions.push(
-      vscode.workspace.onDidChangeTextDocument(refreshFiles),
-      vscode.workspace.onDidSaveTextDocument(refreshFiles),
-      vscode.workspace.onDidCloseTextDocument(refreshFiles)
+      vscode.workspace.onDidChangeTextDocument(e => this.refreshDirtyPaths(e.document)),
+      vscode.workspace.onDidSaveTextDocument(doc => this.refreshDirtyPaths(doc)),
+      vscode.workspace.onDidCloseTextDocument(doc => this.refreshDirtyPaths(doc))
     );
 
     const rootPath = getRootPath();
@@ -717,14 +718,34 @@ class VSLatexApp {
 
   private refreshProjectViews(): void {
     this.registeredProjectsTree?.refresh(this.currentProject());
-    const rootPath = getRootPath();
-    const dirtyPaths = rootPath ? vscode.workspace.textDocuments
-      .filter(doc => doc.isDirty && doc.uri.scheme === 'file')
-      .map(doc => path.relative(rootPath, doc.uri.fsPath).split(path.sep).join('/')) : [];
+    const dirtyPaths = this.collectDirtyPaths();
+    this.dirtyPathsKey = dirtyPaths.join('\n');
     this.projectFilesTree?.update({
-      rootPath, appInfo: { ...this.appInfo, files: this.syncDisplayState.project(this.appInfo.files) }, phase: this.syncPhase,
+      rootPath: getRootPath(), appInfo: { ...this.appInfo, files: this.syncDisplayState.project(this.appInfo.files) }, phase: this.syncPhase,
       lastSyncedAt: this.lastSyncedAt, detail: this.syncDetail, dirtyPaths
     });
+  }
+
+  // Editing fires on every keystroke, but the files view changes only when a
+  // buffer's saved/unsaved state flips. Rebuild the tree only in that case.
+  private refreshDirtyPaths(document: vscode.TextDocument): void {
+    if (document.uri.scheme !== 'file') {
+      return;
+    }
+    const dirtyPaths = this.collectDirtyPaths();
+    const key = dirtyPaths.join('\n');
+    if (key !== this.dirtyPathsKey) {
+      this.dirtyPathsKey = key;
+      this.projectFilesTree?.setDirtyPaths(dirtyPaths);
+    }
+  }
+
+  private collectDirtyPaths(): string[] {
+    const rootPath = getRootPath();
+    return rootPath ? vscode.workspace.textDocuments
+      .filter(doc => doc.isDirty && doc.uri.scheme === 'file')
+      .map(doc => path.relative(rootPath, doc.uri.fsPath).split(path.sep).join('/'))
+      .sort() : [];
   }
 
   private rememberCurrentProject(): void {
@@ -881,7 +902,11 @@ class VSLatexApp {
             return;
           }
         }
-        const account = this.accountService.account || await inputAccount();
+        // inputAccount() rejects when the input is dismissed; treat that as a cancel.
+        const account = this.accountService.account || await inputAccount().catch(() => undefined);
+        if (!account) {
+          return;
+        }
         const project = await vscode.window.withProgress({
           location: vscode.ProgressLocation.Notification, title: localeStr(MESSAGE_TYPE.REGISTER_PROJECT_LOADING)
         }, () => loadProjectById(account, record.endpoint, record.id));

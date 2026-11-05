@@ -228,10 +228,7 @@ suite('Registered Cloud LaTeX projects', () => {
     const tree = new RegisteredProjectsTreeProvider(registry, { endpoint: 'https://cloudlatex.io/api/', id: 42, rootPath: '/papers/current' });
     const row = tree.getChildren()[0];
     assert.strictEqual(row.contextValue, 'registeredProject');
-    assert.ok(String(row.description).includes('REGISTERED_PROJECT_ACTIVE'));
-    assert.ok(String(row.description).includes('https://cloudlatex.io'));
-    assert.ok(String(row.description).includes('#42'));
-    assert.ok(String(row.description).includes('/papers/current'));
+    assert.strictEqual(row.description, 'REGISTERED_PROJECT_ACTIVE · https://cloudlatex.io · #42 · /papers/current');
     assert.strictEqual(row.command?.command, 'cloudlatex.openRegisteredProject');
     assert.deepStrictEqual(plain(row.command?.arguments?.[0]), project());
   });

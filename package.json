@@ -269,6 +269,20 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "cloudlatex.openRegisteredProject",
+          "when": "false"
+        },
+        {
+          "command": "cloudlatex.removeRegisteredProject",
+          "when": "false"
+        },
+        {
+          "command": "cloudlatex.openProjectFile",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "cloudlatex.openHelpPage",

@@ -258,7 +258,7 @@ suite('Project connection wizard', () => {
     assert.strictEqual(canceled.createCalls.length, 0);
     assert.deepStrictEqual(canceled.savedInMemory, []);
     assert.deepStrictEqual(canceled.commits, []);
-    assert.ok(canceled.information[0].message.includes(endpoint));
+    assert.strictEqual(canceled.information[0].message, `CONNECT_CUSTOM_ENDPOINT\n\n${endpoint}`);
     assert.ok(!canceled.information[0].message.includes(account.token));
     assert.strictEqual((canceled.information[0].args[0] as { modal: boolean }).modal, true);
 
