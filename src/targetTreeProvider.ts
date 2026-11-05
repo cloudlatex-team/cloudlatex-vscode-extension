@@ -3,7 +3,6 @@ import { COMMAND_NAMES } from './const';
 import { localeStr } from './interaction';
 import { MESSAGE_TYPE } from './locale';
 import { SideBarInfo } from './type';
-import * as latexWorkshop from './external/latexWorkshop';
 
 export default class TargetTreeProvider implements vscode.TreeDataProvider<Item> {
   private _onDidChangeTreeData: vscode.EventEmitter<Item | undefined> = new vscode.EventEmitter<Item | undefined>();
@@ -24,18 +23,24 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   async getChildren(element?: object) {
     const items: Item[] = [];
 
+    items.push(new Item(localeStr(MESSAGE_TYPE.CONNECT_PROJECT), vscode.TreeItemCollapsibleState.None,
+      { command: COMMAND_NAMES.connectProject, title: 'Connect Project' }, 'plug'));
     items.push(this.getAccountItem());
 
     if (this.status.isWorkspace) {
+      if (this.status.endpointOrigin) {
+        items.push(new Item(`${localeStr(MESSAGE_TYPE.CONNECTION_ENDPOINT)}: ${this.status.endpointOrigin}`,
+          vscode.TreeItemCollapsibleState.None, undefined, 'server', this.status.endpointOrigin));
+      }
       items.push(this.getProjectItem());
+      items.push(new Item(localeStr(MESSAGE_TYPE.CONFIGURE_LATEX_WORKSHOP), vscode.TreeItemCollapsibleState.None,
+        { command: COMMAND_NAMES.configureLatexWorkshop, title: 'Configure LaTeX Workshop' }, 'extensions'));
     }
 
     if (this.status.activated) {
+      items.push(this.getViewPDFItem());
       if (this.status.loginStatus !== 'offline') {
         items.push(this.getCompileItem());
-        if (latexWorkshop.checkInstalled()) {
-          items.push(this.getViewPDFItem());
-        }
         items.push(this.getViewCompilerErrorItem());
         items.push(this.getCompilerLogItem());
         items.push(this.getReloadItem());
@@ -123,7 +128,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
       command: COMMAND_NAMES.viewPDF,
       title: 'view PDF',
       arguments: []
-    }, 'file-pdf', 'view PDF (Open LaTeX Workshop viewer)');
+    }, 'file-pdf');
   }
 }
 

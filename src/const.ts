@@ -30,4 +30,10 @@ export const COMMAND_NAMES: { [k: string]: `${typeof EXTENSION_NAME}.${string}` 
   resetLocal: `${EXTENSION_NAME}.resetLocal`,
   clearAccount: `${EXTENSION_NAME}.clearAccount`,
   setTarget: `${EXTENSION_NAME}.setTarget`,
+  configureLatexWorkshop: `${EXTENSION_NAME}.configureLatexWorkshop`,
+  connectProject: `${EXTENSION_NAME}.connectProject`,
+  registerProject: `${EXTENSION_NAME}.registerProject`,
+  openRegisteredProject: `${EXTENSION_NAME}.openRegisteredProject`,
+  removeRegisteredProject: `${EXTENSION_NAME}.removeRegisteredProject`,
+  openProjectFile: `${EXTENSION_NAME}.openProjectFile`,
 };

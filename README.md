@@ -22,57 +22,80 @@ Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?ite
 
 # Preparation
 
-0. If you do not have an account, create your account from [Cloud LaTeX](https://cloudlatex.io/).
-1. Click on the user name in the upper right corner at [Projects](https://cloudlatex.io/projects) and select the third button from the top labeled 'Extension'. A token generation dialog appears and enter your account information and record the generated client ID and token.
-2. Create your project from [Projects](https://cloudlatex.io/projects).
-3. Record the project ID from the URL (e.g., `/projects/123/edit` -> project ID is `123`)
+1. If you do not have a Cloud LaTeX account, create one at [Cloud LaTeX](https://cloudlatex.io/).
+2. From the account menu on the [Projects page](https://cloudlatex.io/projects), open **Extension** and generate a client ID and token. Token generation still takes place on the website.
+3. Create a project on the website if you do not already have one.
 
 ## Setting
 
-Create an empty VSCode project.
-Click the `CL` icon on the Activity Bar and two buttins are appeared on the Side Bar.
+### Connect from the sidebar
 
-Click `Set account` and enter `email`, `client` and `token`.
-You can also set your account by `cloud LaTeX: Set account` command on the Command Pallete (mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`).
+1. Click the **CL** icon in the Activity Bar, then **Connect Project**.
+2. Open a separate empty local folder for the project. If no folder is open, the command opens a folder picker; after opening the folder, click **Connect Project** again.
+3. Enter your email address, client ID, and token. If saved credentials are valid, the command skips this step.
+4. Select a project from the list if the server supports listing projects with an extension token. If listing is unavailable, choose **Enter Project URL or ID** and paste the project URL from your browser or enter its numeric ID. The extension fetches the project and verifies its title before continuing.
+5. Check the project, server address, and local folder, then choose **Connect and Reload**. The extension saves the connection settings, reloads VS Code, and downloads the project files.
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/panel.png" alt="panel UI" width="240px">
+You can also run **Cloud LaTeX: Connect Project** from the Command Palette (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows/Linux).
+Project listing depends on server support. Some Cloud LaTeX servers allow extension tokens to access a specific project but do not allow them to list projects; the URL/ID fallback uses the existing project API and works without changing the server.
 
-Click `Project setting` and set `Cloudlatex.projectID` and check 　`Clodulatex.Enabled`.
+The first connection requires a single local folder with no project files. The `.vscode` directory, `.git` metadata, and `.DS_Store` can be present. Canceling before confirmation leaves your account and connection settings unchanged.
 
-＊ Make sure to set in `Workspace` tab (not `User` tab).
+To update credentials for an existing connection, use the sidebar's account button. To connect another project, open a separate empty folder and use **Connect Project** there. The command does not switch an enabled connection or adopt existing local source files.
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/setting.png" alt="setting UI" width="600px">
+If the download does not start after reloading, check the account and network connection, then use **Reload** in the Cloud LaTeX sidebar.
 
-You can also set `settings.json` under the project.
+### Projects, files, and synchronization
 
-```settings.json
+The **CL** sidebar has three main views:
+
+- **Registered Projects** keeps your project shortcuts across workspaces in the current VS Code profile. Use the **+** button or **Register Project by URL / ID** to enter a project URL or ID on the configured server. The extension verifies its title through the individual project API; this does not depend on the server supporting project-list access. Connected projects are also remembered automatically.
+- **Files & Sync** shows the current project's tracked files in folders. Click a file to open its local copy. The tree marks the build target, unsaved edits, local or server changes, and conflicts. The summary shows synchronization progress or its last outcome; hover over it to see the last successful sync time.
+- **Commands** contains connection, account, settings, synchronization, compilation, and PDF actions. The server address is shown here so you can check which server the workspace uses.
+
+The registered list is a set of verified shortcuts, not a copy of every project in your web account. Entries store only the project ID, title, server, last-opened time, and a local folder when known. They do not contain tokens or client IDs. Registering a shortcut does not download or synchronize its files.
+
+Clicking a project with a known local folder opens that folder. For an unconnected project, clicking it opens a folder picker. Select an empty local folder to connect and download automatically. The selected project’s server endpoint (including localhost), automatic compilation preference, output directory, and ignored-file settings are carried over; no project reselection or manual server configuration is needed. Existing connected folders and folders inside the current project cannot be reused. **Remove Project from List** only removes the shortcut; it does not delete local or server files or disable an existing connection.
+
+**Unsaved** means an editor buffer has not been saved to disk, so those edits have not been synchronized. Local/server change labels describe the synchronization metadata from the latest checks; they are not a continuous view of remote edits. Save the file to let normal synchronization process it, or use **Reload** to request a sync. A conflict needs resolution before synchronization can finish.
+
+To synchronize and browse without automatic compilation, set `cloudlatex.autoCompile` to `false` before connecting. This also prevents an automatic compile after the initial download. The **Compile** command remains available for a manual build.
+
+### Manual project settings (optional)
+
+For an account that is already configured, you can still enter the project ID and enable the extension through **Project Setting** or the workspace's `.vscode/settings.json`. Use **Workspace** settings rather than **User** settings. The project ID is the number in the website URL, for example `/projects/123/edit` means `123`.
+
+```json
 {
   "cloudlatex.projectId": 123,
   "cloudlatex.enabled": true,
-  "cloudlatex.outDir":  "./.workspace",
+  "cloudlatex.outDir": "./.workspace"
 }
 ```
 
-With [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop), you can use pdf review and command completion.
-In this case, it is recommended to add the following settings (match `latex-workshop.latex.outDir` with `cloudlatex.outDir`).
+After changing Cloud LaTeX settings manually, reload the VS Code window when prompted. Use a separate empty folder for each project. While synchronization is enabled, deleting local project files also deletes the corresponding server files.
 
-```setting.json
+### LaTeX Workshop integration
+
+With [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop), you can preview PDFs and use command completion.
+Run **Cloud LaTeX: Configure LaTeX Workshop** from the Command Palette, or click **Configure LaTeX Workshop** in the Cloud LaTeX sidebar. Review the proposed settings, then apply them to the current workspace.
+
+The command disables LaTeX Workshop's local automatic builds and points its viewer to the Cloud LaTeX output directory. It only updates these two workspace settings. Cloud LaTeX settings, user settings, and formatting preferences stay as they are. Configuring the integration does not contact the Cloud LaTeX server.
+
+For example, when `cloudlatex.outDir` is `./.workspace`, the settings are:
+
+```json
 {
-  "latex-workshop.latex.autoCompile.run": "never",
-  "latex-workshop.latex.outDir": "./.workspace",
-  "[latex]": {
-    "editor.formatOnSave": false,
-  }
+  "latex-workshop.latex.autoBuild.run": "never",
+  "latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%/.workspace"
 }
 ```
 
-When you change the configuration file, a dialog box asks you to restart VSCode.
-After the restart, the project files are downloaded.
-If the download is successful, a dialog box will appear indicating that the files have been successfully synchronized.
+The workspace placeholder keeps the viewer's output path correct even when the main `.tex` file is in a subfolder. An empty `cloudlatex.outDir` uses `%WORKSPACE_FOLDER%`; an absolute output path is kept as an absolute path. Rerun the command after changing `cloudlatex.outDir`.
 
-\* When you try to re-synchronize project, please be careful not to delete any local files when the extension is enabled (this will cause deletion of the server files). Also, when you try to change the project in the same local directory, please be careful not that local files are overwritten unexpectedly (when you change `projectId`, original local files will be overwritten. ).
+**View PDF** opens the downloaded PDF for the current compile target and remains available if the connection goes offline during the session. If LaTeX Workshop is not installed, you can choose **Open LaTeX Workshop in Marketplace** or **Open PDF Externally** to use the system PDF viewer. If the PDF has not been downloaded yet, compile the project first.
 
-\* If the project files have not been downloaded, click the `reload` button or close and reopen VSCode.
+### Settings reference
 
 | Setting key               | Description                                                                       | Default              | Type              |
 | ------------------------- | --------------------------------------------------------------------------------- | -------------------- | ----------------- |

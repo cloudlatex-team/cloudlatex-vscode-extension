@@ -37,7 +37,9 @@ export async function inputAccount(): Promise<Account> {
    */
   const email = await vscode.window.showInputBox({
     ignoreFocusOut: true,
-    prompt: 'Email address'
+    title: `${localeStr(MESSAGE_TYPE.ACCOUNT_INPUT_TITLE)} (1/3)`,
+    validateInput: value => value.trim() ? undefined : localeStr(MESSAGE_TYPE.ACCOUNT_FIELD_REQUIRED),
+    prompt: localeStr(MESSAGE_TYPE.ACCOUNT_EMAIL_PROMPT)
   });
   if (!email) {
     throw new Error('Email address is empty');
@@ -48,7 +50,9 @@ export async function inputAccount(): Promise<Account> {
    */
   const client = await vscode.window.showInputBox({
     ignoreFocusOut: true,
-    prompt: 'Client ID'
+    title: `${localeStr(MESSAGE_TYPE.ACCOUNT_INPUT_TITLE)} (2/3)`,
+    validateInput: value => value.trim() ? undefined : localeStr(MESSAGE_TYPE.ACCOUNT_FIELD_REQUIRED),
+    prompt: localeStr(MESSAGE_TYPE.ACCOUNT_CLIENT_PROMPT)
   });
   if (!client) {
     throw new Error('Client ID is empty');
@@ -59,14 +63,16 @@ export async function inputAccount(): Promise<Account> {
    */
   const token = await vscode.window.showInputBox({
     ignoreFocusOut: true,
-    prompt: 'Token',
+    title: `${localeStr(MESSAGE_TYPE.ACCOUNT_INPUT_TITLE)} (3/3)`,
+    validateInput: value => value.trim() ? undefined : localeStr(MESSAGE_TYPE.ACCOUNT_FIELD_REQUIRED),
+    prompt: localeStr(MESSAGE_TYPE.ACCOUNT_TOKEN_PROMPT),
     password: true
   });
   if (!token) {
     throw new Error('Token is empty');
   }
 
-  return { email, client, token };
+  return { email: email.trim(), client: client.trim(), token: token.trim() };
 }
 
 export async function promptToReload(message: string) {
@@ -93,8 +99,8 @@ export async function promptToShowProblemPanel(message: string) {
 
 export async function promptToSetAccount() {
   const message = localeStr(MESSAGE_TYPE.LOGIN_FAILED);
-  const howToGenerateTokenMessage = localeStr('HOW_TO_GENERATE_TOKEN');
-  const setAccountMessage = localeStr('SET_ACCOUNT');
+  const howToGenerateTokenMessage = localeStr(MESSAGE_TYPE.HOW_TO_GENERATE_TOKEN);
+  const setAccountMessage = localeStr(MESSAGE_TYPE.SET_ACCOUNT);
   const item = await vscode.window.showWarningMessage(
     message,
     { title: howToGenerateTokenMessage },
@@ -119,7 +125,7 @@ export async function promptToSetAccount() {
 }
 
 export async function promptToFixConfigEnabledPlace() {
-  const detailMessage = localeStr('DETAIL');
+  const detailMessage = localeStr(MESSAGE_TYPE.DETAIL);
   const item = await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONFIG_ENABLED_PLACE_ERROR),
     { title: detailMessage },
   );
