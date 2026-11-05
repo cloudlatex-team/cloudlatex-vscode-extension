@@ -77,14 +77,6 @@ until the destination host validates the handoff and clears old sync metadata.
 Expired intents remove only their own marker so the folder can be selected again.
 `jsonc-parser` preserves comments and trailing commas in VS Code settings.
 
-## Screenshot sample
-
-Import the contents of `examples/sidebar-demo` into a separate Cloud LaTeX
-project and select `main.tex` as the compile target. Register that project's URL
-in the CL sidebar, select a separate empty trusted workspace, configure LaTeX
-Workshop, and compile. Do not connect the populated example source directory as
-a first-time workspace. The sample contains no account or server settings.
-
 ## Build
 
 ```bash
