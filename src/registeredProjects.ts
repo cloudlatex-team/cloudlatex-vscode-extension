@@ -1,4 +1,4 @@
-import { COMMAND_NAMES } from './const';
+import { COMMAND_NAMES, DEFAULT_ENDPOINT } from './const';
 import { MESSAGE_TYPE } from './locale';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -33,6 +33,10 @@ export function normalizeProjectEndpoint(endpoint: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+export function isDefaultEndpoint(endpoint: string): boolean {
+  return normalizeProjectEndpoint(endpoint) === DEFAULT_ENDPOINT;
 }
 
 function projectKey(endpoint: string, id: number): string | undefined {
@@ -167,21 +171,33 @@ export class ProjectRegistry implements vscode.Disposable {
 }
 
 export class RegisteredProjectsTreeProvider implements vscode.TreeDataProvider<vscode.TreeItem>, vscode.Disposable {
-  private readonly _onDidChange = new vscode.EventEmitter<vscode.TreeItem | undefined>();
-  readonly onDidChangeTreeData = this._onDidChange.event;
+  private readonly _onDidChangeTreeData = new vscode.EventEmitter<vscode.TreeItem | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
   private readonly registrySubscription: vscode.Disposable;
 
   constructor(private readonly registry: ProjectRegistry, private current?: CurrentRegisteredProject) {
-    this.registrySubscription = registry.onDidChange(() => this._onDidChange.fire(undefined));
+    this.registrySubscription = registry.onDidChange(() => this._onDidChangeTreeData.fire(undefined));
   }
 
   refresh(current?: CurrentRegisteredProject): void {
     this.current = current;
-    this._onDidChange.fire(undefined);
+    this._onDidChangeTreeData.fire(undefined);
   }
 
   getTreeItem(item: vscode.TreeItem): vscode.TreeItem {
     return item;
+  }
+
+  async removeProject(item?: vscode.TreeItem): Promise<void> {
+    if (item?.contextValue !== 'registeredProject') {
+      return;
+    }
+    // Context menus receive the tree item, not its open command's arguments.
+    const project = item.command?.arguments?.[0] as RegisteredProject | undefined;
+    const record = project && this.registry.get(project.endpoint, project.id);
+    if (record) {
+      await this.registry.remove(record.endpoint, record.id);
+    }
   }
 
   getChildren(parent?: vscode.TreeItem): vscode.TreeItem[] {
@@ -203,8 +219,10 @@ export class RegisteredProjectsTreeProvider implements vscode.TreeDataProvider<v
       item.id = `registeredProject:${projectKey(project.endpoint, project.id)}`;
       const binding = project.rootPath || localeStr(MESSAGE_TYPE.REGISTERED_PROJECT_NO_FOLDER);
       const activeLabel = active ? `${localeStr(MESSAGE_TYPE.REGISTERED_PROJECT_ACTIVE)} · ` : '';
-      item.description = `${activeLabel}${new URL(project.endpoint).origin} · #${project.id} · ${binding}`;
-      item.tooltip = `${project.title || ''} (#${project.id})\n${project.endpoint}\n${binding}`;
+      const customEndpoint = !isDefaultEndpoint(project.endpoint);
+      const endpointLabel = customEndpoint ? `${new URL(project.endpoint).origin} · ` : '';
+      item.description = `${activeLabel}${endpointLabel}#${project.id} · ${binding}`;
+      item.tooltip = `${project.title || ''} (#${project.id})\n${customEndpoint ? project.endpoint + '\n' : ''}${binding}`;
       item.iconPath = new vscode.ThemeIcon(active ? 'check' : 'project');
       item.contextValue = 'registeredProject';
       item.command = {
@@ -221,6 +239,6 @@ export class RegisteredProjectsTreeProvider implements vscode.TreeDataProvider<v
 
   dispose(): void {
     this.registrySubscription.dispose();
-    this._onDidChange.dispose();
+    this._onDidChangeTreeData.dispose();
   }
 }

@@ -16,6 +16,10 @@ This is an extension for Visual Studio Code to write tex locally with Cloud LaTe
 - Automatic synchronization between files in your PC and the Cloud LaTeX server
 - Offline support (auto-sync on return to online)
 
+Edit locally, compile on Cloud LaTeX, and view the PDF alongside your source with LaTeX Workshop.
+
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/workshop-preview.png" alt="Cloud LaTeX sidebar, local LaTeX source, and compiled PDF in VS Code" width="960px">
+
 # Installation
 
 Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=cloudlatex.cloudlatex), or run `ext install cloudlatex` in VS Code Quick Open (`ctrl/cmd + P`).
@@ -33,11 +37,11 @@ Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?ite
 1. Click the **CL** icon in the Activity Bar, then **Connect Project**.
 2. Open a separate empty local folder for the project. If no folder is open, the command opens a folder picker; after opening the folder, click **Connect Project** again.
 3. Enter your email address, client ID, and token. If saved credentials are valid, the command skips this step.
-4. Select a project from the list if the server supports listing projects with an extension token. If listing is unavailable, choose **Enter Project URL or ID** and paste the project URL from your browser or enter its numeric ID. The extension fetches the project and verifies its title before continuing.
-5. Check the project, server address, and local folder, then choose **Connect and Reload**. The extension saves the connection settings, reloads VS Code, and downloads the project files.
+4. Paste the URL of the Cloud LaTeX project open in your browser or enter its numeric ID. The extension verifies the project title before continuing.
+5. Check the project and local folder, then choose **Connect and Reload**. The extension saves the connection settings, reloads VS Code, and downloads the project files.
 
 You can also run **Cloud LaTeX: Connect Project** from the Command Palette (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows/Linux).
-Project listing depends on server support. Some Cloud LaTeX servers allow extension tokens to access a specific project but do not allow them to list projects; the URL/ID fallback uses the existing project API and works without changing the server.
+To find a project URL, open the project from the [Cloud LaTeX Projects page](https://cloudlatex.io/projects) and copy the address from your browser.
 
 The first connection requires a single local folder with no project files. The `.vscode` directory, `.git` metadata, and `.DS_Store` can be present. Canceling before confirmation leaves your account and connection settings unchanged.
 
@@ -49,13 +53,15 @@ If the download does not start after reloading, check the account and network co
 
 The **CL** sidebar has three main views:
 
-- **Registered Projects** keeps your project shortcuts across workspaces in the current VS Code profile. Use the **+** button or **Register Project by URL / ID** to enter a project URL or ID on the configured server. The extension verifies its title through the individual project API; this does not depend on the server supporting project-list access. Connected projects are also remembered automatically.
+- **Registered Projects** keeps your project shortcuts across workspaces in the current VS Code profile. Use the **+** button or **Register Project by URL / ID** to enter a Cloud LaTeX project URL or ID. The extension verifies the project title before adding the shortcut. Connected projects are also remembered automatically.
 - **Files & Sync** shows the current project's tracked files in folders. Click a file to open its local copy. The tree marks the build target, unsaved edits, local or server changes, and conflicts. The summary shows synchronization progress or its last outcome; hover over it to see the last successful sync time.
-- **Commands** contains connection, account, settings, synchronization, compilation, and PDF actions. The server address is shown here so you can check which server the workspace uses.
+- **Commands** contains connection, account, settings, synchronization, compilation, and PDF actions.
 
-The registered list is a set of verified shortcuts, not a copy of every project in your web account. Entries store only the project ID, title, server, last-opened time, and a local folder when known. They do not contain tokens or client IDs. Registering a shortcut does not download or synchronize its files.
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/sidebar-preview.png" alt="CL sidebar showing a registered project, synchronized files, and the compile target" width="320px">
 
-Clicking a project with a known local folder opens that folder. For an unconnected project, clicking it opens a folder picker. Select an empty local folder to connect and download automatically. The selected project’s server endpoint, automatic compilation preference, output directory, and ignored-file settings are carried over; no project reselection or manual server configuration is needed. Existing connected folders and folders inside the current project cannot be reused. **Remove Project from List** only removes the shortcut; it does not delete local or server files or disable an existing connection.
+The registered list is a set of verified shortcuts, not a copy of every project in your web account. The shortcuts do not contain tokens or client IDs. Registering a shortcut does not download or synchronize its files.
+
+Clicking a project with a known local folder opens that folder. For an unconnected project, clicking it opens a folder picker. Select an empty local folder to connect and download automatically. Your automatic compilation preference, output directory, and ignored-file settings are carried over; you do not need to select the project again. Existing connected folders and folders inside the current project cannot be reused. **Remove Project from List** only removes the shortcut; it does not delete local or server files or disable an existing connection.
 
 **Unsaved** means an editor buffer has not been saved to disk, so those edits have not been synchronized. Local/server change labels describe the synchronization metadata from the latest checks; they are not a continuous view of remote edits. Save the file to let normal synchronization process it, or use **Reload** to request a sync. A conflict needs resolution before synchronization can finish.
 

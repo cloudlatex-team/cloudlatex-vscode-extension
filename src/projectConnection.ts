@@ -2,9 +2,10 @@ import { MESSAGE_TYPE } from './locale';
 import * as vscode from 'vscode';
 import * as http from 'http';
 import * as https from 'https';
-import { Account, AccountService, LatexApp, ProjectInfo } from 'cloudlatex-cli-plugin';
+import { Account, ProjectInfo } from 'cloudlatex-cli-plugin';
 import { getVSConfig } from './config';
 import { inputAccount, localeStr } from './interaction';
+import { isDefaultEndpoint } from './registeredProjects';
 
 export type ProjectConnection = {
   rootPath: string;
@@ -20,7 +21,11 @@ type ConnectionSnapshot = {
   enabled: boolean;
 };
 
-type ProjectListResult = Awaited<ReturnType<LatexApp['listProjects']>>;
+class ProjectAuthenticationError extends Error {
+  constructor() {
+    super('Project lookup failed');
+  }
+}
 
 function parseEndpoint(endpoint: string): URL | undefined {
   try {
@@ -72,9 +77,8 @@ export function parseProjectId(input: string, endpoint: string): number | undefi
   return Number.isSafeInteger(id) && id > 0 ? id : undefined;
 }
 
-// The project show endpoint supports extension tokens on servers where the
-// project index still requires a browser session. Never follow redirects with
-// these token headers or reuse a browser's session/cookies.
+// Look up the selected project through the existing project show endpoint.
+// Never follow redirects with these token headers or reuse browser cookies.
 export function loadProjectById(account: Account, endpoint: string, id: number): Promise<ProjectInfo> {
   const server = parseEndpoint(endpoint);
   if (!server || !Number.isSafeInteger(id) || id <= 0) {
@@ -93,7 +97,7 @@ export function loadProjectById(account: Account, endpoint: string, id: number):
   return new Promise((resolve, reject) => {
     let settled = false;
     let request: http.ClientRequest | undefined;
-    const finish = (project?: ProjectInfo) => {
+    const finish = (project?: ProjectInfo, error?: Error) => {
       if (settled) {
         return;
       }
@@ -102,7 +106,7 @@ export function loadProjectById(account: Account, endpoint: string, id: number):
       if (project) {
         resolve(project);
       } else {
-        reject(new Error('Project lookup failed'));
+        reject(error || new Error('Project lookup failed'));
       }
     };
     const timer = setTimeout(() => {
@@ -113,7 +117,7 @@ export function loadProjectById(account: Account, endpoint: string, id: number):
       const transport = url.protocol === 'https:' ? https : http;
       request = transport.get(url, { headers }, response => {
         if (response.statusCode !== 200) {
-          finish();
+          finish(undefined, response.statusCode === 401 ? new ProjectAuthenticationError() : undefined);
           response.destroy();
           return;
         }
@@ -227,24 +231,6 @@ async function requireEmptyFolder(rootPath: string): Promise<boolean> {
   return false;
 }
 
-async function listProjects(account: Account, snapshot: ConnectionSnapshot): Promise<ProjectListResult> {
-  const accountService = new AccountService<Account>();
-  await accountService.save(account);
-  const app = await LatexApp.createApp({
-    backend: 'cloudlatex',
-    rootPath: snapshot.rootPath,
-    endpoint: snapshot.endpoint,
-    projectId: 0,
-    storagePath: undefined
-  }, { accountService });
-  try {
-    // Do not start the watcher, synchronize files, or compile while choosing.
-    return await app.listProjects();
-  } finally {
-    await app.stop();
-  }
-}
-
 export async function connectProject(
   savedAccount: Account | null,
   commit: (connection: ProjectConnection) => Promise<void>
@@ -274,9 +260,10 @@ export async function connectProject(
       await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONNECT_FAILED));
       return;
     }
+    const customEndpoint = !isDefaultEndpoint(snapshot.endpoint);
     // A workspace can configure its own endpoint. Ask before sending global
     // credentials anywhere other than the default Cloud LaTeX API.
-    if (!/^https:\/\/cloudlatex\.io\/api\/?$/.test(snapshot.endpoint)) {
+    if (customEndpoint) {
       const allow = localeStr(MESSAGE_TYPE.CONNECT_ALLOW_ENDPOINT);
       const choice = await vscode.window.showInformationMessage(
         `${localeStr(MESSAGE_TYPE.CONNECT_CUSTOM_ENDPOINT)}\n\n${snapshot.endpoint}`, { modal: true }, allow
@@ -287,85 +274,63 @@ export async function connectProject(
     }
 
     let account = savedAccount;
-    let projects: ProjectInfo[] = [];
-    let project: ProjectInfo | undefined;
+    if (!account) {
+      try {
+        const entered = await inputAccount();
+        account = { email: entered.email.trim(), client: entered.client.trim(), token: entered.token.trim() };
+      } catch {
+        // The account helper signals dismissed/empty input by throwing.
+        return;
+      }
+    }
+    const input = await vscode.window.showInputBox({
+      title: localeStr(MESSAGE_TYPE.PROJECT_URL_PROMPT),
+      placeHolder: localeStr(MESSAGE_TYPE.PROJECT_URL_PLACEHOLDER),
+      ignoreFocusOut: true,
+      validateInput: value => parseProjectId(value, snapshot.endpoint) !== undefined
+        ? undefined : localeStr(MESSAGE_TYPE.PROJECT_URL_INVALID)
+    });
+    if (input === undefined) {
+      return;
+    }
+    const id = parseProjectId(input, snapshot.endpoint);
+    if (id === undefined) {
+      await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.PROJECT_URL_INVALID));
+      return;
+    }
+    let project: ProjectInfo;
     while (true) {
-      if (!account) {
+      if (!snapshotUnchanged(snapshot)) {
+        await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.CONNECT_SETTINGS_CHANGED));
+        return;
+      }
+      try {
+        project = await vscode.window.withProgress({
+          location: vscode.ProgressLocation.Notification,
+          title: localeStr(MESSAGE_TYPE.REGISTER_PROJECT_LOADING)
+        }, () => loadProjectById(account!, snapshot.endpoint, id));
+        break;
+      } catch (error) {
+        if (!(error instanceof ProjectAuthenticationError)) {
+          throw error;
+        }
+        void vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.CONNECT_ACCOUNT_INVALID));
         try {
           const entered = await inputAccount();
           account = { email: entered.email.trim(), client: entered.client.trim(), token: entered.token.trim() };
         } catch {
-          // The account helper signals dismissed/empty input by throwing.
           return;
         }
       }
-      const result = await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: localeStr(MESSAGE_TYPE.PROJECTS_LOADING)
-      }, () => listProjects(account!, snapshot));
-      if (result.status === 'invalid-account') {
-        await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.CONNECT_ACCOUNT_INVALID));
-        account = null;
-        continue;
-      }
-      if (result.status === 'unknown-error') {
-        const enterUrl = localeStr(MESSAGE_TYPE.CONNECT_BY_URL);
-        const choice = await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.PROJECT_LIST_UNAVAILABLE), enterUrl);
-        if (choice !== enterUrl) {
-          return;
-        }
-        const input = await vscode.window.showInputBox({
-          title: localeStr(MESSAGE_TYPE.PROJECT_URL_PROMPT),
-          placeHolder: localeStr(MESSAGE_TYPE.PROJECT_URL_PLACEHOLDER),
-          ignoreFocusOut: true,
-          validateInput: value => parseProjectId(value, snapshot.endpoint) !== undefined
-            ? undefined : localeStr(MESSAGE_TYPE.PROJECT_URL_INVALID)
-        });
-        if (input === undefined) {
-          return;
-        }
-        const id = parseProjectId(input, snapshot.endpoint);
-        if (id === undefined) {
-          await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.PROJECT_URL_INVALID));
-          return;
-        }
-        project = await vscode.window.withProgress({
-          location: vscode.ProgressLocation.Notification,
-          title: localeStr(MESSAGE_TYPE.PROJECTS_LOADING)
-        }, () => loadProjectById(account!, snapshot.endpoint, id));
-        break;
-      }
-      if (result.status !== 'success') {
-        await vscode.window.showErrorMessage(localeStr(result.status === 'offline' ? MESSAGE_TYPE.OFFLINE_ERROR : MESSAGE_TYPE.CONNECT_FAILED));
-        return;
-      }
-      projects = result.projects.filter(project => Number.isSafeInteger(project.id) && project.id > 0);
-      break;
-    }
-
-    if (!project) {
-      if (projects.length === 0) {
-        await vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.NO_PROJECTS));
-        return;
-      }
-      const selected = await vscode.window.showQuickPick(projects.map(project => ({
-        label: project.title || `#${project.id}`,
-        description: `#${project.id}`,
-        project
-      })), {
-        placeHolder: localeStr(MESSAGE_TYPE.SELECT_PROJECT),
-        matchOnDescription: true,
-        ignoreFocusOut: true
-      });
-      if (!selected) {
-        return;
-      }
-      project = selected.project;
     }
 
     const confirm = localeStr(MESSAGE_TYPE.CONNECT_AND_RELOAD);
-    const preview = localeStr(MESSAGE_TYPE.CONNECT_CONFIRM) + '\n\n'
-      + `${project.title || ''} (#${project.id})\n${account!.email}\n${snapshot.endpoint}\n${snapshot.rootPath}`;
+    const details = [`${project.title || ''} (#${project.id})`, account.email];
+    if (customEndpoint) {
+      details.push(snapshot.endpoint);
+    }
+    details.push(snapshot.rootPath);
+    const preview = localeStr(MESSAGE_TYPE.CONNECT_CONFIRM) + '\n\n' + details.join('\n');
     const choice = await vscode.window.showInformationMessage(preview, { modal: true }, confirm);
     if (choice !== confirm) {
       return;
@@ -378,7 +343,7 @@ export async function connectProject(
       return;
     }
     // Selection and credentials stay in memory until this final commit step.
-    await commit({ rootPath: snapshot.rootPath, endpoint: snapshot.endpoint, project, account: account! });
+    await commit({ rootPath: snapshot.rootPath, endpoint: snapshot.endpoint, project, account });
   } catch {
     // Server errors can contain response bodies; never show them with credentials.
     await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONNECT_FAILED));

@@ -96,6 +96,18 @@ suite('Registered Cloud LaTeX projects', () => {
     }
   });
 
+  test('default endpoint recognition normalizes aliases and rejects custom or invalid endpoints', () => {
+    const { isDefaultEndpoint } = loadRegistry();
+    for (const endpoint of ['https://cloudlatex.io/api', 'https://cloudlatex.io/api/', ' HTTPS://CLOUDLATEX.IO:443/api/// ']) {
+      assert.strictEqual(isDefaultEndpoint(endpoint), true, endpoint);
+    }
+    for (const endpoint of ['http://localhost:3000/api', 'https://cloudlatex.io/custom/api',
+      'http://cloudlatex.io/api', 'https://cloudlatex.io:444/api', '',
+      'https://user:secret@cloudlatex.io/api', 'https://cloudlatex.io/api?token=secret']) {
+      assert.strictEqual(isDefaultEndpoint(endpoint), false, endpoint);
+    }
+  });
+
   test('loading validates persisted records, deduplicates endpoint plus ID, and excludes secret fields', async () => {
     const { ProjectRegistry } = loadRegistry();
     const state = new MemoryState([
@@ -222,15 +234,42 @@ suite('Registered Cloud LaTeX projects', () => {
     assert.strictEqual(tree.getChildren(rows[0]).length, 0);
   });
 
-  test('tree rows display origin, ID, binding and active state with token-free open arguments', () => {
+  test('default project rows show ID, binding and active state without endpoint details', () => {
     const { ProjectRegistry, RegisteredProjectsTreeProvider } = loadRegistry();
     const registry = new ProjectRegistry(new MemoryState([project()]));
     const tree = new RegisteredProjectsTreeProvider(registry, { endpoint: 'https://cloudlatex.io/api/', id: 42, rootPath: '/papers/current' });
     const row = tree.getChildren()[0];
     assert.strictEqual(row.contextValue, 'registeredProject');
-    assert.strictEqual(row.description, 'REGISTERED_PROJECT_ACTIVE · https://cloudlatex.io · #42 · /papers/current');
+    assert.strictEqual(row.description, 'REGISTERED_PROJECT_ACTIVE · #42 · /papers/current');
+    assert.strictEqual(row.tooltip, 'Paper (#42)\n/papers/current');
     assert.strictEqual(row.command?.command, 'cloudlatex.openRegisteredProject');
     assert.deepStrictEqual(plain(row.command?.arguments?.[0]), project());
+  });
+
+  test('normalized default endpoint aliases do not add server details to the row or tooltip', () => {
+    const { ProjectRegistry, RegisteredProjectsTreeProvider } = loadRegistry();
+    for (const endpoint of ['https://cloudlatex.io/api/', ' HTTPS://CLOUDLATEX.IO:443/api/// ']) {
+      const registry = new ProjectRegistry(new MemoryState([project({ endpoint })]));
+      const tree = new RegisteredProjectsTreeProvider(registry);
+      const row = tree.getChildren()[0];
+      assert.strictEqual(row.description, '#42 · /papers/current');
+      assert.strictEqual(row.tooltip, 'Paper (#42)\n/papers/current');
+      assert.deepStrictEqual(plain(row.command?.arguments?.[0]), project());
+    }
+  });
+
+  test('custom endpoint rows retain origin, endpoint and local binding in the tooltip and open arguments', () => {
+    const { ProjectRegistry, RegisteredProjectsTreeProvider } = loadRegistry();
+    for (const endpoint of ['http://localhost:3000/api', 'https://cloudlatex.io/custom/api']) {
+      const record = project({ endpoint });
+      const registry = new ProjectRegistry(new MemoryState([record]));
+      const tree = new RegisteredProjectsTreeProvider(registry);
+      const row = tree.getChildren()[0];
+      assert.strictEqual(row.description, `${new URL(endpoint).origin} · #42 · /papers/current`);
+      assert.strictEqual(row.tooltip, `Paper (#42)\n${endpoint}\n/papers/current`);
+      assert.strictEqual(row.command?.command, 'cloudlatex.openRegisteredProject');
+      assert.deepStrictEqual(plain(row.command?.arguments?.[0]), record);
+    }
   });
 
   test('tree refresh updates the active binding and registry changes trigger the event', async () => {
@@ -248,5 +287,31 @@ suite('Registered Cloud LaTeX projects', () => {
     tree.dispose();
     await registry.remove(project().endpoint, 42);
     assert.strictEqual(changes, 2);
+  });
+
+  test('context menu removal accepts the tree item and removes only that endpoint and project', async () => {
+    const { ProjectRegistry, RegisteredProjectsTreeProvider } = loadRegistry();
+    const local = project({ endpoint: 'http://localhost:3000/api' });
+    const state = new MemoryState([project(), local]);
+    const registry = new ProjectRegistry(state);
+    const tree = new RegisteredProjectsTreeProvider(registry);
+    const row = tree.getChildren().find(item => item.command?.arguments?.[0].endpoint === local.endpoint);
+    assert.ok(row);
+    await tree.removeProject(row);
+    assert.strictEqual(registry.get(local.endpoint, local.id), undefined);
+    assert.deepStrictEqual(plain(registry.list()), [project()]);
+    assert.deepStrictEqual(plain(state.data), [project()]);
+    assert.strictEqual(tree.getChildren().length, 1);
+  });
+
+  test('context menu removal ignores missing entries and the empty-list action', async () => {
+    const { ProjectRegistry, RegisteredProjectsTreeProvider } = loadRegistry();
+    const state = new MemoryState();
+    const registry = new ProjectRegistry(state);
+    const tree = new RegisteredProjectsTreeProvider(registry);
+    await tree.removeProject();
+    await tree.removeProject(tree.getChildren()[0]);
+    assert.strictEqual(state.writes.length, 0);
+    assert.strictEqual(tree.getChildren()[0].command?.command, 'cloudlatex.registerProject');
   });
 });

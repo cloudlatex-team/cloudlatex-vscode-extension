@@ -46,7 +46,7 @@ export class ProjectFileItem extends vscode.TreeItem {
 // Opening files is handled by the extension command, which checks file existence.
 export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<ProjectFileItem>, vscode.Disposable {
   private readonly _onDidChangeTreeData = new vscode.EventEmitter<ProjectFileItem | undefined>();
-  readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+  readonly onDidChangeTreeData: vscode.Event<ProjectFileItem | undefined> = this._onDidChangeTreeData.event;
   private snapshot: ProjectFilesSnapshot;
   private items: ProjectFileItem[] = [];
 
@@ -140,12 +140,12 @@ export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<Project
       labels.push(localeStr(MESSAGE_TYPE.FILE_SYNC_CONFLICT_FILE));
       icon = 'warning';
     } else if (local) {
-      labels.push(localeStr(info.localChange === 'create' ? 'FILE_SYNC_LOCAL_CREATE'
-        : info.localChange === 'delete' ? 'FILE_SYNC_LOCAL_DELETE' : 'FILE_SYNC_LOCAL_UPDATE'));
+      labels.push(localeStr(info.localChange === 'create' ? MESSAGE_TYPE.FILE_SYNC_LOCAL_CREATE
+        : info.localChange === 'delete' ? MESSAGE_TYPE.FILE_SYNC_LOCAL_DELETE : MESSAGE_TYPE.FILE_SYNC_LOCAL_UPDATE));
       icon = info.localChange === 'delete' ? 'trash' : 'cloud-upload';
     } else if (remote) {
-      labels.push(localeStr(info.remoteChange === 'create' ? 'FILE_SYNC_REMOTE_CREATE'
-        : info.remoteChange === 'delete' ? 'FILE_SYNC_REMOTE_DELETE' : 'FILE_SYNC_REMOTE_UPDATE'));
+      labels.push(localeStr(info.remoteChange === 'create' ? MESSAGE_TYPE.FILE_SYNC_REMOTE_CREATE
+        : info.remoteChange === 'delete' ? MESSAGE_TYPE.FILE_SYNC_REMOTE_DELETE : MESSAGE_TYPE.FILE_SYNC_REMOTE_UPDATE));
       icon = 'cloud-download';
     } else if (!dirty) {
       labels.push(localeStr(MESSAGE_TYPE.FILE_SYNCED));

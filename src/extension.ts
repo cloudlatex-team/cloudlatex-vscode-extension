@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { EXTENSION_NAME, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_COMMDNS_ID, STATUS_BAR_TEXT } from './const';
+import { EXTENSION_NAME, DEFAULT_ENDPOINT, CONFIG_NAMES, COMMAND_NAMES, DATA_TREE_PROVIDER_COMMDNS_ID, DATA_TREE_PROVIDER_PROJECTS_ID, DATA_TREE_PROVIDER_FILES_ID, STATUS_BAR_TEXT } from './const';
 import TargetTreeProvider from './targetTreeProvider';
 import { LatexApp, LATEX_APP_EVENTS, Config, Account, CompileResult, AccountService, AppInfo, ConflictSolution, SyncResult } from 'cloudlatex-cli-plugin';
 import { inputAccount, promptToReload, promptToShowProblemPanel, promptToSetAccount, localeStr, promptToFixConfigEnabledPlace, decideConflictSolution, showTargetFileSelector } from './interaction';
@@ -14,8 +14,8 @@ import * as latexWorkshop from './external/latexWorkshop';
 import { getRootPath, getStoragePath, getVSConfig, obtainAccountPath } from './config';
 import { CLFileDecorationProvider } from './clFileDecorationProvider';
 import { connectProject, loadProjectById, parseProjectId } from './projectConnection';
-import { ProjectRegistry, RegisteredProjectsTreeProvider, RegisteredProject, normalizeProjectEndpoint } from './registeredProjects';
-import { ProjectFilesTreeProvider } from './projectFilesTreeProvider';
+import { ProjectRegistry, RegisteredProjectsTreeProvider, RegisteredProject, CurrentRegisteredProject, normalizeProjectEndpoint, isDefaultEndpoint } from './registeredProjects';
+import { ProjectFilesTreeProvider, ProjectSyncPhase } from './projectFilesTreeProvider';
 import { folderMatchesRegisteredProject } from './registeredProjectBinding';
 import { SyncDisplayState } from './syncDisplayState';
 import { saveProjectConnection } from './projectConnectionSettings';
@@ -73,7 +73,7 @@ class VSLatexApp {
   private projectRegistry: ProjectRegistry;
   private registeredProjectsTree?: RegisteredProjectsTreeProvider;
   private projectFilesTree?: ProjectFilesTreeProvider;
-  private syncPhase: 'inactive' | 'ready' | 'syncing' | 'offline' | 'conflict' | 'error' = 'inactive';
+  private syncPhase: ProjectSyncPhase = 'inactive';
   private syncDetail?: string;
   private lastSyncedAt?: number;
   private rememberedProject?: string;
@@ -124,7 +124,7 @@ class VSLatexApp {
     await this.accountService.load();
     this.setupSideBar();
     if (folderConnected) {
-      vscode.commands.executeCommand('workbench.view.extension.cloudlatex');
+      vscode.commands.executeCommand(`workbench.view.extension.${EXTENSION_NAME}`);
     }
     if (folderConnectionFailed) {
       return;
@@ -345,8 +345,8 @@ class VSLatexApp {
     this.registeredProjectsTree = new RegisteredProjectsTreeProvider(this.projectRegistry);
     this.projectFilesTree = new ProjectFilesTreeProvider();
     this.context.subscriptions.push(
-      vscode.window.registerTreeDataProvider('cloudlatex-projects', this.registeredProjectsTree),
-      vscode.window.registerTreeDataProvider('cloudlatex-files', this.projectFilesTree),
+      vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_PROJECTS_ID, this.registeredProjectsTree),
+      vscode.window.registerTreeDataProvider(DATA_TREE_PROVIDER_FILES_ID, this.projectFilesTree),
       this.projectRegistry, this.registeredProjectsTree, this.projectFilesTree
     );
     this.refreshProjectViews();
@@ -397,16 +397,18 @@ class VSLatexApp {
       this.rerenderSideBar();
     });
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(COMMAND_NAMES.registerProject, async () => this.registerProject()),
-      vscode.commands.registerCommand(COMMAND_NAMES.openRegisteredProject, async (entry: RegisteredProject) => this.openRegisteredProject(entry)),
-      vscode.commands.registerCommand(COMMAND_NAMES.removeRegisteredProject, async (entry: RegisteredProject) => {
-        const record = this.projectRegistry.get(entry?.endpoint, entry?.id);
-        if (record) {
-          await this.projectRegistry.remove(record.endpoint, record.id);
-          this.registeredProjectsTree?.refresh(this.currentProject());
-        }
+      vscode.commands.registerCommand(COMMAND_NAMES.registerProject, async () => {
+        await this.registerProject();
       }),
-      vscode.commands.registerCommand(COMMAND_NAMES.openProjectFile, async (filePath: string) => this.openProjectFile(filePath))
+      vscode.commands.registerCommand(COMMAND_NAMES.openRegisteredProject, async (entry: RegisteredProject) => {
+        await this.openRegisteredProject(entry);
+      }),
+      vscode.commands.registerCommand(COMMAND_NAMES.removeRegisteredProject, async (entry: vscode.TreeItem) => {
+        await this.registeredProjectsTree?.removeProject(entry);
+      }),
+      vscode.commands.registerCommand(COMMAND_NAMES.openProjectFile, async (filePath: string) => {
+        await this.openProjectFile(filePath);
+      })
     );
 
     vscode.commands.registerCommand(COMMAND_NAMES.openHelpPage, () => {
@@ -697,7 +699,6 @@ class VSLatexApp {
       loginStatus: this.appInfo.loginStatus || 'offline',
       activated: this.activated && this.appInfo.activationStatus === 'active',
       projectName: this.appInfo.projectName || null,
-      endpointOrigin: this.getEndpointOrigin(),
       displayUserName: this.accountService.account?.email,
       targetRelativeFilePath: this.appInfo.targetFile?.relativePath,
     };
@@ -710,7 +711,7 @@ class VSLatexApp {
     this.rememberCurrentProject();
   }
 
-  private currentProject(): { endpoint: string; id: number; rootPath?: string } | undefined {
+  private currentProject(): CurrentRegisteredProject | undefined {
     const id = getVSConfig().get<number>('projectId', 0);
     const endpoint = normalizeProjectEndpoint(getVSConfig().get<string>('endpoint', ''));
     return endpoint && id > 0 ? { endpoint, id, rootPath: getRootPath() } : undefined;
@@ -790,7 +791,7 @@ class VSLatexApp {
       if (!id) {
         return;
       }
-      if (endpoint !== 'https://cloudlatex.io/api' && this.trustedRegistrationEndpoint !== endpoint) {
+      if (!isDefaultEndpoint(endpoint) && this.trustedRegistrationEndpoint !== endpoint) {
         const allow = localeStr(MESSAGE_TYPE.CONNECT_ALLOW_ENDPOINT);
         const choice = await vscode.window.showInformationMessage(
           `${localeStr(MESSAGE_TYPE.CONNECT_CUSTOM_ENDPOINT)}\n\n${endpoint}`, { modal: true }, allow
@@ -843,7 +844,7 @@ class VSLatexApp {
     const matches = record.rootPath && (record.rootPath === getRootPath()
       ? current?.id === record.id && current.endpoint === record.endpoint
       : await folderMatchesRegisteredProject(record,
-        getVSConfig().inspect<string>('endpoint')?.globalValue || 'https://cloudlatex.io/api'));
+        getVSConfig().inspect<string>('endpoint')?.globalValue || DEFAULT_ENDPOINT));
     if (record.rootPath && matches) {
       try {
         const stat = await vscode.workspace.fs.stat(vscode.Uri.file(record.rootPath));
@@ -851,7 +852,7 @@ class VSLatexApp {
           if (record.rootPath !== getRootPath()) {
             await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(record.rootPath));
           } else {
-            await vscode.commands.executeCommand('workbench.view.extension.cloudlatex');
+            await vscode.commands.executeCommand(`workbench.view.extension.${EXTENSION_NAME}`);
           }
           return;
         }
@@ -874,9 +875,11 @@ class VSLatexApp {
     };
     try {
       while (true) {
+        const endpointLabel = isDefaultEndpoint(record.endpoint)
+          ? '' : `${new URL(record.endpoint).origin} — `;
         const folders = await vscode.window.showOpenDialog({
           canSelectFiles: false, canSelectFolders: true, canSelectMany: false,
-          title: `${record.title} — ${new URL(record.endpoint).origin} — ${localeStr(MESSAGE_TYPE.SELECT_PROJECT_DESTINATION)}`,
+          title: `${record.title} — ${endpointLabel}${localeStr(MESSAGE_TYPE.SELECT_PROJECT_DESTINATION)}`,
           openLabel: localeStr(MESSAGE_TYPE.CONNECT_PROJECT)
         });
         if (!folders?.[0]) {
@@ -959,14 +962,6 @@ class VSLatexApp {
       await vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
     } catch {
       await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.PROJECT_FILE_NOT_LOCAL));
-    }
-  }
-
-  private getEndpointOrigin(): string | undefined {
-    try {
-      return new URL(getVSConfig().get<string>('endpoint', '')).origin;
-    } catch {
-      return undefined;
     }
   }
 

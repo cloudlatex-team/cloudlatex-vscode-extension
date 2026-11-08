@@ -3,10 +3,10 @@ import * as path from 'path';
 import { randomBytes } from 'crypto';
 import { applyEdits, modify, parse, ParseError } from 'jsonc-parser';
 import * as vscode from 'vscode';
+import { getVSConfig } from './config';
 import { RegisteredProject, normalizeProjectEndpoint } from './registeredProjects';
 
 export const CONNECTION_MARKER = '.vscode/cloudlatex-connection.json';
-const legacyPendingKey = 'cloudlatex.pendingFolderConnection';
 const pendingKeyPrefix = 'cloudlatex.pendingFolderConnection:';
 type Pending = {
   rootPath: string;
@@ -142,13 +142,9 @@ export async function completeFolderConnection(context: vscode.ExtensionContext)
   }
   const root = await fs.promises.realpath(folders[0].uri.fsPath);
   // Each folder has its own intent so simultaneous connections in two windows
-  // cannot overwrite one another's handoff. Accept the earlier key on upgrade.
-  let pendingKey = pendingKeyPrefix + root;
-  let pending = context.globalState.get<Pending>(pendingKey);
-  if (!pending && context.globalState.get<Pending>(legacyPendingKey)?.rootPath === root) {
-    pendingKey = legacyPendingKey;
-    pending = context.globalState.get<Pending>(pendingKey);
-  }
+  // cannot overwrite one another's handoff.
+  const pendingKey = pendingKeyPrefix + root;
+  const pending = context.globalState.get<Pending>(pendingKey);
   if (!pending || root !== pending.rootPath) {
     return false;
   }
@@ -176,7 +172,7 @@ export async function completeFolderConnection(context: vscode.ExtensionContext)
     // failure must not leave a connection enabled after activation reported failure.
     await fs.promises.unlink(marker);
     await context.globalState.update(pendingKey, undefined);
-    await vscode.workspace.getConfiguration('cloudlatex').update('enabled', true, vscode.ConfigurationTarget.Workspace);
+    await getVSConfig().update('enabled', true, vscode.ConfigurationTarget.Workspace);
     return true;
   } catch (error) {
     // No network access is started when the one-use handoff cannot be verified.

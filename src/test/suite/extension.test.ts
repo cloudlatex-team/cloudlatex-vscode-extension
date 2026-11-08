@@ -34,13 +34,15 @@ suite('LaTeX Workshop integration in VS Code', () => {
     assert.ok(items.some(item => item.command?.command === COMMAND_NAMES.connectProject));
   });
 
-  test('the sidebar identifies the actual server, including localhost ports', async () => {
-    const tree = new TargetTreeProvider({
-      isWorkspace: true, activated: false, loginStatus: 'offline', projectName: null,
-      endpointOrigin: 'http://localhost:3000'
-    });
-    const items = await tree.getChildren();
-    assert.ok(items.some(item => item.label.includes('http://localhost:3000')));
+  test('Commands lists actions instead of connection metadata', async () => {
+    for (const loginStatus of ['valid', 'invalid', 'offline'] as const) {
+      const tree = new TargetTreeProvider({
+        isWorkspace: true, activated: true, loginStatus, projectName: 'Paper'
+      });
+      const items = await tree.getChildren();
+      assert.ok(items.length > 0);
+      assert.ok(items.every(item => item.command?.command), `${loginStatus}: every entry should be actionable`);
+    }
   });
 
   test('an active project keeps PDF viewing available while offline', async () => {

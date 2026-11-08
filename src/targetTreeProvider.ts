@@ -23,18 +23,12 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
   async getChildren(element?: object) {
     const items: Item[] = [];
 
-    items.push(new Item(localeStr(MESSAGE_TYPE.CONNECT_PROJECT), vscode.TreeItemCollapsibleState.None,
-      { command: COMMAND_NAMES.connectProject, title: 'Connect Project' }, 'plug'));
+    items.push(this.getConnectProjectItem());
     items.push(this.getAccountItem());
 
     if (this.status.isWorkspace) {
-      if (this.status.endpointOrigin) {
-        items.push(new Item(`${localeStr(MESSAGE_TYPE.CONNECTION_ENDPOINT)}: ${this.status.endpointOrigin}`,
-          vscode.TreeItemCollapsibleState.None, undefined, 'server', this.status.endpointOrigin));
-      }
       items.push(this.getProjectItem());
-      items.push(new Item(localeStr(MESSAGE_TYPE.CONFIGURE_LATEX_WORKSHOP), vscode.TreeItemCollapsibleState.None,
-        { command: COMMAND_NAMES.configureLatexWorkshop, title: 'Configure LaTeX Workshop' }, 'extensions'));
+      items.push(this.getConfigureLatexWorkshopItem());
     }
 
     if (this.status.activated) {
@@ -50,6 +44,15 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
     }
 
     return items;
+  }
+
+  getConnectProjectItem() {
+    return new Item(localeStr(MESSAGE_TYPE.CONNECT_PROJECT), vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.connectProject,
+        title: 'Connect Project',
+        arguments: []
+      }, 'plug');
   }
 
   getAccountItem() {
@@ -75,6 +78,15 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<Item>
         title: 'setting',
         arguments: []
       }, 'settings');
+  }
+
+  getConfigureLatexWorkshopItem() {
+    return new Item(localeStr(MESSAGE_TYPE.CONFIGURE_LATEX_WORKSHOP), vscode.TreeItemCollapsibleState.None,
+      {
+        command: COMMAND_NAMES.configureLatexWorkshop,
+        title: 'Configure LaTeX Workshop',
+        arguments: []
+      }, 'extensions');
   }
 
   getCompileItem() {
@@ -138,7 +150,6 @@ class Item extends vscode.TreeItem {
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly command?: vscode.Command,
     public readonly codicon?: string,
-    public readonly tooltip?: string,
   ) {
     super(label, collapsibleState);
     if (codicon) {

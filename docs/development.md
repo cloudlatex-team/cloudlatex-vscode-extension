@@ -33,6 +33,41 @@ yarn install
 Use debug tool
 https://code.visualstudio.com/docs/editor/debugging
 
+### Custom API endpoints
+
+Normal use connects to `https://cloudlatex.io/api`. For local development, set
+`cloudlatex.endpoint` in an empty development workspace's `.vscode/settings.json`
+before registering or connecting a project:
+
+```json
+{
+  "cloudlatex.endpoint": "http://localhost:3000/api"
+}
+```
+
+Use a separate VS Code user-data directory and development credentials when
+testing another server. Named profiles within one user-data directory share the
+existing account file. The extension asks for confirmation before sending
+credentials to a custom endpoint. Registered shortcuts retain their endpoint,
+and a new folder connection carries it over along with the compilation, output,
+and ignored-file settings. The default endpoint is hidden from the registered
+project row, tooltip, connection confirmation, and folder picker; only custom
+endpoints are shown. Commands contains actions rather than server metadata.
+
+### Project connections and registered shortcuts
+
+The connection wizard accepts a project URL or ID and validates it through the
+existing individual-project API. It does not request a server-wide project list
+or depend on an unreleased project-list API. Shortcut registration uses the same
+individual-project API.
+
+Registered Projects is a local shortcut registry, not a server-wide project
+list. It remembers projects explicitly registered by URL/ID or connected in the
+current VS Code profile. Records contain the project ID, title, endpoint,
+last-opened time, and local folder when known; they contain no credentials.
+Any future feature that lists all account projects must be implemented only
+after the corresponding server API has been released.
+
 ## Tests
 
 ```bash

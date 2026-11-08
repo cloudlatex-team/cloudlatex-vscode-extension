@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse, ParseError } from 'jsonc-parser';
+import { DEFAULT_ENDPOINT } from './const';
 import { RegisteredProject, normalizeProjectEndpoint } from './registeredProjects';
 
 const settingsLimit = 1024 * 1024;
@@ -14,7 +15,7 @@ function insideRoot(root: string, target: string): boolean {
 // current project and server before opening another workspace from the sidebar.
 export async function folderMatchesRegisteredProject(
   record: RegisteredProject,
-  globalEndpoint = 'https://cloudlatex.io/api'
+  globalEndpoint = DEFAULT_ENDPOINT
 ): Promise<boolean> {
   if (!record.rootPath || !path.isAbsolute(record.rootPath) || !Number.isSafeInteger(record.id) || record.id <= 0) {
     return false;

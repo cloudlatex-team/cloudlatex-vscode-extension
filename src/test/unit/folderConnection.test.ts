@@ -30,6 +30,7 @@ async function fixture(state = new Map<string, unknown>()) {
   vm.runInNewContext(fs.readFileSync(require.resolve('../../registeredProjects'), 'utf8'), registrySandbox);
   const sandbox = { exports: {}, require: (name: string) => name === './locale' ? require('../../locale')
     : name === './const' ? require('../../const') : name === 'vscode' ? vscode
+    : name === './config' ? { getVSConfig: () => vscode.workspace.getConfiguration() }
     : name === './registeredProjects' ? registrySandbox.exports : require(name) };
   vm.runInNewContext(fs.readFileSync(require.resolve('../../folderConnection'), 'utf8'), sandbox);
   const mod = sandbox.exports as Module;
@@ -135,17 +136,6 @@ suite('Registered project folder handoff', () => {
       assert.strictEqual((await second.settings())['cloudlatex.enabled'], true);
       assert.strictEqual(shared.size, 0);
     } finally { await first.clean(); await second.clean(); }
-  });
-  test('a staged handoff from the earlier storage key can finish after upgrading', async () => {
-    const f = await fixture();
-    try {
-      await f.stage();
-      const [key, value] = Array.from(f.state.entries())[0];
-      f.state.delete(key);
-      f.state.set('cloudlatex.pendingFolderConnection', value);
-      assert.strictEqual(await f.complete(), true);
-      assert.strictEqual(f.state.size, 0);
-    } finally { await f.clean(); }
   });
   for (const change of ['nonce', 'endpoint', 'nonempty', 'expired', 'other-profile']) {
     test(`does not enable a handoff with ${change}`, async () => {
