@@ -33,27 +33,6 @@ yarn install
 Use debug tool
 https://code.visualstudio.com/docs/editor/debugging
 
-### Custom API endpoints
-
-Normal use connects to `https://cloudlatex.io/api`. For local development, set
-`cloudlatex.endpoint` in an empty development workspace's `.vscode/settings.json`
-before registering or connecting a project:
-
-```json
-{
-  "cloudlatex.endpoint": "http://localhost:3000/api"
-}
-```
-
-Use a separate VS Code user-data directory and development credentials when
-testing another server. Named profiles within one user-data directory share the
-existing account file. The extension asks for confirmation before sending
-credentials to a custom endpoint. Registered shortcuts retain their endpoint,
-and a new folder connection carries it over along with the compilation, output,
-and ignored-file settings. The default endpoint is hidden from the registered
-project row, tooltip, connection confirmation, and folder picker; only custom
-endpoints are shown. Commands contains actions rather than server metadata.
-
 ### Project connections and registered shortcuts
 
 The connection wizard accepts a project URL or ID and validates it through the
@@ -82,9 +61,9 @@ regression tests also run the pinned CLI plugin against an isolated loopback HTT
 fixture and real temporary files. They verify offline edits, reconnects,
 simultaneous sync requests, explicit push/pull conflict resolution, and remote
 deletion during offline editing without using a Cloud LaTeX account.
-`yarn test` also runs
-extension-host tests in an isolated temporary workspace, user profile and
-extension directory, with Cloud LaTeX disabled and its endpoint set to localhost.
+`yarn test` also runs extension-host tests in an isolated temporary workspace,
+user profile and extension directory, with Cloud LaTeX disabled and its endpoint
+set to an unused loopback port. No running Cloud LaTeX server is required.
 It downloads a test copy of VS Code by default. To use an existing executable,
 set `VSCODE_EXECUTABLE_PATH` (the application executable, not the `code` shell script).
 
