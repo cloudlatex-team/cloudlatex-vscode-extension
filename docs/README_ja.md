@@ -10,75 +10,96 @@
 - ローカル上のファイルと Cloud LaTeX サーバ上のファイルを自動同期
 - オフライン時のファイル編集にも対応 (オンライン復帰時に自動同期)
 
+ローカルで編集し、Cloud LaTeX でコンパイルした PDF を LaTeX Workshop で原稿の横に表示できます。
+
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/workshop-preview.png" alt="VS Code の Cloud LaTeX サイドバー、ローカル原稿、コンパイル済み PDF" width="960px">
+
 # インストール
 
 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=cloudlatex.cloudlatex)からインストール、あるいはクイックオープン(`ctrl/cmd + P`)に `ext install cloudlatex` と入力します.
 
 # 準備
 
-0. Cloud LaTeX のアカウントを持っていない場合は、[Cloud LaTeX](https://cloudlatex.io/)からアカウントを作成します。
-1. [プロジェクト一覧](https://cloudlatex.io/projects)の右上のユーザ名をクリックし、上から 3 つ目のプラグイン連携を選択する。トークン生成ダイアログが表示されるので、アカウント情報を入力し、生成されるクライアント ID、トークンを記録します。
+1. Cloud LaTeX のアカウントを持っていない場合は、[Cloud LaTeX](https://cloudlatex.io/) から作成します。
+2. [プロジェクト一覧](https://cloudlatex.io/projects) の右上のユーザ名をクリックし、プラグイン連携からクライアント ID とトークンを発行します。トークンの発行は従来どおり Web サイトで行います。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/extension_button_jp.png" alt="extension button" width="240px">  
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/extension_button_jp.png" alt="プラグイン連携メニュー" width="240px">
 <br />
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/token_dialog_jp.png" alt="token dialog" width="320px">
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/token_dialog_jp.png" alt="トークン発行ダイアログ" width="320px">
 
-2. [プロジェクト一覧](https://cloudlatex.io/projects)からプロジェクトを作成します。（VSCode から利用したいプロジェクトが既に存在する場合はスキップしてください。）
-3. 作成したプロジェクトのプロジェクト ID を URL より記録します。例: `/projects/123/edit` -> プロジェクト ID は `123`
+3. 接続するプロジェクトがまだない場合は、Web サイトで作成します。
 
-<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/cl_project_url.png" alt="url of cloudlatex project page" width="420px">
+# サイドバーから接続する
 
-# 設定
+1. Activity Bar の **CL** アイコンをクリックし、**プロジェクトを接続** を選びます。
+2. プロジェクト専用の空のローカルフォルダを開きます。フォルダを開いていない場合は選択画面が表示されるので、フォルダを開いてからもう一度 **プロジェクトを接続** を選んでください。
+3. メールアドレス、クライアント ID、トークンを入力します。保存済みの認証情報が有効なら、この入力は省略されます。
+4. ブラウザで開いている Cloud LaTeX のプロジェクトの URL または数値の ID を入力します。拡張機能がプロジェクトのタイトルを確認してから次へ進みます。
+5. プロジェクト名とローカルフォルダを確認し、**接続して再読み込み** を選びます。接続設定を保存して VS Code を再読み込みし、プロジェクトのファイルをダウンロードします。
 
-- ローカルに**空のプロジェクト用フォルダ**を作成し、VSCode でそのフォルダを開きます。
-  [Activity Bar](https://code.visualstudio.com/docs/getstarted/userinterface)に表示される`CL`アイコンをクリックすると Side Bar に二つのボタンが表示されます。
+コマンドパレット（macOS: `Cmd+Shift+P`、Windows/Linux: `Ctrl+Shift+P`）の **Cloud LaTeX: プロジェクトを接続** からも利用できます。
+プロジェクトの URL は、[Cloud LaTeX のプロジェクト一覧](https://cloudlatex.io/projects) から対象を開き、ブラウザのアドレス欄からコピーしてください。
 
-  <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/panel.png" alt="panel UI" width="320px">
+最初の接続では、プロジェクトのファイルが入っていないローカルフォルダを一つだけ開いてください。`.vscode` ディレクトリ、`.git` の管理情報、`.DS_Store` はあっても構いません。確認画面までにキャンセルした場合は、アカウント情報や接続設定を変更しません。
 
-- `Set account`ボタン（`アカウント設定` ボタン）をクリックし、`email`, `client`, `token` を設定します。
-  アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
-- VSCode の言語設定で日本語が設定されている場合は当拡張機能の表示も日本語化されます。キャプチャ画像は英語のものです。（[詳細](#ui言語設定)）
-- 次に`Project setting` ボタン (`プロジェクト設定` ボタン) をクリックし表示される項目のうち、
-  `Cloudlatex.projectID` に準備の項で確認した値を設定し、
-  `Clodulatex.Enabled` にチェックを付けます。(`Project setting` ボタンが表示されていない場合、プロジェクトフォルダが開かれているか確認してください。)
+接続済みプロジェクトに再ログインする場合は、サイドバーのアカウントボタンを使います。別のプロジェクトには、別の空フォルダを開いて **プロジェクトを接続** から接続してください。連携が有効なフォルダの接続先を切り替えたり、既存のローカル原稿を取り込んだりする操作には対応していません。
 
-  ＊ `User` タブではなく、`Workspace` タブに設定を行う必要があります。
+再読み込み後もダウンロードが始まらない場合は、認証情報や通信状態を確認してからサイドバーの **リロード** を実行してください。
+VS Code を日本語表示にすると、拡張機能の表示も日本語になります。（[UI 言語設定](#ui-言語設定)）
 
-    <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/setting.png" alt="setting UI" width="600px">
+## プロジェクト・ファイル・同期状態の表示
 
-- プロジェクトの[settings.json](https://code.visualstudio.com/docs/getstarted/settings)から設定することも可能です。(右上のアイコンクリックで`settings.json`を開きます)
+**CL** サイドバーには、次の三つの主要ビューがあります。
 
-  ```settings.json
-  {
-    "cloudlatex.projectId": 123,
-    "cloudlatex.enabled": true,
-    "cloudlatex.outDir":  "./.workspace",
-  }
-  ```
+- **登録済みプロジェクト** は、この端末内で、ワークスペースや VS Code プロファイルをまたいで使えるプロジェクトのショートカット一覧です。**+** ボタンまたは **URL／IDでプロジェクトを登録** から、Cloud LaTeX のプロジェクト URL または ID を入力します。タイトルを確認してショートカットを追加します。接続したプロジェクトも自動で記録されます。
+- **ファイル・同期状態** は、現在のプロジェクトで追跡しているファイルをフォルダ階層で表示します。ファイルをクリックするとローカルのファイルを開きます。コンパイル対象、未保存の編集、ローカルやサーバの変更、競合を表示します。先頭の行には同期の進行状況または直近の結果を表示し、マウスを重ねると最終同期時刻を確認できます。
+- **Commands** には、接続、アカウント、設定、同期、コンパイル、PDF 表示の操作があります。
 
-- [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)と併用することで、pdf のレビューやコマンド補完などが使えるようになります。
-  この場合、以下のようにして Latex Workshop の自動コンパイルを無効化してください (`latex-workshop.latex.outDir`は `cloudlatex.outDir` と同じ値に設定します)。
+<img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/sidebar-preview.png" alt="登録済みプロジェクト、同期済みファイル、コンパイル対象を表示する CL サイドバー" width="320px">
 
-  ```setting.json
-  {
-    "cloudlatex.projectId": 123,
-    "cloudlatex.enabled": true,
-    "cloudlatex.outDir":  "./.workspace",
-    "latex-workshop.latex.autoBuild.run": "never",
-    "latex-workshop.latex.outDir": "./.workspace",
-    "[latex]": {
-      "editor.formatOnSave": false,
-    }
-  }
-  ```
+登録済みプロジェクトは、確認済みのショートカット一覧です。Web アカウントにある全プロジェクトを取得した一覧ではありません。一覧はこの端末に保存され、VS Code のウィンドウとプロファイル間で共有されます。ショートカットにトークンやクライアント ID は含みません。ショートカットを登録するだけではファイルのダウンロードや同期は行いません。
 
-- 設定ファイルを変更すると、VSCode を再起動するよう促すダイアログが表示されるので、ダイアログ中のダイアログ中の `Restart VSCode` ボタンを押して再起動します。
-  再起動後、プロジェクトファイルがダウンロードされます。
-  ダウンロードが成功すると、ファイル同期に成功した旨のダイアログが表示されます。
+ローカルフォルダが記録されているプロジェクトをクリックすると、そのフォルダを開きます。ローカル未接続の場合は、クリックすると保存先フォルダの選択画面が開きます。空のローカルフォルダを選ぶと、そのプロジェクトに接続してファイルを自動取得します。自動コンパイルの設定、出力先、除外ファイル設定も引き継ぐため、プロジェクトを選び直す必要はありません。接続済みフォルダや、現在のプロジェクト内のフォルダは保存先にできません。**一覧から登録を解除** はショートカットだけを削除します。ローカルやサーバのファイルを削除したり、既存の接続を無効にしたりする操作ではありません。
 
-  ＊ **プロジェクトを同期しなおす際には、同期中にローカルのファイルを削除しないように注意してください。(サーバのファイルも削除されます)　また、　同じローカルディレクトリ内で同期するプロジェクトを変更する際には、ローカルファイルが予期せず上書きされないように注意してください。（`projectId` を変更して同期を行うと、元のローカルファイルは上書きされます）**
+出力先は、プロジェクト内を指す相対パスだけを引き継ぎます。絶対パスやプロジェクトの外を指すパスの場合、新しいフォルダでは既定の出力先を使用します。
 
-  ＊ プロジェクトファイルがダウンロードされない時は、`reload`ボタン(`リロード` ボタン)をクリックするか、一旦 VSCode を閉じ、再度開いてみてください
+**未保存** は、エディタ上の編集がまだディスクに保存されておらず、その内容が同期されていないことを示します。ローカル・サーバの変更表示は、直近の確認で得られた同期情報です。サーバ側の編集を常時監視した表示ではありません。ファイルを保存すると通常の同期処理が働き、**リロード** からも同期を要求できます。競合がある場合は、解決してから同期を完了します。
+
+自動コンパイルせずに同期やファイル閲覧を行いたい場合は、接続前に `cloudlatex.autoCompile` を `false` に設定してください。最初のダウンロード後にも自動コンパイルを実行しません。**コンパイル** から手動でビルドできます。
+
+## 手動でプロジェクトを設定する場合
+
+アカウントが設定済みの場合は、従来どおり **プロジェクト設定** またはワークスペースの `.vscode/settings.json` からプロジェクト ID と連携の有効化を設定できます。**User** ではなく **Workspace** に設定してください。プロジェクト ID は Web サイトの URL に含まれる数値です。例えば `/projects/123/edit` なら `123` です。
+
+```json
+{
+  "cloudlatex.projectId": 123,
+  "cloudlatex.enabled": true,
+  "cloudlatex.outDir": "./.workspace"
+}
+```
+
+Cloud LaTeX の設定を手動で変更した後は、表示される案内から VS Code のウィンドウを再読み込みしてください。プロジェクトごとに別の空フォルダを使用してください。同期が有効な状態でローカルのプロジェクトファイルを削除すると、サーバ上の対応するファイルも削除されます。
+
+## LaTeX Workshop との連携
+
+[LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop) と併用すると、PDF のプレビューやコマンド補完が使えます。
+コマンドパレットから **Cloud LaTeX: LaTeX Workshop 連携を設定** を実行するか、Cloud LaTeX のサイドバーで **LaTeX Workshop 連携を設定** を選びます。表示される設定内容を確認してから、現在のワークスペースに適用してください。
+
+このコマンドは、LaTeX Workshop によるローカルの自動ビルドを無効にし、PDF の参照先を Cloud LaTeX の成果物出力先に合わせます。変更するのは次の二つのワークスペース設定だけです。Cloud LaTeX 自体の設定、ユーザ設定、フォーマット設定は変更しません。連携の設定時に Cloud LaTeX サーバへの接続は行いません。
+
+例えば `cloudlatex.outDir` が `./.workspace` の場合、以下のように設定されます。
+
+```json
+{
+  "latex-workshop.latex.autoBuild.run": "never",
+  "latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%/.workspace"
+}
+```
+
+ワークスペースを基準にするため、メインの `.tex` ファイルがサブフォルダにあっても成果物を正しく参照できます。`cloudlatex.outDir` が空の場合は `%WORKSPACE_FOLDER%`、絶対パスの場合はその絶対パスを使用します。`cloudlatex.outDir` を変更した後は、このコマンドを再実行してください。
+
+**PDF 表示** は、現在のコンパイルターゲットのダウンロード済み PDF を開きます。接続済みのプロジェクトで通信がオフラインになった場合も利用できます。LaTeX Workshop が未インストールの場合は、インストールするか、外部アプリで開くかを選べます。PDF がまだダウンロードされていない場合は、先にプロジェクトをコンパイルしてください。
 
 ## 設定項目一覧
 
@@ -218,7 +239,7 @@ Cloud LaTeX web アプリのプロジェクトにアクセスし、コンパイ�
 ## 「ディレクトリにファイルが存在します。ファイルの上書きを防ぐため、同期を行うディレクトリは空である必要があります。」または「The directory contains files. To prevent overwriting files, the directory to be synchronized must be empty.」というメッセージが表示されてファイルの同期が開始されない
 
 同期を開始するディレクトリに既存のファイルがある場合、意図しない上書きの防止の為に同期が開始されません。
-[設定](#設定)の通り、空のディレクトリで VSCode を開いてください。
+[サイドバーから接続する](#サイドバーから接続する)の通り、空のディレクトリで VSCode を開いてください。
 
 # 注意事項
 

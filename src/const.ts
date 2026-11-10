@@ -1,9 +1,12 @@
 import { VSConfig } from './type';
 
 export const EXTENSION_NAME = 'cloudlatex';
+export const DEFAULT_ENDPOINT = 'https://cloudlatex.io/api';
 
 export const DATA_TREE_PROVIDER_COMMDNS_ID = 'cloudlatex-commands';
 export const DATA_TREE_PROVIDER_TUTORIAL_ID = 'cloudlatex-tutorial';
+export const DATA_TREE_PROVIDER_PROJECTS_ID = 'cloudlatex-projects';
+export const DATA_TREE_PROVIDER_FILES_ID = 'cloudlatex-files';
 export const STATUS_BAR_TEXT = 'CL';
 
 export const CONFIG_NAMES: { [k in keyof VSConfig]: `${typeof EXTENSION_NAME}.${keyof VSConfig}` } = {
@@ -30,4 +33,10 @@ export const COMMAND_NAMES: { [k: string]: `${typeof EXTENSION_NAME}.${string}` 
   resetLocal: `${EXTENSION_NAME}.resetLocal`,
   clearAccount: `${EXTENSION_NAME}.clearAccount`,
   setTarget: `${EXTENSION_NAME}.setTarget`,
+  configureLatexWorkshop: `${EXTENSION_NAME}.configureLatexWorkshop`,
+  connectProject: `${EXTENSION_NAME}.connectProject`,
+  registerProject: `${EXTENSION_NAME}.registerProject`,
+  openRegisteredProject: `${EXTENSION_NAME}.openRegisteredProject`,
+  removeRegisteredProject: `${EXTENSION_NAME}.removeRegisteredProject`,
+  openProjectFile: `${EXTENSION_NAME}.openProjectFile`,
 };

@@ -5,8 +5,8 @@
   "cloudlatex.config.autoCompile": "自動コンパイルを有効にする",
   "cloudlatex.config.supressIcon": "LaTeX プロジェクト以外のプロジェクトでは Activity Bar に CL アイコンが表示されなくなります",
   "cloudlatex.config.ignoredFiles": "同期を行わないファイル",
-  "cloudlatex.viewsWelcome.emptyWorkbench": "CloudLaTeX プラグインの利用を開始するためには空のフォルダを作成し開く必要があります。\n[Open Folder](command:vscode.openFolder)\n詳しい利用方法はドキュメントを参照してください:\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)",
-  "cloudlatex.viewsWelcome.inWorkbench": "1. [Cloud LaTeX プロジェクト一覧ページ](https://cloudlatex.io/projects?locale=ja) の右上メニューよりアクセストークンを発行 \n 2. 発行したアクセストークンを使って、アカウント設定を行う\n3. プロジェクトの設定を行い、拡張機能を有効化する  \n\n詳しい利用方法はドキュメントを参照してください:\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)",
+  "cloudlatex.viewsWelcome.emptyWorkbench": "このサイドバーから Cloud LaTeX のプロジェクトに接続できます。\n[プロジェクトを接続](command:cloudlatex.connectProject)\n空のローカルフォルダを開いてから、もう一度「プロジェクトを接続」を選んでください。認証情報を入力し、プロジェクトの URL / ID で接続します。\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#connect-from-the-sidebar) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#サイドバーから接続する)",
+  "cloudlatex.viewsWelcome.inWorkbench": "1. [Cloud LaTeX プロジェクト一覧](https://cloudlatex.io/projects?locale=ja) のアカウントメニューからクライアント ID とトークンを発行します。\n2. [プロジェクトを接続](command:cloudlatex.connectProject) から認証情報を入力します。プロジェクトの URL または ID を入力します。拡張機能がタイトルを確認します。\n3. プロジェクトと空のローカルフォルダを確認すると、再読み込みしてダウンロードします。接続済みプロジェクトへの再ログインはアカウントボタンから行えます。\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#connect-from-the-sidebar) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#サイドバーから接続する)",
   "cloudlatex.command.openHelpPage": "ヘルプページを開く",
   "cloudlatex.command.compile": "コンパイル",
   "cloudlatex.command.account": "アカウント",
@@ -14,5 +14,13 @@
   "cloudlatex.command.viewCompilerError": "コンパイルエラー表示",
   "cloudlatex.command.compilerLog": "コンパイルログ表示",
   "cloudlatex.command.viewPDF": "PDF",
-  "cloudlatex.command.setTarget": "コンパイルターゲットに設定"
+  "cloudlatex.command.setTarget": "コンパイルターゲットに設定",
+  "cloudlatex.command.configureLatexWorkshop": "LaTeX Workshop 連携を設定",
+  "cloudlatex.command.connectProject": "プロジェクトを接続",
+  "cloudlatex.views.projects": "登録済みプロジェクト",
+  "cloudlatex.views.files": "ファイル・同期状態",
+  "cloudlatex.command.registerProject": "URL／IDでプロジェクトを登録",
+  "cloudlatex.command.openRegisteredProject": "登録済みプロジェクトを開く",
+  "cloudlatex.command.removeRegisteredProject": "一覧から登録を解除",
+  "cloudlatex.command.openProjectFile": "プロジェクトのファイルを開く"
 }

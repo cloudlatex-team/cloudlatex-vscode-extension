@@ -33,6 +33,69 @@ yarn install
 Use debug tool
 https://code.visualstudio.com/docs/editor/debugging
 
+### Project connections and registered shortcuts
+
+The connection wizard accepts a project URL or ID and validates it through the
+existing individual-project API. It does not request a server-wide project list
+or depend on an unreleased project-list API. Shortcut registration uses the same
+individual-project API.
+
+Registered Projects is a local shortcut registry, not a server-wide project
+list. It remembers projects explicitly registered by URL/ID or connected on this
+device, shared by VS Code windows and profiles. Updates use an exclusive file
+lock and atomic file replacement rather than cached globalState arrays. Records
+contain the project ID, title, endpoint,
+last-opened time, and local folder when known; they contain no credentials.
+Any future feature that lists all account projects must be implemented only
+after the corresponding server API has been released.
+
+## Tests
+
+```bash
+yarn install --frozen-lockfile
+yarn run lint
+yarn run test:unit
+yarn test
+```
+
+Adapter unit tests mock VS Code and require no server or account. The offline
+regression tests also run the pinned CLI plugin against an isolated loopback HTTP
+fixture and real temporary files. They verify offline edits, reconnects,
+simultaneous sync requests, explicit push/pull conflict resolution, and remote
+deletion during offline editing without using a Cloud LaTeX account.
+`yarn test` also runs extension-host tests in an isolated temporary workspace,
+user profile and extension directory, with Cloud LaTeX disabled and its endpoint
+set to an unused loopback port. No running Cloud LaTeX server is required.
+It downloads a test copy of VS Code by default. To use an existing executable,
+set `VSCODE_EXECUTABLE_PATH` (the application executable, not the `code` shell script).
+
+## Synchronization review notes
+
+The CLI plugin remains pinned to `853b03cb8777381019293cecb7f6ad05fcb5c1c2`.
+The extension does not add a reconnect timer or a new merge algorithm. File-change
+events and the Reload action continue to call the existing synchronization API.
+The new display baseline copies file metadata and normalizes only stale remote
+flags from a known successful sync; it does not modify the core repository.
+
+There is one intentional compilation change: `cloudlatex.autoCompile: false`
+also suppresses the initial automatic compile. Manual Compile remains available.
+
+The current upstream watcher has a separate cold-start limitation: changes made
+externally while the watcher is stopped may not be marked as local edits on
+restart. If the remote copy changed too, the core can download it without
+reporting a conflict. The running-watcher offline tests above do not establish
+safety for that scenario. This limitation requires a CLI-plugin change and is
+not addressed by the sidebar feature.
+
+The folder connection marker contains a one-use nonce only. Each target folder's
+pending intent is stored in a separate file in the extension's global storage,
+shared by windows and profiles on this device. It does not use cached globalState
+writes. Synchronization stays disabled until the destination host validates the
+handoff and clears old sync metadata. Consumed intents retain a tombstone so stale
+legacy state cannot restore them.
+Expired intents remove only their own marker so the folder can be selected again.
+`jsonc-parser` preserves comments and trailing commas in VS Code settings.
+
 ## Build
 
 ```bash

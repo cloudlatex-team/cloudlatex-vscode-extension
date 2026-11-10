@@ -37,12 +37,32 @@
     "onCommand:cloudlatex.reload",
     "onCommand:cloudlatex.compile",
     "onCommand:cloudlatex.account",
-    "onCommand:cloudlatex.setting"
+    "onCommand:cloudlatex.setting",
+    "onCommand:cloudlatex.configureLatexWorkshop",
+    "onCommand:cloudlatex.viewPDF",
+    "onCommand:cloudlatex.connectProject",
+    "onView:cloudlatex-projects",
+    "onView:cloudlatex-files",
+    "onCommand:cloudlatex.registerProject",
+    "onCommand:cloudlatex.openRegisteredProject",
+    "onCommand:cloudlatex.removeRegisteredProject",
+    "onCommand:cloudlatex.openProjectFile",
+    "workspaceContains:.vscode/cloudlatex-connection.json"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "views": {
       "cloudlatex": [
+        {
+          "id": "cloudlatex-projects",
+          "name": "%cloudlatex.views.projects%",
+          "when": "config.cloudlatex.enabled || !config.cloudlatex.supressIcon"
+        },
+        {
+          "id": "cloudlatex-files",
+          "name": "%cloudlatex.views.files%",
+          "when": "config.cloudlatex.enabled || !config.cloudlatex.supressIcon"
+        },
         {
           "id": "cloudlatex-commands",
           "name": "Commands",
@@ -215,13 +235,63 @@
         "command": "cloudlatex.clearAccount",
         "title": "Clear stored account",
         "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.configureLatexWorkshop",
+        "title": "%cloudlatex.command.configureLatexWorkshop%",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.connectProject",
+        "title": "%cloudlatex.command.connectProject%",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.registerProject",
+        "title": "%cloudlatex.command.registerProject%",
+        "category": "Cloud LaTeX",
+        "icon": "$(add)"
+      },
+      {
+        "command": "cloudlatex.openRegisteredProject",
+        "title": "%cloudlatex.command.openRegisteredProject%",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.removeRegisteredProject",
+        "title": "%cloudlatex.command.removeRegisteredProject%",
+        "category": "Cloud LaTeX"
+      },
+      {
+        "command": "cloudlatex.openProjectFile",
+        "title": "%cloudlatex.command.openProjectFile%",
+        "category": "Cloud LaTeX"
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "cloudlatex.openRegisteredProject",
+          "when": "false"
+        },
+        {
+          "command": "cloudlatex.removeRegisteredProject",
+          "when": "false"
+        },
+        {
+          "command": "cloudlatex.openProjectFile",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "cloudlatex.openHelpPage",
           "when": "view == cloudlatex-commands",
+          "group": "navigation"
+        },
+        {
+          "command": "cloudlatex.registerProject",
+          "when": "view == cloudlatex-projects",
           "group": "navigation"
         }
       ],
@@ -229,6 +299,13 @@
         {
           "when": "(resourceLangId == latex || resourceLangId == tex) && treeElementHasParent == false",
           "command": "cloudlatex.setTarget"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "cloudlatex.removeRegisteredProject",
+          "when": "view == cloudlatex-projects && viewItem == registeredProject",
+          "group": "management"
         }
       ]
     },
@@ -252,7 +329,8 @@
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "test": "node ./out/test/runTest.js",
-    "vsce": "vsce package --yarn -o build"
+    "vsce": "vsce package --yarn -o build",
+    "test:unit": "yarn run compile && node ./out/test/unit/run.js"
   },
   "devDependencies": {
     "@types/dateformat": "^3.0.1",
@@ -271,6 +349,7 @@
   },
   "dependencies": {
     "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#853b03cb8777381019293cecb7f6ad05fcb5c1c2",
-    "dateformat": "^4.0.0"
+    "dateformat": "^4.0.0",
+    "jsonc-parser": "^3.3.1"
   }
 }

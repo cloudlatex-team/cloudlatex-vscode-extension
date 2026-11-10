@@ -6,8 +6,8 @@
   "cloudlatex.config.supressIcon": "Set true to hide cloudlatex icon on the activity bar in the unactivated project.",
   "cloudlatex.config.ignoredFiles": "Ignore file patterns",
   "cloudlatex.config.endpoint": "API endpoint. *Do not edit this value under normal usage.",
-  "cloudlatex.viewsWelcome.emptyWorkbench": "In order to start to use CloudLaTeX extension, you need to create empty folder and open it.\n[Open Folder](command:vscode.openFolder)\nTo learn more about the extension, read document: \n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [JA](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)",
-  "cloudlatex.viewsWelcome.inWorkbench": "1. Generate an access token from the menu in the upper right corner of [Cloud LaTeX Projects page](https://cloudlatex.io/projects)\n2. Set account with generated token \n 3. Configure project setting and activate the extension  \n\nTo learn more about the extension, read document: \n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#setting) [JA](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#%E6%BA%96%E5%82%99)",
+  "cloudlatex.viewsWelcome.emptyWorkbench": "Connect a Cloud LaTeX project from this sidebar.\n[Connect Project](command:cloudlatex.connectProject)\nChoose an empty local folder, then click Connect Project again. Enter your credentials and connect using the project URL or ID.\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#connect-from-the-sidebar) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#サイドバーから接続する)",
+  "cloudlatex.viewsWelcome.inWorkbench": "1. Generate a client ID and token from the account menu on the [Cloud LaTeX Projects page](https://cloudlatex.io/projects).\n2. [Connect Project](command:cloudlatex.connectProject) and enter your credentials. Paste your project URL or enter its ID. The extension verifies the project title.\n3. Confirm the project and empty local folder to reload and download files. Use the account button to re-login to an existing connection.\n[EN](https://github.com/cloudlatex-team/cloudlatex-vscode-extension#connect-from-the-sidebar) [日本語](https://github.com/cloudlatex-team/cloudlatex-vscode-extension/blob/main/docs/README_ja.md#サイドバーから接続する)",
   "cloudlatex.command.openHelpPage": "Open Help Page",
   "cloudlatex.command.compile": "Compile",
   "cloudlatex.command.account": "Set Account",
@@ -15,5 +15,13 @@
   "cloudlatex.command.viewCompilerError": "View Compile Error",
   "cloudlatex.command.compilerLog": "View Compiler Log",
   "cloudlatex.command.viewPDF": "View PDF",
-  "cloudlatex.command.setTarget": "Set As LaTeX Compile Target"
+  "cloudlatex.command.setTarget": "Set As LaTeX Compile Target",
+  "cloudlatex.command.configureLatexWorkshop": "Configure LaTeX Workshop",
+  "cloudlatex.command.connectProject": "Connect Project",
+  "cloudlatex.views.projects": "Registered Projects",
+  "cloudlatex.views.files": "Files & Sync",
+  "cloudlatex.command.registerProject": "Register Project by URL / ID",
+  "cloudlatex.command.openRegisteredProject": "Open Registered Project",
+  "cloudlatex.command.removeRegisteredProject": "Remove Project from List",
+  "cloudlatex.command.openProjectFile": "Open Project File"
 }

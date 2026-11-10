@@ -29,6 +29,8 @@ jobs:
       run: yarn install --frozen-lockfile
     - name: lint
       run: yarn run lint
+    - name: Unit tests
+      run: yarn run test:unit
     - name: Install vsce
       run: yarn add vsce
     - name: build vsce
