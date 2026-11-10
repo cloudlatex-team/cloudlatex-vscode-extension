@@ -6,6 +6,7 @@ import { getRootPath, getVSConfig } from '../config';
 
 const extensionId = 'james-yu.latex-workshop';
 const marketplaceUrl = 'https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop';
+const viewPDFCommand = 'latex-workshop.view';
 const refreshPDFViewerCommand = 'latex-workshop.refresh-viewer';
 
 export function checkInstalled() {
@@ -94,7 +95,17 @@ export async function viewPDF(pdfPath?: string): Promise<void> {
     return;
   }
   if (!pdfPath) {
-    await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.PDF_NOT_FOUND));
+    // The core does not restore the compile target on an offline cold start.
+    // Let Workshop resolve the existing local PDF as it did before this adapter.
+    if (checkInstalled()) {
+      try {
+        await vscode.commands.executeCommand(viewPDFCommand);
+      } catch (error) {
+        await vscode.window.showErrorMessage(`${localeStr(MESSAGE_TYPE.PDF_OPEN_FAILED)} ${String(error)}`);
+      }
+    } else {
+      await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.PDF_NOT_FOUND));
+    }
     return;
   }
 
@@ -104,7 +115,7 @@ export async function viewPDF(pdfPath?: string): Promise<void> {
     if (!(stat.type & vscode.FileType.File)) {
       throw new Error('Not a file');
     }
-  } catch {
+  } catch (e) {
     await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.PDF_NOT_FOUND));
     return;
   }

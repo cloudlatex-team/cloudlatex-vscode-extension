@@ -262,7 +262,7 @@ suite('LaTeX Workshop integration', () => {
 
   test('missing PDF, missing workspace and directories never open a viewer', async () => {
     const cases: [Options, string | undefined, string][] = [
-      [{}, undefined, 'PDF_NOT_FOUND'],
+      [{ installed: false }, undefined, 'PDF_NOT_FOUND'],
       [{ rootPath: null }, 'main.pdf', 'NO_WORKSPACE_ERROR'],
       [{ statError: new Error('ENOENT') }, 'main.pdf', 'PDF_NOT_FOUND'],
       [{ statType: 2 }, 'main.pdf', 'PDF_NOT_FOUND']
@@ -274,6 +274,22 @@ suite('LaTeX Workshop integration', () => {
       assert.deepStrictEqual(state.commands, []);
       assert.deepStrictEqual(state.externalUris, []);
     }
+  });
+
+  test('unknown artifact on an offline cold start preserves Workshop local PDF discovery', async () => {
+    const state = loadWorkshop();
+    await state.workshop.viewPDF();
+    assert.deepStrictEqual(state.commands, [{ command: 'latex-workshop.view', args: [] }]);
+    assert.deepStrictEqual(state.statUris, []);
+    assert.deepStrictEqual(state.warnings, []);
+    assert.deepStrictEqual(state.externalUris, []);
+  });
+
+  test('offline Workshop PDF discovery failures are reported', async () => {
+    const state = loadWorkshop({ commandError: new Error('local PDF unavailable') });
+    await state.workshop.viewPDF();
+    assert.ok(state.errors[0].includes('PDF_OPEN_FAILED'));
+    assert.ok(state.errors[0].includes('local PDF unavailable'));
   });
 
   test('PDF preview command rejections are reported', async () => {

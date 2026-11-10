@@ -61,7 +61,8 @@ function loadConnection(options: Options = {}) {
     require: (name: string): unknown => {
       if (name === './locale' || name === '../locale') { return require('../../locale'); }
       if (name === './const') { return require('../../const'); }
-      if (name === 'path') { return require(name); }
+      if (name === 'fs' || name === 'path' || name === 'crypto') { return require(name); }
+      if (name === './fileLock') { return require('../../fileLock'); }
       if (name === './registeredProjects') {
         const registrySandbox = { exports: {}, URL, require: sandbox.require };
         vm.runInNewContext(fs.readFileSync(require.resolve('../../registeredProjects'), 'utf8'), registrySandbox);
@@ -465,6 +466,86 @@ suite('Project connection wizard', () => {
   });
 });
 
+suite('Registered project authentication recovery', () => {
+  test('valid saved credentials do not prompt again', async () => {
+    const state = loadConnection();
+    const loaded = await state.api.loadProjectWithAccount(account, 'https://cloudlatex.io/api', 42);
+    assert.strictEqual(loaded?.account, account);
+    assert.strictEqual(loaded?.project.id, 42);
+    assert.strictEqual(state.requests.length, 1);
+    assert.strictEqual(state.accountInputs(), 0);
+  });
+
+  test('a 401 retries the same project once with the entered credentials', async () => {
+    const replacement = { ...account, token: ' replacement-token ' };
+    const rejected = mockTransport({ status: 401 });
+    const accepted = mockTransport();
+    const state = loadConnection({
+      enteredAccounts: [replacement], warningNeverDismissed: true,
+      get: (url, options, callback) => options.headers['access-token'] === account.token
+        ? rejected.get(url, options, callback) : accepted.get(url, options, callback)
+    });
+    const loaded = await state.api.loadProjectWithAccount(account, 'https://cloudlatex.io/api', 42);
+    assert.strictEqual(loaded?.account.token, 'replacement-token');
+    assert.strictEqual(loaded?.project.id, 42);
+    assert.strictEqual(state.accountInputs(), 1);
+    assert.strictEqual(state.requests.length, 2);
+    assert.ok(state.requests.every(request => request.url.href === 'https://cloudlatex.io/api/projects/42'));
+    assert.deepStrictEqual(state.warnings, ['CONNECT_ACCOUNT_INVALID']);
+    assert.strictEqual(account.token, 'private-test-token');
+  });
+
+  test('the progress wrapper covers each request but not the credential prompt', async () => {
+    const replacement = { ...account, token: 'replacement-token' };
+    const rejected = mockTransport({ status: 401 });
+    const accepted = mockTransport();
+    const state = loadConnection({
+      enteredAccounts: [replacement], warningNeverDismissed: true,
+      get: (url, options, callback) => options.headers['access-token'] === account.token
+        ? rejected.get(url, options, callback) : accepted.get(url, options, callback)
+    });
+    const promptsDuringProgress: number[] = [];
+    const loaded = await state.api.loadProjectWithAccount(account, 'https://cloudlatex.io/api', 42, async task => {
+      const before = state.accountInputs();
+      try {
+        return await task();
+      } finally {
+        promptsDuringProgress.push(state.accountInputs() - before);
+      }
+    });
+    assert.strictEqual(loaded?.account.token, 'replacement-token');
+    assert.deepStrictEqual(promptsDuringProgress, [0, 0]);
+    assert.strictEqual(state.accountInputs(), 1);
+  });
+
+  test('canceling credential re-entry stops without saving or retrying', async () => {
+    const rejected = mockTransport({ status: 401 });
+    const state = loadConnection({ get: rejected.get, enteredAccounts: [new Error('canceled')] });
+    assert.strictEqual(await state.api.loadProjectWithAccount(account, 'https://cloudlatex.io/api', 42), undefined);
+    assert.strictEqual(state.requests.length, 1);
+    assert.strictEqual(state.accountInputs(), 1);
+    assert.deepStrictEqual(state.commits, []);
+  });
+
+  test('invalid replacement credentials do not create an unbounded retry loop', async () => {
+    const rejected = mockTransport({ status: 401 });
+    const state = loadConnection({ get: rejected.get });
+    await assert.rejects(state.api.loadProjectWithAccount(account, 'https://cloudlatex.io/api', 42), /Project lookup failed/);
+    assert.strictEqual(state.requests.length, 2);
+    assert.strictEqual(state.accountInputs(), 1);
+  });
+
+  test('permission and network errors do not prompt for credentials', async () => {
+    for (const options of [{ status: 403 }, { requestError: new Error('offline') }]) {
+      const transport = mockTransport(options);
+      const state = loadConnection({ get: transport.get });
+      await assert.rejects(state.api.loadProjectWithAccount(account, 'https://cloudlatex.io/api', 42), /Project lookup failed/);
+      assert.strictEqual(state.requests.length, 1);
+      assert.strictEqual(state.accountInputs(), 0);
+    }
+  });
+});
+
 suite('Project URL parsing and token lookup transport', () => {
   test('accepts a positive safe ID or same-origin Cloud LaTeX project URL', () => {
     const { api } = loadConnection();
@@ -489,6 +570,33 @@ suite('Project URL parsing and token lookup transport', () => {
     for (const endpoint of ['file:///api', 'https://user:password@cloudlatex.io/api', 'https://cloudlatex.io/api?x=1', 'https://cloudlatex.io/api#fragment']) {
       assert.strictEqual(api.parseProjectId('42', endpoint), undefined, endpoint);
     }
+  });
+
+  test('connection parsing and lookup reject endpoint spellings the project registry cannot persist', async () => {
+    for (const endpoint of [
+      'https://cloudlatex.io/api?', 'https://cloudlatex.io/api#',
+      'https://cloudlatex.io/a pi', 'https://cloudlatex.io/a\tpi',
+      'https://cloudlatex.\nio/api', 'https://cloudlatex.io/api\u0000',
+      'https://cloudlatex.io/api\u007f'
+    ]) {
+      const state = loadConnection({ config: { endpoint } });
+      assert.strictEqual(state.api.parseProjectId('42', endpoint), undefined, endpoint);
+      await assert.rejects(state.api.loadProjectById(account, endpoint, 42), /Project lookup failed/);
+      await state.run();
+      assert.strictEqual(state.accountInputs(), 0);
+      assert.deepStrictEqual(state.requests, []);
+      assert.deepStrictEqual(state.commits, []);
+      assert.deepStrictEqual(state.errors, ['CONNECT_FAILED']);
+    }
+  });
+
+  test('valid endpoint spellings use the same canonical API path as the project registry', async () => {
+    const transport = mockTransport();
+    const { api } = loadConnection({ get: transport.get });
+    const endpoint = ' HTTPS://CloudLaTeX.IO:443/api/// ';
+    assert.strictEqual(api.parseProjectId('https://cloudlatex.io/projects/42/edit', endpoint), 42);
+    await api.loadProjectById(account, endpoint, 42);
+    assert.strictEqual(transport.requests[0].url.href, 'https://cloudlatex.io/api/projects/42');
   });
 
   test('lookup sends only token authentication headers to the selected API project endpoint', async () => {

@@ -87,7 +87,7 @@ export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<Project
     this._onDidChangeTreeData.dispose();
   }
 
-  private relativePath(raw: string): string | undefined {
+  relativePath(raw: string): string | undefined {
     const normalized = raw.replace(/\\/g, '/');
     if (!normalized || normalized.startsWith('/') || /^[a-z]:/i.test(normalized) || normalized.includes('\0')) {
       return undefined;
@@ -99,7 +99,7 @@ export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<Project
     return parts.join('/');
   }
 
-  private localPath(relativePath: string): string | undefined {
+  localPath(relativePath: string): string | undefined {
     if (!this.snapshot.rootPath) {
       return undefined;
     }
@@ -112,7 +112,7 @@ export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<Project
     return resolved;
   }
 
-  private dirtyPaths(): Set<string> {
+  dirtyPaths(): Set<string> {
     const dirty = new Set<string>();
     for (const raw of this.snapshot.dirtyPaths || []) {
       let relative = raw;
@@ -130,7 +130,7 @@ export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<Project
     return dirty;
   }
 
-  private describe(info: FileInfo, dirty: boolean): FileState {
+  describe(info: FileInfo, dirty: boolean): FileState {
     const local = info.localChange !== 'no';
     const remote = info.remoteChange !== 'no';
     const conflict = info.changeLocation === 'both' || (local && remote);
@@ -159,10 +159,18 @@ export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<Project
     if (info.relativePath.replace(/\\/g, '/') === this.snapshot.appInfo.targetFile?.relativePath.replace(/\\/g, '/')) {
       labels.push(localeStr(MESSAGE_TYPE.FILE_COMPILE_TARGET));
     }
-    return { conflict, pending: conflict || local || remote || dirty, dirty, pendingCount: conflict || local || remote || dirty ? 1 : 0, description: labels.join(' · '), icon };
+    const pending = conflict || local || remote || dirty;
+    return {
+      conflict,
+      pending,
+      dirty,
+      pendingCount: pending ? 1 : 0,
+      description: labels.join(' · '),
+      icon
+    };
   }
 
-  private rebuild(): void {
+  rebuild(): void {
     const roots: ProjectFileItem[] = [];
     const nodes = new Map<string, ProjectFileItem>();
     const dirty = this.dirtyPaths();
@@ -310,7 +318,8 @@ export class ProjectFilesTreeProvider implements vscode.TreeDataProvider<Project
     summary.tooltip = tooltip.join('\n');
     this.items = [summary, ...roots];
     if (!roots.length) {
-      this.items.push(new ProjectFileItem('empty', localeStr(this.snapshot.rootPath ? MESSAGE_TYPE.FILES_EMPTY : MESSAGE_TYPE.FILES_NO_PROJECT)));
+      const message = this.snapshot.rootPath ? MESSAGE_TYPE.FILES_EMPTY : MESSAGE_TYPE.FILES_NO_PROJECT;
+      this.items.push(new ProjectFileItem('empty', localeStr(message)));
     }
   }
 }

@@ -41,8 +41,10 @@ or depend on an unreleased project-list API. Shortcut registration uses the same
 individual-project API.
 
 Registered Projects is a local shortcut registry, not a server-wide project
-list. It remembers projects explicitly registered by URL/ID or connected in the
-current VS Code profile. Records contain the project ID, title, endpoint,
+list. It remembers projects explicitly registered by URL/ID or connected on this
+device, shared by VS Code windows and profiles. Updates use an exclusive file
+lock and atomic file replacement rather than cached globalState arrays. Records
+contain the project ID, title, endpoint,
 last-opened time, and local folder when known; they contain no credentials.
 Any future feature that lists all account projects must be implemented only
 after the corresponding server API has been released.
@@ -85,9 +87,12 @@ reporting a conflict. The running-watcher offline tests above do not establish
 safety for that scenario. This limitation requires a CLI-plugin change and is
 not addressed by the sidebar feature.
 
-The folder connection marker contains a one-use nonce only. The profile's
-pending intent is keyed by the target folder. Synchronization stays disabled
-until the destination host validates the handoff and clears old sync metadata.
+The folder connection marker contains a one-use nonce only. Each target folder's
+pending intent is stored in a separate file in the extension's global storage,
+shared by windows and profiles on this device. It does not use cached globalState
+writes. Synchronization stays disabled until the destination host validates the
+handoff and clears old sync metadata. Consumed intents retain a tombstone so stale
+legacy state cannot restore them.
 Expired intents remove only their own marker so the folder can be selected again.
 `jsonc-parser` preserves comments and trailing commas in VS Code settings.
 

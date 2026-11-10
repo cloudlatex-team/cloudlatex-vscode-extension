@@ -53,15 +53,17 @@ If the download does not start after reloading, check the account and network co
 
 The **CL** sidebar has three main views:
 
-- **Registered Projects** keeps your project shortcuts across workspaces in the current VS Code profile. Use the **+** button or **Register Project by URL / ID** to enter a Cloud LaTeX project URL or ID. The extension verifies the project title before adding the shortcut. Connected projects are also remembered automatically.
+- **Registered Projects** keeps your project shortcuts across workspaces and VS Code profiles on this device. Use the **+** button or **Register Project by URL / ID** to enter a Cloud LaTeX project URL or ID. The extension verifies the project title before adding the shortcut. Connected projects are also remembered automatically.
 - **Files & Sync** shows the current project's tracked files in folders. Click a file to open its local copy. The tree marks the build target, unsaved edits, local or server changes, and conflicts. The summary shows synchronization progress or its last outcome; hover over it to see the last successful sync time.
 - **Commands** contains connection, account, settings, synchronization, compilation, and PDF actions.
 
 <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/sidebar-preview.png" alt="CL sidebar showing a registered project, synchronized files, and the compile target" width="320px">
 
-The registered list is a set of verified shortcuts, not a copy of every project in your web account. The shortcuts do not contain tokens or client IDs. Registering a shortcut does not download or synchronize its files.
+The registered list is a set of verified shortcuts, not a copy of every project in your web account. It is stored on this device and shared by VS Code windows and profiles. The shortcuts do not contain tokens or client IDs. Registering a shortcut does not download or synchronize its files.
 
 Clicking a project with a known local folder opens that folder. For an unconnected project, clicking it opens a folder picker. Select an empty local folder to connect and download automatically. Your automatic compilation preference, output directory, and ignored-file settings are carried over; you do not need to select the project again. Existing connected folders and folders inside the current project cannot be reused. **Remove Project from List** only removes the shortcut; it does not delete local or server files or disable an existing connection.
+
+Only output directories relative to and contained within the project are carried over. Absolute paths and paths outside the project use the default output directory in the new folder.
 
 **Unsaved** means an editor buffer has not been saved to disk, so those edits have not been synchronized. Local/server change labels describe the synchronization metadata from the latest checks; they are not a continuous view of remote edits. Save the file to let normal synchronization process it, or use **Reload** to request a sync. A conflict needs resolution before synchronization can finish.
 

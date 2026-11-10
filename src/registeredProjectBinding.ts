@@ -69,7 +69,7 @@ export async function folderMatchesRegisteredProject(
     const configuredEndpoint = Object.prototype.hasOwnProperty.call(settings, 'cloudlatex.endpoint')
       ? settings['cloudlatex.endpoint'] : globalEndpoint;
     return typeof configuredEndpoint === 'string' && normalizeProjectEndpoint(configuredEndpoint) === endpoint;
-  } catch {
+  } catch (e) {
     return false;
   } finally {
     await handle?.close().catch(() => undefined);

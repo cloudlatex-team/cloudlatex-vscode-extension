@@ -5,7 +5,7 @@ import * as https from 'https';
 import { Account, ProjectInfo } from 'cloudlatex-cli-plugin';
 import { getVSConfig } from './config';
 import { inputAccount, localeStr } from './interaction';
-import { isDefaultEndpoint } from './registeredProjects';
+import { isDefaultEndpoint, normalizeProjectEndpoint } from './registeredProjects';
 
 export type ProjectConnection = {
   rootPath: string;
@@ -28,20 +28,8 @@ class ProjectAuthenticationError extends Error {
 }
 
 function parseEndpoint(endpoint: string): URL | undefined {
-  try {
-    const value = endpoint.trim();
-    const authority = /^https?:\/\/([^/?#]+)/i.exec(value)?.[1];
-    if (!authority || authority.includes('@') || value.includes('\\')) {
-      return undefined;
-    }
-    const url = new URL(value);
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
-      return undefined;
-    }
-    return url;
-  } catch {
-    return undefined;
-  }
+  const normalized = normalizeProjectEndpoint(endpoint);
+  return normalized ? new URL(normalized) : undefined;
 }
 
 export function parseProjectId(input: string, endpoint: string): number | undefined {
@@ -61,7 +49,7 @@ export function parseProjectId(input: string, endpoint: string): number | undefi
     let url: URL;
     try {
       url = new URL(value);
-    } catch {
+    } catch (e) {
       return undefined;
     }
     if (!['http:', 'https:'].includes(url.protocol) || url.origin !== server.origin || url.username || url.password) {
@@ -150,16 +138,39 @@ export function loadProjectById(account: Account, endpoint: string, id: number):
               return;
             }
             finish({ id, title: project.title, compileTargetFileRemoteId: target });
-          } catch {
+          } catch (e) {
             finish();
           }
         });
       });
       request.once('error', () => finish());
-    } catch {
+    } catch (e) {
       finish();
     }
   });
+}
+
+// `progress` wraps each request only, so no progress notification stays open
+// while the user re-enters credentials.
+export async function loadProjectWithAccount(
+  account: Account, endpoint: string, id: number,
+  progress: <T>(task: () => Promise<T>) => Thenable<T> = task => task()
+): Promise<{ account: Account; project: ProjectInfo } | undefined> {
+  try {
+    return { account, project: await progress(() => loadProjectById(account, endpoint, id)) };
+  } catch (error) {
+    if (!(error instanceof ProjectAuthenticationError)) {
+      throw error;
+    }
+  }
+  void vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.CONNECT_ACCOUNT_INVALID));
+  try {
+    const entered = await inputAccount();
+    account = { email: entered.email.trim(), client: entered.client.trim(), token: entered.token.trim() };
+  } catch (e) {
+    return undefined;
+  }
+  return { account, project: await progress(() => loadProjectById(account, endpoint, id)) };
 }
 
 async function openEmptyFolder(): Promise<void> {
@@ -278,7 +289,7 @@ export async function connectProject(
       try {
         const entered = await inputAccount();
         account = { email: entered.email.trim(), client: entered.client.trim(), token: entered.token.trim() };
-      } catch {
+      } catch (e) {
         // The account helper signals dismissed/empty input by throwing.
         return;
       }
@@ -318,7 +329,7 @@ export async function connectProject(
         try {
           const entered = await inputAccount();
           account = { email: entered.email.trim(), client: entered.client.trim(), token: entered.token.trim() };
-        } catch {
+        } catch (e) {
           return;
         }
       }
@@ -344,7 +355,7 @@ export async function connectProject(
     }
     // Selection and credentials stay in memory until this final commit step.
     await commit({ rootPath: snapshot.rootPath, endpoint: snapshot.endpoint, project, account });
-  } catch {
+  } catch (e) {
     // Server errors can contain response bodies; never show them with credentials.
     await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONNECT_FAILED));
   }

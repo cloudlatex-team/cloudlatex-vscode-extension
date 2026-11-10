@@ -1,6 +1,9 @@
 import { COMMAND_NAMES, DEFAULT_ENDPOINT } from './const';
 import { MESSAGE_TYPE } from './locale';
 import * as path from 'path';
+import * as fs from 'fs';
+import { createHash, randomBytes } from 'crypto';
+import { withFileLock } from './fileLock';
 import * as vscode from 'vscode';
 import { localeStr } from './interaction';
 
@@ -14,7 +17,8 @@ export type RegisteredProject = {
 
 export type RegisteredProjectInput = Omit<RegisteredProject, 'lastOpenedAt'> & { lastOpenedAt?: number };
 export type CurrentRegisteredProject = { endpoint: string; id: number; rootPath?: string };
-type RegistryState = Pick<vscode.Memento, 'get' | 'update'>;
+type RegistryState = Pick<vscode.Memento, 'get'>;
+type StoredRegistry = { version: number; projects: unknown[]; imported: string[]; removed: string[] };
 
 const registryKey = 'cloudlatex.registeredProjects';
 
@@ -30,7 +34,7 @@ export function normalizeProjectEndpoint(endpoint: string): string | undefined {
       return undefined;
     }
     return url.origin + url.pathname.replace(/\/+$/, '');
-  } catch {
+  } catch (e) {
     return undefined;
   }
 }
@@ -82,26 +86,20 @@ export class ProjectRegistry implements vscode.Disposable {
   private records = new Map<string, RegisteredProject>();
   private pending: Promise<void> = Promise.resolve();
   private readonly _onDidChange = new vscode.EventEmitter<void>();
+  private readonly legacy: Map<string, RegisteredProject>;
+  private imported = new Set<string>();
+  private removed = new Set<string>();
+  private watcher?: fs.FSWatcher;
+  private disposed = false;
   readonly onDidChange = this._onDidChange.event;
 
-  constructor(private readonly state: RegistryState) {
-    const stored = state.get<unknown>(registryKey);
-    if (!Array.isArray(stored)) {
-      return;
-    }
-    for (const value of stored) {
-      const record = validateRecord(value);
-      if (!record) {
-        continue;
-      }
-      const key = projectKey(record.endpoint, record.id)!;
-      const previous = this.records.get(key);
-      if (!previous || record.lastOpenedAt >= previous.lastOpenedAt) {
-        this.records.set(key, { ...record, ...(record.rootPath || !previous?.rootPath ? {} : { rootPath: previous.rootPath }) });
-      } else if (!previous.rootPath && record.rootPath) {
-        this.records.set(key, { ...previous, rootPath: record.rootPath });
-      }
-    }
+  constructor(state: RegistryState, private readonly storagePath: string) {
+    this.legacy = this.readRecords(state.get<unknown>(registryKey));
+    this.records = new Map(this.legacy);
+  }
+
+  load(): Promise<void> {
+    return this.disposed ? Promise.resolve() : this.enqueue(async () => undefined);
   }
 
   list(): RegisteredProject[] {
@@ -131,7 +129,9 @@ export class ProjectRegistry implements vscode.Disposable {
       };
       const next = new Map(this.records);
       next.set(key, merged);
-      await this.persist(next);
+      const removed = new Set(this.removed);
+      removed.delete(key);
+      await this.persist(next, removed);
       return snapshot(merged);
     });
   }
@@ -147,26 +147,144 @@ export class ProjectRegistry implements vscode.Disposable {
       }
       const next = new Map(this.records);
       next.delete(key);
-      await this.persist(next);
+      const removed = new Set(this.removed);
+      removed.add(key);
+      await this.persist(next, removed);
     });
   }
 
+  readRecords(stored: unknown): Map<string, RegisteredProject> {
+    const records = new Map<string, RegisteredProject>();
+    if (!Array.isArray(stored)) {
+      return records;
+    }
+    for (const value of stored) {
+      const record = validateRecord(value);
+      if (!record) {
+        continue;
+      }
+      const key = projectKey(record.endpoint, record.id)!;
+      const previous = records.get(key);
+      if (!previous || record.lastOpenedAt >= previous.lastOpenedAt) {
+        records.set(key, { ...record, ...(record.rootPath || !previous?.rootPath ? {} : { rootPath: previous.rootPath }) });
+      } else if (!previous.rootPath && record.rootPath) {
+        records.set(key, { ...previous, rootPath: record.rootPath });
+      }
+    }
+    return records;
+  }
+
+  fingerprint(records: Map<string, RegisteredProject>): string {
+    return JSON.stringify([...records.values()]
+      .sort((a, b) => projectKey(a.endpoint, a.id)!.localeCompare(projectKey(b.endpoint, b.id)!))
+      .map(r => [r.endpoint, r.id, r.title, r.lastOpenedAt, r.rootPath]));
+  }
+
+  async readStorage(): Promise<StoredRegistry> {
+    let text: string;
+    try {
+      text = await fs.promises.readFile(path.join(this.storagePath, 'registered-projects.json'), 'utf8');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return { version: 1, projects: [], imported: [], removed: [] };
+      }
+      throw error;
+    }
+    const stored = JSON.parse(text) as StoredRegistry;
+    if (!stored || stored.version !== 1 || !Array.isArray(stored.projects)
+      || !Array.isArray(stored.imported) || !stored.imported.every(value => typeof value === 'string')
+      || !Array.isArray(stored.removed) || !stored.removed.every(value => typeof value === 'string')) {
+      throw new Error('Invalid registered projects storage');
+    }
+    return stored;
+  }
+
+  updateRecords(records: Map<string, RegisteredProject>): void {
+    if (this.fingerprint(records) !== this.fingerprint(this.records)) {
+      this.records = records;
+      this._onDidChange.fire();
+    }
+  }
+
+  watch(): void {
+    if (this.watcher || this.disposed) {
+      return;
+    }
+    this.watcher = fs.watch(this.storagePath, (_event, file) => {
+      if (!file || file.toString() === 'registered-projects.json') {
+        // A watcher refresh must not overwrite a mutation in this window.
+        void this.load().catch(() => undefined);
+      }
+    });
+    this.watcher.on('error', () => {
+      this.watcher?.close();
+      this.watcher = undefined;
+    });
+    const watcher = this.watcher as fs.FSWatcher & { unref?: () => void };
+    watcher.unref?.();
+  }
+
   private enqueue<T>(operation: () => Promise<T>): Promise<T> {
-    const result = this.pending.then(operation);
-    // A failed storage write must not discard prior records or poison later
-    // mutations. Each queued operation builds on the last successful snapshot.
+    const result = this.pending.then(async () => {
+      if (this.disposed) {
+        throw new Error('Project registry is disposed');
+      }
+      await fs.promises.mkdir(this.storagePath, { recursive: true });
+      const file = path.join(this.storagePath, 'registered-projects.json');
+      return withFileLock(file + '.lock', async () => {
+        // Memento is cached per extension host and writes the entire state bag.
+        // Read the shared file under the lock instead of merging cached arrays.
+        const stored = await this.readStorage();
+        const records = this.readRecords(stored.projects);
+        this.imported = new Set(stored.imported);
+        this.removed = new Set(stored.removed);
+        const legacyKey = createHash('sha256').update(this.fingerprint(this.legacy)).digest('hex');
+        if (!this.imported.has(legacyKey)) {
+          // Each old profile snapshot is imported once. A later profile import
+          // must not resurrect a shortcut removed from the shared registry.
+          for (const [key, record] of this.legacy) {
+            if (!records.has(key) && !this.removed.has(key)) {
+              records.set(key, record);
+            }
+          }
+          this.imported.add(legacyKey);
+          await this.persist(records);
+        } else {
+          this.updateRecords(records);
+        }
+        this.watch();
+        return operation();
+      });
+    });
+    // A failed storage write must not poison later updates.
     this.pending = result.then(() => undefined, () => undefined);
     return result;
   }
 
-  private async persist(next: Map<string, RegisteredProject>): Promise<void> {
-    await this.state.update(registryKey, [...next.values()].map(record => ({ ...record })));
-    this.records = next;
-    this._onDidChange.fire();
+  async persist(next: Map<string, RegisteredProject>, removed = this.removed): Promise<void> {
+    const file = path.join(this.storagePath, 'registered-projects.json');
+    const temporary = file + '.' + randomBytes(12).toString('hex') + '.tmp';
+    const stored: StoredRegistry = {
+      version: 1, projects: [...next.values()].map(record => ({ ...record })),
+      imported: [...this.imported], removed: [...removed]
+    };
+    try {
+      await fs.promises.writeFile(temporary, JSON.stringify(stored), { flag: 'wx', mode: 0o600 });
+      await fs.promises.rename(temporary, file);
+    } finally {
+      await fs.promises.rm(temporary, { force: true });
+    }
+    this.removed = removed;
+    this.updateRecords(next);
   }
 
-  dispose(): void {
+  dispose(): Promise<void> {
+    this.disposed = true;
+    this.watcher?.close();
+    this.watcher = undefined;
     this._onDidChange.dispose();
+    // Explicit owners can wait until an in-flight file lock has been released.
+    return this.pending;
   }
 }
 
@@ -232,7 +350,7 @@ export class RegisteredProjectsTreeProvider implements vscode.TreeDataProvider<v
     });
   }
 
-  private isActive(project: RegisteredProject): boolean {
+  isActive(project: RegisteredProject): boolean {
     return !!this.current && projectKey(project.endpoint, project.id) === projectKey(this.current.endpoint, this.current.id)
       && (!project.rootPath || !this.current.rootPath || project.rootPath === this.current.rootPath);
   }

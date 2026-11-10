@@ -13,10 +13,16 @@ type BindingModule = typeof import('../../registeredProjectBinding');
 function loadBinding(): BindingModule {
   // Reuse the real endpoint normalizer without loading the VS Code runtime.
   const registry = { exports: {}, URL, require: (name: string) => {
-      if (name === './locale' || name === '../locale') { return require('../../locale'); }
-      if (name === './const') { return require('../../const'); }
+    if (name === './locale' || name === '../locale') { return require('../../locale'); }
+    if (name === './const') { return require('../../const'); }
     if (name === 'path') {
       return path;
+    }
+    if (name === 'fs' || name === 'crypto') {
+      return require(name);
+    }
+    if (name === './fileLock') {
+      return require('../../fileLock');
     }
     if (name === 'vscode') {
       return {};
@@ -29,8 +35,8 @@ function loadBinding(): BindingModule {
   const registryFile = require.resolve('../../registeredProjects');
   vm.runInNewContext(fs.readFileSync(registryFile, 'utf8'), registry, { filename: registryFile });
   const binding = { exports: {}, Buffer, require: (name: string) => {
-      if (name === './locale' || name === '../locale') { return require('../../locale'); }
-      if (name === './const') { return require('../../const'); }
+    if (name === './locale' || name === '../locale') { return require('../../locale'); }
+    if (name === './const') { return require('../../const'); }
     if (name === 'fs') {
       return fs;
     }

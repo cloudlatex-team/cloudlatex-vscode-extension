@@ -350,6 +350,6 @@
   "dependencies": {
     "cloudlatex-cli-plugin": "https://github.com/cloudlatex-team/cloudlatex-cli-plugin.git#853b03cb8777381019293cecb7f6ad05fcb5c1c2",
     "dateformat": "^4.0.0",
-    "jsonc-parser": "3.3.1"
+    "jsonc-parser": "^3.3.1"
   }
 }

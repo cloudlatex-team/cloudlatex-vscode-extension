@@ -13,7 +13,7 @@ import { MESSAGE_TYPE } from './locale';
 import * as latexWorkshop from './external/latexWorkshop';
 import { getRootPath, getStoragePath, getVSConfig, obtainAccountPath } from './config';
 import { CLFileDecorationProvider } from './clFileDecorationProvider';
-import { connectProject, loadProjectById, parseProjectId } from './projectConnection';
+import { connectProject, loadProjectWithAccount, parseProjectId } from './projectConnection';
 import { ProjectRegistry, RegisteredProjectsTreeProvider, RegisteredProject, CurrentRegisteredProject, normalizeProjectEndpoint, isDefaultEndpoint } from './registeredProjects';
 import { ProjectFilesTreeProvider, ProjectSyncPhase } from './projectFilesTreeProvider';
 import { folderMatchesRegisteredProject } from './registeredProjectBinding';
@@ -54,6 +54,12 @@ export function deactivate() {
   // TODO delete config files
 }
 
+function showLoadingProgress<T>(task: () => Promise<T>): Thenable<T> {
+  return vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification, title: localeStr(MESSAGE_TYPE.REGISTER_PROJECT_LOADING)
+  }, task);
+}
+
 class VSLatexApp {
   latexApp?: LatexApp;
   context: vscode.ExtensionContext;
@@ -69,19 +75,19 @@ class VSLatexApp {
   syncedInitilally: boolean;
   accountService: AccountService<Account>;
   connectionConfigUpdating = false;
-  private connectionSetupRunning = false;
-  private projectRegistry: ProjectRegistry;
-  private registeredProjectsTree?: RegisteredProjectsTreeProvider;
-  private projectFilesTree?: ProjectFilesTreeProvider;
-  private syncPhase: ProjectSyncPhase = 'inactive';
-  private syncDetail?: string;
-  private lastSyncedAt?: number;
-  private rememberedProject?: string;
-  private trustedRegistrationEndpoint?: string;
-  private dirtyPathsKey?: string;
+  connectionSetupRunning = false;
+  projectRegistry: ProjectRegistry;
+  registeredProjectsTree?: RegisteredProjectsTreeProvider;
+  projectFilesTree?: ProjectFilesTreeProvider;
+  syncPhase: ProjectSyncPhase = 'inactive';
+  syncDetail?: string;
+  lastSyncedAt?: number;
+  rememberedProject?: string;
+  trustedRegistrationEndpoint?: string;
+  dirtyPathsKey?: string;
   // Discard outdated UI results; this does not cancel backend I/O already running.
-  private backendGeneration = 0;
-  private readonly syncDisplayState = new SyncDisplayState();
+  backendGeneration = 0;
+  readonly syncDisplayState = new SyncDisplayState();
   appInfo: AppInfo = {
     activationStatus: 'inactive',
     loginStatus: 'offline',
@@ -93,7 +99,7 @@ class VSLatexApp {
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
-    this.projectRegistry = new ProjectRegistry(context.globalState);
+    this.projectRegistry = new ProjectRegistry(context.globalState, context.globalStorageUri.fsPath);
     this.activated = false;
     this.autoCompile = false;
     this.syncedInitilally = false;
@@ -109,7 +115,8 @@ class VSLatexApp {
     let folderConnected = false;
     try {
       folderConnected = await completeFolderConnection(this.context);
-    } catch {
+    } catch (e) {
+      this.logger.error(e);
       // A notification resolves only when dismissed; never block command registration on it.
       void vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONNECT_FAILED));
       folderConnectionFailed = true;
@@ -122,6 +129,12 @@ class VSLatexApp {
 
     this.setupCommands();
     await this.accountService.load();
+    try {
+      await this.projectRegistry.load();
+    } catch (e) {
+      this.logger.error(e);
+      void vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.REGISTER_PROJECT_FAILED));
+    }
     this.setupSideBar();
     if (folderConnected) {
       vscode.commands.executeCommand(`workbench.view.extension.${EXTENSION_NAME}`);
@@ -199,10 +212,11 @@ class VSLatexApp {
     const generation = this.backendGeneration;
     try {
       result = await this.latexApp.sync(conflictSolution);
-    } catch {
+    } catch (e) {
       if (generation !== this.backendGeneration) {
         return;
       }
+      this.logger.error(e);
       this.syncPhase = 'error';
       this.syncDetail = localeStr(MESSAGE_TYPE.FILE_SYNC_FAILED);
       this.refreshProjectViews();
@@ -450,10 +464,6 @@ class VSLatexApp {
       if (this.connectionConfigUpdating) {
         return;
       }
-      if (!this.activated) {
-        await this.connectProject(true);
-        return;
-      }
       let account!: Account;
       try {
         account = await inputAccount();
@@ -563,13 +573,18 @@ class VSLatexApp {
     });
   }
 
-  private async connectProject(forceAccount = false): Promise<void> {
+  async loadStoredAccount(): Promise<Account | null> {
+    const accountService = new AccountService<Account>(obtainAccountPath(this.context));
+    return accountService.load();
+  }
+
+  async connectProject(): Promise<void> {
     if (this.connectionSetupRunning || this.connectionConfigUpdating) {
       return;
     }
     this.connectionSetupRunning = true;
     try {
-      await connectProject(forceAccount ? null : this.accountService.account, async connection => {
+      await connectProject(await this.loadStoredAccount(), async connection => {
         this.connectionConfigUpdating = true;
         this.backendGeneration++;
         try {
@@ -584,7 +599,7 @@ class VSLatexApp {
             id: connection.project.id, title: connection.project.title,
             endpoint: connection.endpoint, rootPath: connection.rootPath
           });
-        } catch {
+        } catch (e) {
           // The connection is already saved; retry shortcut persistence after reload.
           this.logger.warn(localeStr(MESSAGE_TYPE.REGISTER_PROJECT_FAILED));
         }
@@ -592,7 +607,8 @@ class VSLatexApp {
         this.rerenderSideBar();
         try {
           await vscode.commands.executeCommand('workbench.action.reloadWindow');
-        } catch {
+        } catch (e) {
+          this.logger.warn(e);
           await vscode.window.showInformationMessage(localeStr(MESSAGE_TYPE.CONNECT_RELOAD_REQUIRED));
         }
       });
@@ -711,25 +727,29 @@ class VSLatexApp {
     this.rememberCurrentProject();
   }
 
-  private currentProject(): CurrentRegisteredProject | undefined {
+  currentProject(): CurrentRegisteredProject | undefined {
     const id = getVSConfig().get<number>('projectId', 0);
     const endpoint = normalizeProjectEndpoint(getVSConfig().get<string>('endpoint', ''));
     return endpoint && id > 0 ? { endpoint, id, rootPath: getRootPath() } : undefined;
   }
 
-  private refreshProjectViews(): void {
+  refreshProjectViews(): void {
     this.registeredProjectsTree?.refresh(this.currentProject());
     const dirtyPaths = this.collectDirtyPaths();
     this.dirtyPathsKey = dirtyPaths.join('\n');
     this.projectFilesTree?.update({
-      rootPath: getRootPath(), appInfo: { ...this.appInfo, files: this.syncDisplayState.project(this.appInfo.files) }, phase: this.syncPhase,
-      lastSyncedAt: this.lastSyncedAt, detail: this.syncDetail, dirtyPaths
+      rootPath: getRootPath(),
+      appInfo: { ...this.appInfo, files: this.syncDisplayState.project(this.appInfo.files) },
+      phase: this.syncPhase,
+      lastSyncedAt: this.lastSyncedAt,
+      detail: this.syncDetail,
+      dirtyPaths
     });
   }
 
   // Editing fires on every keystroke, but the files view changes only when a
   // buffer's saved/unsaved state flips. Rebuild the tree only in that case.
-  private refreshDirtyPaths(document: vscode.TextDocument): void {
+  refreshDirtyPaths(document: vscode.TextDocument): void {
     if (document.uri.scheme !== 'file') {
       return;
     }
@@ -741,7 +761,7 @@ class VSLatexApp {
     }
   }
 
-  private collectDirtyPaths(): string[] {
+  collectDirtyPaths(): string[] {
     const rootPath = getRootPath();
     return rootPath ? vscode.workspace.textDocuments
       .filter(doc => doc.isDirty && doc.uri.scheme === 'file')
@@ -749,9 +769,12 @@ class VSLatexApp {
       .sort() : [];
   }
 
-  private rememberCurrentProject(): void {
+  rememberCurrentProject(): void {
     const current = this.currentProject();
-    if (!this.activated || this.connectionConfigUpdating || !current || !this.appInfo.loaded || !this.appInfo.projectName || !current.rootPath) {
+    if (!this.activated || this.connectionConfigUpdating || !current) {
+      return;
+    }
+    if (!this.appInfo.loaded || !this.appInfo.projectName || !current.rootPath) {
       return;
     }
     const key = `${current.endpoint}#${current.id}:${current.rootPath}:${this.appInfo.projectName}`;
@@ -767,7 +790,7 @@ class VSLatexApp {
     });
   }
 
-  private async registerProject(): Promise<void> {
+  async registerProject(): Promise<void> {
     if (this.connectionSetupRunning || this.connectionConfigUpdating) {
       return;
     }
@@ -801,26 +824,33 @@ class VSLatexApp {
         }
         this.trustedRegistrationEndpoint = endpoint;
       }
-      let account = this.accountService.account;
+      const savedAccount = await this.loadStoredAccount();
+      let account = savedAccount;
       if (!account) {
         try {
           account = await inputAccount();
-        } catch {
+        } catch (e) {
+          this.logger.log('Account input is canceled');
           return;
         }
       }
-      const project = await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification, title: localeStr(MESSAGE_TYPE.REGISTER_PROJECT_LOADING)
-      }, () => loadProjectById(account!, endpoint, id));
+      const loaded = await loadProjectWithAccount(account, endpoint, id, showLoadingProgress);
+      if (!loaded) {
+        return;
+      }
+      account = loaded.account;
+      const project = loaded.project;
       if (generation !== this.backendGeneration || rootPath !== getRootPath()
         || endpoint !== normalizeProjectEndpoint(getVSConfig().get<string>('endpoint', ''))) {
         await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.CONNECT_SETTINGS_CHANGED));
         return;
       }
-      if (!this.accountService.account && !this.activated) {
+      if (account !== savedAccount) {
         await fs.promises.mkdir(this.context.globalStorageUri.fsPath, { recursive: true });
         await new AccountService<Account>(obtainAccountPath(this.context)).save(account);
-        await this.accountService.load();
+        if (!this.activated) {
+          await this.accountService.load();
+        }
       }
       const current = this.currentProject();
       await this.projectRegistry.upsert({
@@ -828,14 +858,15 @@ class VSLatexApp {
         rootPath: this.appInfo.loaded && current?.id === project.id && current.endpoint === endpoint ? getRootPath() : undefined
       });
       this.registeredProjectsTree?.refresh(this.currentProject());
-    } catch {
+    } catch (e) {
+      this.logger.error(e);
       await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.REGISTER_PROJECT_FAILED));
     } finally {
       this.connectionSetupRunning = false;
     }
   }
 
-  private async openRegisteredProject(entry: RegisteredProject): Promise<void> {
+  async openRegisteredProject(entry: RegisteredProject): Promise<void> {
     const record = this.projectRegistry.get(entry?.endpoint, entry?.id);
     if (!record) {
       return;
@@ -856,12 +887,12 @@ class VSLatexApp {
           }
           return;
         }
-      } catch { /* The local folder may have moved. */ }
+      } catch (e) { /* The local folder may have moved. */ }
     }
     await this.connectRegisteredFolder(record);
   }
 
-  private async connectRegisteredFolder(record: RegisteredProject): Promise<void> {
+  async connectRegisteredFolder(record: RegisteredProject): Promise<void> {
     if (this.connectionSetupRunning || this.connectionConfigUpdating) {
       return;
     }
@@ -874,6 +905,10 @@ class VSLatexApp {
       ignoredFiles: config.get<string[]>('ignoredFiles', [])
     };
     try {
+      const savedAccount = await this.loadStoredAccount();
+      // Kept across iterations so credentials re-entered after a 401 are not
+      // lost when the user has to choose another folder.
+      let account: Account | undefined = savedAccount || undefined;
       while (true) {
         const endpointLabel = isDefaultEndpoint(record.endpoint)
           ? '' : `${new URL(record.endpoint).origin} — `;
@@ -901,30 +936,39 @@ class VSLatexApp {
         // shared account. The usual same-server switch needs only the folder.
         if (normalizeProjectEndpoint(config.get<string>('endpoint', '')) !== record.endpoint) {
           const allow = localeStr(MESSAGE_TYPE.CONNECT_ALLOW_ENDPOINT);
-          if (await vscode.window.showInformationMessage(`${localeStr(MESSAGE_TYPE.CONNECT_CUSTOM_ENDPOINT)}\n\n${record.endpoint}`, { modal: true }, allow) !== allow) {
+          const message = `${localeStr(MESSAGE_TYPE.CONNECT_CUSTOM_ENDPOINT)}\n\n${record.endpoint}`;
+          if (await vscode.window.showInformationMessage(message, { modal: true }, allow) !== allow) {
             return;
           }
         }
         // inputAccount() rejects when the input is dismissed; treat that as a cancel.
-        const account = this.accountService.account || await inputAccount().catch(() => undefined);
+        account = account || await inputAccount().catch(() => {
+          this.logger.log('Account input is canceled');
+          return undefined;
+        });
         if (!account) {
           return;
         }
-        const project = await vscode.window.withProgress({
-          location: vscode.ProgressLocation.Notification, title: localeStr(MESSAGE_TYPE.REGISTER_PROJECT_LOADING)
-        }, () => loadProjectById(account, record.endpoint, record.id));
+        const loaded = await loadProjectWithAccount(account, record.endpoint, record.id, showLoadingProgress);
+        if (!loaded) {
+          return;
+        }
+        account = loaded.account;
+        const project = loaded.project;
         if (generation !== this.backendGeneration) {
           throw new Error('Connection changed');
         }
         let rollback: () => Promise<void>;
         try {
           rollback = await stageFolderConnection(this.context, rootPath, { ...record, title: project.title }, inherited);
-        } catch {
+        } catch (e) {
+          this.logger.warn(e);
           await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.CONNECT_FOLDER_FAILED));
           continue;
         }
         try {
-          if (!this.accountService.account) {
+          if (account !== savedAccount) {
+            await fs.promises.mkdir(this.context.globalStorageUri.fsPath, { recursive: true });
             await new AccountService<Account>(obtainAccountPath(this.context)).save(account);
           }
           await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(rootPath), { forceReuseWindow: true });
@@ -934,14 +978,15 @@ class VSLatexApp {
         }
         return;
       }
-    } catch {
+    } catch (e) {
+      this.logger.error(e);
       await vscode.window.showErrorMessage(localeStr(MESSAGE_TYPE.CONNECT_FAILED));
     } finally {
       this.connectionSetupRunning = false;
     }
   }
 
-  private async openProjectFile(filePath: string): Promise<void> {
+  async openProjectFile(filePath: string): Promise<void> {
     const rootPath = getRootPath();
     if (!rootPath || typeof filePath !== 'string') {
       return;
@@ -960,13 +1005,17 @@ class VSLatexApp {
         throw new Error('Not a file');
       }
       await vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
-    } catch {
+    } catch (e) {
+      this.logger.warn(e);
       await vscode.window.showWarningMessage(localeStr(MESSAGE_TYPE.PROJECT_FILE_NOT_LOCAL));
     }
   }
 
   handleConfigurationChange(): void {
     this.backendGeneration++;
+    if (this.statusBarItem) {
+      this.statusBarItem.text = STATUS_BAR_TEXT;
+    }
     this.activated = false;
     this.syncPhase = 'inactive';
     this.lastSyncedAt = undefined;
