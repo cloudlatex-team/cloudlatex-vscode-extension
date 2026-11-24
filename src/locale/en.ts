@@ -38,5 +38,7 @@ export const enTranslation: Translation = {
   UNKNOWN_ERROR: 'An unknown error has occurred',
   PROJECT_UPDATED: 'Project setting has been updated',
   FIRST_SYNC_NOTIFICATION: 'Do you want to sync the project \'$project_name\'?',
-  NOT_EMPTY_DIRECTORY: 'The directory contains files. To prevent overwriting files, the directory to be synchronized must be empty.'
+  NOT_EMPTY_DIRECTORY: 'The directory contains files. To prevent overwriting files, the directory to be synchronized must be empty.',
+
+  ACCOUNT_UID_PROMPT: 'User identifier (your email address, or the user identifier shown in the Extension dialog of Cloud LaTeX)',
 };

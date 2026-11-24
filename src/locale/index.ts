@@ -34,6 +34,9 @@ export const MESSAGE_TYPE = {
   PROJECT_UPDATED: 'PROJECT_UPDATED',
   FIRST_SYNC_NOTIFICATION: 'FIRST_SYNC_NOTIFICATION',
   NOT_EMPTY_DIRECTORY: 'NOT_EMPTY_DIRECTORY',
+
+  /** Account input */
+  ACCOUNT_UID_PROMPT: 'ACCOUNT_UID_PROMPT',
 } as const;
 /* eslint-enable @typescript-eslint/naming-convention */
 

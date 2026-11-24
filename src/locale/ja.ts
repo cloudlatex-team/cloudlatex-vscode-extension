@@ -37,4 +37,6 @@ export const jaTranslation: Translation = {
   PROJECT_UPDATED: 'プロジェクト設定が更新されました',
   FIRST_SYNC_NOTIFICATION: 'プロジェクト \'$project_name\' を同期しますか？',
   NOT_EMPTY_DIRECTORY: 'ディレクトリにファイルが存在します。ファイルの上書きを防ぐため、同期を行うディレクトリは空である必要があります。',
+
+  ACCOUNT_UID_PROMPT: 'ユーザー識別子（メールアドレス、または Cloud LaTeX の「プラグイン連携」画面に表示されるユーザー識別子）',
 };

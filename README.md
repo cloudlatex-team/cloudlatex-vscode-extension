@@ -32,7 +32,8 @@ Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?ite
 Create an empty VSCode project.
 Click the `CL` icon on the Activity Bar and two buttins are appeared on the Side Bar.
 
-Click `Set account` and enter `email`, `client` and `token`.
+Click `Set account` and enter your user identifier, `client` and `token`.
+The user identifier is your Cloud LaTeX email address. If you signed up with Acaric ID and have no email address to sign in with, enter the user identifier shown in the Extension dialog when you generate the token.
 You can also set your account by `cloud LaTeX: Set account` command on the Command Pallete (mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`).
 
 <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/panel.png" alt="panel UI" width="240px">

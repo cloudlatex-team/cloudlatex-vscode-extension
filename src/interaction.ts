@@ -33,23 +33,24 @@ export const decideConflictSolution = async function (conflictFiles: FileInfo[])
 
 export async function inputAccount(): Promise<Account> {
   /**
-   * Email
+   * User identifier (uid): the email address, or the random ID of a user without one.
+   * Stored in Account.email, which is sent as is as the uid header.
    */
-  const email = await vscode.window.showInputBox({
+  const email = (await vscode.window.showInputBox({
     ignoreFocusOut: true,
-    prompt: 'Email address'
-  });
+    prompt: localeStr(MESSAGE_TYPE.ACCOUNT_UID_PROMPT)
+  }))?.trim();
   if (!email) {
-    throw new Error('Email address is empty');
+    throw new Error('User identifier is empty');
   }
 
   /**
    * Client ID
    */
-  const client = await vscode.window.showInputBox({
+  const client = (await vscode.window.showInputBox({
     ignoreFocusOut: true,
     prompt: 'Client ID'
-  });
+  }))?.trim();
   if (!client) {
     throw new Error('Client ID is empty');
   }
@@ -57,11 +58,11 @@ export async function inputAccount(): Promise<Account> {
   /**
    * Token
    */
-  const token = await vscode.window.showInputBox({
+  const token = (await vscode.window.showInputBox({
     ignoreFocusOut: true,
     prompt: 'Token',
     password: true
-  });
+  }))?.trim();
   if (!token) {
     throw new Error('Token is empty');
   }
