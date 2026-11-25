@@ -35,7 +35,8 @@
 
   <img src="https://github.com/cloudlatex-team/cloudlatex-vscode-extension/raw/main/docs/panel.png" alt="panel UI" width="320px">
 
-- `Set account`ボタン（`アカウント設定` ボタン）をクリックし、`email`, `client`, `token` を設定します。
+- `Set account`ボタン（`アカウント設定` ボタン）をクリックし、ユーザー識別子、`client`, `token` を設定します。
+  ユーザー識別子には、Cloud LaTeX のメールアドレスを入力します。トークン生成時に「プラグイン連携」画面に「ユーザー識別子」が表示された場合は、メールアドレスの代わりにその値を入力します。
   アカウントの設定は、コマンドパレット(mac: `Cmd+Shift+P`, win: `Ctrl+Shift+P`)で`cloud LaTeX: Set account` コマンドからも可能です。
 - VSCode の言語設定で日本語が設定されている場合は当拡張機能の表示も日本語化されます。キャプチャ画像は英語のものです。（[詳細](#ui言語設定)）
 - 次に`Project setting` ボタン (`プロジェクト設定` ボタン) をクリックし表示される項目のうち、
