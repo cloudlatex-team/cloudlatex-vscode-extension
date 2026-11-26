@@ -1,0 +1,13 @@
+{
+  "name": "cloudlatex-publish-tools",
+  "private": true,
+  "description": "Tools for the publish job of .github/workflows/release.yml. Installed with npm ci --ignore-scripts.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@vscode/vsce": "4.1.1",
+    "ovsx": "1.4.0"
+  }
+}
