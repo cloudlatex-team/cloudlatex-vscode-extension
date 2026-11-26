@@ -14,13 +14,15 @@ Implementation of Editor independent functionality
 
 ## Setup
 
+Node.js 22 or later and Yarn 1 are required. The packaging tool (`@vscode/vsce`) does not support older versions of
+Node.js. CI uses Node.js 24.
+
 ```bash
 git clone git@github.com:cloudlatex-team/cloudlatex-vscode-extension.git
 git clone git@github.com:cloudlatex-team/cloudlatex-cli-plugin.git
 
 cd cloudlatex-cli-plugin
-yarn install
-yarn run build
+yarn install    # also builds dist with the prepare script
 yarn link
 
 cd ../cloudlatex-vscode-extension
@@ -46,3 +48,7 @@ Install extension locally by follwoing.
 ```bash
 code --install-extension ./build/cloudlatex-xxx.vsix
 ```
+
+## Release
+
+See [release.md](release.md).

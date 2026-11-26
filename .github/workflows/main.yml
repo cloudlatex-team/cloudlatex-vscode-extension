@@ -1,36 +1,41 @@
 name: build
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# Lints and packages the extension on pushes to main, pull requests and manual runs.
+# release.yml also calls it to build the VSIX of a release.
 on:
   push:
     branches:
       - main
   pull_request:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      release:
+        description: Build without the dependency cache.
+        type: boolean
+        default: false
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+permissions:
+  contents: read
+
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
     - name: Setup NodeJs
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
-        node-version: '20.x'
-        cache: yarn
+        node-version: '24.x'
+        # A release is built without a cache restored from earlier runs.
+        cache: ${{ !inputs.release && 'yarn' || '' }}
     - name: Install Dependencies
       run: yarn install --frozen-lockfile
     - name: lint
       run: yarn run lint
-    - name: Install vsce
-      run: yarn add vsce
     - name: build vsce
       run: yarn run vsce
     - name: Archive vsce result

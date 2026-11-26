@@ -2,7 +2,11 @@
 .vscode-test/**
 out/test/**
 src/**
-.gitignore
+**/.gitignore
+**/.github/**
+build/**
+docs/**
+yarn.lock
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map
